@@ -20,9 +20,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=28) -->
-  <link rel="stylesheet" href="./styles.css?v=28">
-  <link rel="modulepreload" href="./db.js?v=28">
+  <!-- Stylesheet (Cache-Busting ?v=29) -->
+  <link rel="stylesheet" href="./styles.css?v=29">
+  <link rel="modulepreload" href="./db.js?v=29">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -764,7 +764,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
-  <script type="module" src="./app.js?v=28"></script>
+  <script type="module" src="./app.js?v=29"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>
@@ -817,9 +817,7 @@
         <span style="font-size:18px; line-height:1;">‹</span> Indietro
       </button>
       <h2 class="trans-header-title">Traduttore</h2>
-      <button id="btnOpenConversationMode" class="trans-header-btn-conv" aria-label="Modalità Conversazione">
-        ⇄ 180°
-      </button>
+      <div style="width:40px;"></div>
     </header>
 
     <!-- Segmented Control iOS Style -->
@@ -997,57 +995,6 @@
       </div>
       <div style="font-size:13px; color:#57606A; text-align:center;">
         Mostra questo schermo al tassista, negoziante o interlocutore locale.
-      </div>
-    </div>
-  </div>
-
-  <!-- OVERLAY MODALITÀ CONVERSAZIONE SCHERMO DIVISO 180° -->
-  <div id="conversationSplitOverlay" class="conversation-split-overlay" role="dialog" aria-modal="true">
-    <button id="btnCloseConversationMode" class="conv-split-close-btn" aria-label="Chiudi Conversazione">✕</button>
-
-    <!-- Avviso Offline / No Speech in Conversazione -->
-    <div id="convOfflineNotice" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:50; width:90%; max-width:340px; padding:12px 16px; border-radius:14px; background:rgba(20, 27, 33, 0.95); border:1px solid rgba(245, 158, 11, 0.45); color:#FBBF24; font-size:12px; line-height:1.45; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.6); pointer-events:none;">
-      📡 <strong>Modalità Offline</strong><br>
-      La dettatura vocale richiede connessione internet. Usa il <strong>Frasario Offline</strong> o digita direttamente nel Traduttore.
-    </div>
-
-    <!-- Metà Superiore (Ruotata 180° verso l'interlocutore) -->
-    <div class="conv-half conv-half-top">
-      <div class="conv-half-header">
-        <span class="conv-half-lang-tag" id="convTopLangTag">🇨🇳 Cinese</span>
-        <span style="font-size:11px; color:#9BA3AB;">Interlocutore (Ruotato 180°)</span>
-      </div>
-      <div class="conv-half-content">
-        <div class="conv-half-text-main" id="convTopMainText">Premi "Parla" o tocca per iniziare</div>
-        <div class="conv-half-text-sub" id="convTopSubText"></div>
-      </div>
-      <div class="conv-half-controls">
-        <button id="btnConvTopSpeak" class="btn-glass-pill" style="padding:10px 18px; font-size:13.5px; font-weight:700;">
-          🔊 Ascolta
-        </button>
-        <button id="btnConvTopMic" class="btn-glass-pill accent btn-mic-pulse" style="padding:10px 22px; font-size:14px; font-weight:800;">
-          🎤 Parla
-        </button>
-      </div>
-    </div>
-
-    <!-- Metà Inferiore (Dritta verso di te) -->
-    <div class="conv-half conv-half-bottom">
-      <div class="conv-half-header">
-        <span class="conv-half-lang-tag" id="convBottomLangTag">🇮🇹 Italiano</span>
-        <span style="font-size:11px; color:#9BA3AB;">Tu</span>
-      </div>
-      <div class="conv-half-content">
-        <div class="conv-half-text-main" id="convBottomMainText">Tocca "Parla" per registrare</div>
-        <div class="conv-half-text-sub" id="convBottomSubText"></div>
-      </div>
-      <div class="conv-half-controls">
-        <button id="btnConvBottomSpeak" class="btn-glass-pill" style="padding:10px 18px; font-size:13.5px; font-weight:700;">
-          🔊 Ascolta
-        </button>
-        <button id="btnConvBottomMic" class="btn-glass-pill accent btn-mic-pulse" style="padding:10px 22px; font-size:14px; font-weight:800;">
-          🎤 Parla
-        </button>
       </div>
     </div>
   </div>

@@ -2137,5 +2137,61 @@ export const DEFAULT_SURVIVAL_PHRASES = [
       "ar": "Khamsumi'ah, Alf",
       "el": "Pentakosia, Chilia"
     }
+  },
+  {
+    "id": "ph_num_4",
+    "category": "Numeri & Contrattazione",
+    "it": "Quanto costa questo? È troppo caro",
+    "translations": {
+      "en": "How much is this? It is too expensive",
+      "zh": "这个多少钱？太贵了",
+      "ja": "これはいくらですか？高すぎます",
+      "es": "¿Cuánto cuesta esto? Es demasiado caro",
+      "fr": "Combien ça coûte ? C'est trop cher",
+      "de": "Wie viel kostet das? Das ist zu teuer",
+      "pt": "Quanto custa isso? Está muito caro",
+      "th": "อันนี้เท่าไหร่? แพงเกินไปแล้ว",
+      "ko": "이거 얼마예요? 너무 비싸요",
+      "ar": "كم سعر هذا؟ إنه مكلف جداً",
+      "vi": "Cái này bao nhiêu tiền? Đắt quá",
+      "tr": "Bu ne kadar? Çok pahalı",
+      "el": "Πόσο κάνει αυτό; Είναι πολύ ακριβό"
+    },
+    "phonetics": {
+      "zh": "Zhège duōshǎo qián? Tài guì le",
+      "ja": "Kore wa ikura desu ka? Takasugimasu",
+      "ko": "Igeo eolmayeyo? Neomu bissayo",
+      "th": "An ni thao rai? Phaeng koen pai laeo",
+      "ar": "Kam si'r hadha? Innahu mukallif jiddan",
+      "el": "Poso kanei afto? Einai poli akrivo"
+    }
+  },
+  {
+    "id": "ph_num_5",
+    "category": "Numeri & Contrattazione",
+    "it": "Può farmi uno sconto se pago in contanti?",
+    "translations": {
+      "en": "Can you give me a discount if I pay in cash?",
+      "zh": "如果付现金可以给我打折吗？",
+      "ja": "現金で払うと割引してもらえますか？",
+      "es": "¿Puede hacerme un descuento si pago en efectivo?",
+      "fr": "Pouvez-vous me faire une réduction si je paie en espèces ?",
+      "de": "Gibt es einen Rabatt bei Barzahlung?",
+      "pt": "Pode me dar um desconto se eu pagar em dinheiro?",
+      "th": "ถ้าจ่ายเงินสด ลดราคาให้หน่อยได้ไหม?",
+      "ko": "현금으로 내면 할인해 주실 수 있나요?",
+      "ar": "هل يمكنك تقديم خصم إذا دفعت نقداً؟",
+      "vi": "Nếu tôi trả tiền mặt có được giảm giá không?",
+      "tr": "Nakit ödersem indirim yapar mısınız?",
+      "el": "Μπορείτε να μου κάνετε έκπτωση αν πληρώσω με μετρητά;"
+    },
+    "phonetics": {
+      "zh": "Rúguǒ fù xiànjīn kěyǐ gěi wǒ dǎzhé ma?",
+      "ja": "Genkin de harau to waribiki shite moraemasu ka?",
+      "ko": "Hyeongeumeuro naemyeon harinhae jusil su innayo?",
+      "th": "Tha chai ngoen sot lot rakha hai noi dai mai?",
+      "ar": "Hal yumkinuk taqdim khasm idha dafa'tu naqdan?",
+      "el": "Boreite na mou kanete ekptosi an pliroso me metrita?"
+    }
   }
 ];

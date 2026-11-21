@@ -16,7 +16,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=28';
+} from './db.js?v=29';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -33,6 +33,7 @@ const state = {
   tripSubView: 'plan',            // 'plan' | 'map'
   activeWalletFilter: 'Tutti',    // 'Tutti' | 'flight' | 'train' | 'bus' | 'ferry' | 'accommodation' | 'documents'
   privacyCodesHidden: true,
+  budgetHidden: localStorage.getItem('nomad_budget_hidden') === 'true',
   wakeLockSentinel: null,
   currentGateDocBlobUrl: null,
   homeCurrency: localStorage.getItem('nomad_home_currency') || 'EUR',
@@ -1730,7 +1731,7 @@ function renderTabDashboard() {
 
     <!-- 5) WIDGET BUDGET VIAGGIO + BUSSOLA GIORNALIERA (MOBILE-FIRST 360-430px) -->
     <div class="glass-card dash-widget-card" style="padding:16px;">
-      <!-- Riga 1: Header (Titolo a sinistra, Bottoni allineati orizzontalmente a destra) -->
+      <!-- Riga 1: Header (Titolo a sinistra, Bottoni allineati orizzontalmente a destra con Icona Occhio Privacy) -->
       <div class="dash-budget-header-mobile">
         <div style="display:flex; align-items:center; gap:8px;">
           <div class="dash-widget-icon-badge icon-badge-budget" style="width:26px; height:26px;">
@@ -1743,6 +1744,19 @@ function renderTabDashboard() {
           <div class="dash-budget-title-mobile">Budget Viaggio</div>
         </div>
         <div class="dash-budget-actions-mobile">
+          <button id="dashBtnToggleBudgetPrivacy" class="btn-privacy-toggle ${state.budgetHidden ? 'active' : ''}" aria-label="Attiva/Disattiva Privacy Budget" title="${state.budgetHidden ? 'Mostra importi' : 'Nascondi importi (Privacy)'}">
+            ${state.budgetHidden ? `
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:16px;height:16px;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            ` : `
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:16px;height:16px;">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            `}
+          </button>
           <button id="btn-edit-budget" class="btn-edit-budget-pill" onclick="openBudgetEditModal()" aria-label="Modifica Budget">
             ${hasBudgetSet ? '✎ Modifica' : 'Imposta budget'}
           </button>
@@ -1754,7 +1768,7 @@ function renderTabDashboard() {
 
       ${hasBudgetSet ? `
         <!-- Riga 2: Box Bussola Giornaliera Dedicata -->
-        <div class="dash-compass-card-mobile">
+        <div class="dash-compass-card-mobile ${state.budgetHidden ? 'privacy-masked' : ''}">
           <div class="dash-compass-tag-mobile">
             <span>🧭 Bussola Giornaliera</span>
             <span style="font-size:0.72rem; color:#A8B8C0; text-transform:none;">${remainingDays} ${remainingDays === 1 ? 'giorno rimasto' : 'giorni rimasti'}</span>
@@ -1768,12 +1782,12 @@ function renderTabDashboard() {
         </div>
 
         <!-- Riga 3: Barra di progresso -->
-        <div class="dash-budget-progress-mobile">
+        <div class="dash-budget-progress-mobile ${state.budgetHidden ? 'privacy-masked' : ''}">
           <div class="flow-progress-bar ${budgetColorClass}" style="width: ${Math.min(100, budgetUsagePercent)}%;"></div>
         </div>
 
         <!-- Riga 4: Griglia Dati 3 Colonne -->
-        <div class="dash-budget-3col-mobile tabular-nums">
+        <div class="dash-budget-3col-mobile tabular-nums ${state.budgetHidden ? 'privacy-masked' : ''}">
           <div>
             <div class="budget-col-label">Speso</div>
             <div class="budget-col-val">${formatMoney(totalSpent, homeCurr)}</div>
@@ -1811,13 +1825,7 @@ function renderTabDashboard() {
             <div style="font-size:11px; color:var(--text-secondary);">${(trip.participants || ["Io"]).length} partecipanti</div>
           </div>
         </div>
-        <span class="split-status-badge ${splitGroup.statusType === "credit" ? "split-status-credit" : (splitGroup.statusType === "debt" ? "split-status-debt" : "split-status-settled")} tabular-nums">
-          ${splitGroup.statusText}
-        </span>
-      </div>
-    </div>
-        </div>
-        <span class="split-status-badge ${splitGroup.statusType === "credit" ? "split-status-credit" : (splitGroup.statusType === "debt" ? "split-status-debt" : "split-status-settled")} tabular-nums">
+        <span class="split-status-badge ${splitGroup.statusType === "credit" ? "split-status-credit" : (splitGroup.statusType === "debt" ? "split-status-debt" : "split-status-settled")} tabular-nums ${state.budgetHidden ? 'privacy-masked' : ''}">
           ${splitGroup.statusText}
         </span>
       </div>
@@ -1835,8 +1843,15 @@ function renderTabDashboard() {
     openSheet("sheetTrips");
   });
 
-  // 3. Modifica Budget al volo (Event Delegation blindata sul container + listener specifici)
+  // 3. Modifica Budget al volo & Toggle Privacy (Event Delegation blindata sul container + listener specifici)
   container.addEventListener("click", (e) => {
+    if (e.target.closest("#dashBtnToggleBudgetPrivacy")) {
+      e.stopPropagation();
+      state.budgetHidden = !state.budgetHidden;
+      localStorage.setItem('nomad_budget_hidden', state.budgetHidden ? 'true' : 'false');
+      renderTabDashboard();
+      return;
+    }
     if (e.target.closest("#btn-edit-budget") || e.target.closest("#dashColBudgetCapClick") || e.target.closest("#btnSetBudgetEmpty")) {
       e.stopPropagation();
       openBudgetEditModal();
@@ -1852,6 +1867,13 @@ function renderTabDashboard() {
       switchTab("expenses");
       return;
     }
+  });
+
+  document.getElementById("dashBtnToggleBudgetPrivacy")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    state.budgetHidden = !state.budgetHidden;
+    localStorage.setItem('nomad_budget_hidden', state.budgetHidden ? 'true' : 'false');
+    renderTabDashboard();
   });
 
   document.getElementById("btn-edit-budget")?.addEventListener("click", openBudgetEditModal);
@@ -4401,15 +4423,6 @@ let activeSpeechRecognition = null;
 let selectedPhrasebookCategory = 'all';
 let phrasebookSearchQuery = '';
 
-let convState = {
-  topLang: 'zh',
-  bottomLang: 'it',
-  topText: 'Premi "Parla" o tocca per iniziare',
-  bottomText: 'Tocca "Parla" per registrare',
-  topSub: '',
-  bottomSub: ''
-};
-
 function loadVoices() {
   if (!('speechSynthesis' in window)) return [];
   cachedVoices = window.speechSynthesis.getVoices() || [];
@@ -4520,16 +4533,6 @@ function updateTranslatorOnlineStatus() {
   if (banner) {
     banner.style.display = isOnline ? 'none' : 'flex';
   }
-
-  const convNotice = document.getElementById('convOfflineNotice');
-  if (convNotice) {
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!isOnline || !SpeechRec) {
-      convNotice.style.display = 'block';
-    } else {
-      convNotice.style.display = 'none';
-    }
-  }
 }
 
 window.addEventListener('online', updateTranslatorOnlineStatus);
@@ -4622,56 +4625,6 @@ function startSpeechRecognition({ langKey, onStart, onResult, onEnd, onError }) 
     if (onError) onError(err);
     return null;
   }
-}
-
-// ==========================================================================
-// MODALITÀ CONVERSAZIONE SCHERMO DIVISO 180°
-// ==========================================================================
-function openConversationMode() {
-  const overlay = document.getElementById('conversationSplitOverlay');
-  if (!overlay) return;
-
-  const sFrom = document.getElementById('transLangFrom');
-  const sTo = document.getElementById('transLangTo');
-
-  convState.bottomLang = (sFrom ? sFrom.value : 'it').toLowerCase();
-  convState.topLang = (sTo ? sTo.value : 'zh').toLowerCase();
-
-  updateConversationUI();
-  updateTranslatorOnlineStatus();
-  overlay.classList.add('active');
-  acquireWakeLock();
-}
-
-function closeConversationMode() {
-  const overlay = document.getElementById('conversationSplitOverlay');
-  if (overlay) overlay.classList.remove('active');
-  if (activeSpeechRecognition) {
-    try { activeSpeechRecognition.abort(); } catch (e) {}
-    activeSpeechRecognition = null;
-  }
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-  releaseWakeLock();
-}
-
-function updateConversationUI() {
-  const topTag = document.getElementById('convTopLangTag');
-  const bottomTag = document.getElementById('convBottomLangTag');
-  const topMain = document.getElementById('convTopMainText');
-  const topSub = document.getElementById('convTopSubText');
-  const bottomMain = document.getElementById('convBottomMainText');
-  const bottomSub = document.getElementById('convBottomSubText');
-
-  const topInfo = LANG_MAP[convState.topLang] || { flag: '🌐', name: convState.topLang.toUpperCase() };
-  const bottomInfo = LANG_MAP[convState.bottomLang] || { flag: '🌐', name: convState.bottomLang.toUpperCase() };
-
-  if (topTag) topTag.textContent = `${topInfo.flag} ${topInfo.name}`;
-  if (bottomTag) bottomTag.textContent = `${bottomInfo.flag} ${bottomInfo.name}`;
-
-  if (topMain) topMain.textContent = convState.topText;
-  if (topSub) topSub.textContent = convState.topSub;
-  if (bottomMain) bottomMain.textContent = convState.bottomText;
-  if (bottomSub) bottomSub.textContent = convState.bottomSub;
 }
 
 // ==========================================================================
@@ -5136,25 +5089,62 @@ function setupTravelManualSheet() {
   });
 
   // Azioni Risultato
+  const getCurrentTranslation = () => {
+    const transEl = document.getElementById('transResultTranslated');
+    const origEl = document.getElementById('transResultOriginal');
+    const sTo = document.getElementById('transLangTo');
+    const sFrom = document.getElementById('transLangFrom');
+
+    const toL = (sTo ? sTo.value : 'zh').toLowerCase();
+    const fromL = (sFrom ? sFrom.value : 'it').toLowerCase();
+    const textTrans = transEl ? transEl.textContent.trim() : '';
+    const textOrig = origEl ? origEl.textContent.replace(/^"|"(\s*\(.*\))?$/g, '').trim() : '';
+
+    if (lastTranslation && lastTranslation.translated === textTrans) {
+      return lastTranslation;
+    }
+    if (textTrans && textTrans !== 'Impossibile tradurre online (Offline)' && textTrans !== 'Seleziona due lingue diverse') {
+      return {
+        translated: textTrans,
+        original: textOrig || textTrans,
+        toLang: toL,
+        fromLang: fromL
+      };
+    }
+    return lastTranslation;
+  };
+
   document.getElementById('btnTransSpeakNormal')?.addEventListener('click', () => {
-    if (!lastTranslation) return;
-    speakText(lastTranslation.translated, lastTranslation.toLang, 0.95);
+    const cur = getCurrentTranslation();
+    if (!cur || !cur.translated) {
+      showToast('Nessuna traduzione da ascoltare');
+      return;
+    }
+    speakText(cur.translated, cur.toLang, 0.95);
   });
 
   document.getElementById('btnTransSpeakSlow')?.addEventListener('click', () => {
-    if (!lastTranslation) return;
-    speakText(lastTranslation.translated, lastTranslation.toLang, 0.72);
+    const cur = getCurrentTranslation();
+    if (!cur || !cur.translated) {
+      showToast('Nessuna traduzione da ascoltare');
+      return;
+    }
+    speakText(cur.translated, cur.toLang, 0.72);
   });
 
   const btnCopy = document.getElementById('btnTransCopy');
   btnCopy?.addEventListener('click', async () => {
-    if (!lastTranslation || !lastTranslation.translated) return;
+    const cur = getCurrentTranslation();
+    if (!cur || !cur.translated) {
+      showToast('Nessuna traduzione da copiare');
+      return;
+    }
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(lastTranslation.translated);
+        await navigator.clipboard.writeText(cur.translated);
       } else {
         const ta = document.createElement('textarea');
-        ta.value = lastTranslation.translated;
+        ta.value = cur.translated;
         document.body.appendChild(ta);
         ta.select();
         document.execCommand('copy');
@@ -5176,15 +5166,23 @@ function setupTravelManualSheet() {
   });
 
   document.getElementById('btnTransSaveOffline')?.addEventListener('click', async () => {
-    if (!lastTranslation) return;
-    await saveToTranslationHistory(lastTranslation);
+    const cur = getCurrentTranslation();
+    if (!cur || !cur.translated) {
+      showToast('Nessuna traduzione da salvare');
+      return;
+    }
+    await saveToTranslationHistory(cur);
     showToast('Frase salvata!');
   });
 
   document.getElementById('btnTransShowBig')?.addEventListener('click', () => {
-    if (!lastTranslation) return;
-    const toName = LANG_MAP[lastTranslation.toLang]?.name || lastTranslation.toLang.toUpperCase();
-    openPhraseBigOverlay(lastTranslation.translated, lastTranslation.original, `Traduzione (${toName})`, lastTranslation.toLang);
+    const cur = getCurrentTranslation();
+    if (!cur || !cur.translated) {
+      showToast('Nessuna traduzione da visualizzare');
+      return;
+    }
+    const toName = LANG_MAP[cur.toLang]?.name || cur.toLang.toUpperCase();
+    openPhraseBigOverlay(cur.translated, cur.original, `Traduzione (${toName})`, cur.toLang);
   });
 
   document.getElementById('btnClearTranslationHistory')?.addEventListener('click', async () => {
@@ -5194,113 +5192,6 @@ function setupTravelManualSheet() {
       await putToStore('trips_store', state.activeTrip);
       renderSavedTranslationsList();
       showToast('Cronologia svuotata');
-    }
-  });
-
-  // Modalità Conversazione
-  document.getElementById('btnOpenConversationMode')?.addEventListener('click', openConversationMode);
-  document.getElementById('btnCloseConversationMode')?.addEventListener('click', closeConversationMode);
-
-  // Conversazione: Controlli Tu
-  const convBottomMic = document.getElementById('btnConvBottomMic');
-  convBottomMic?.addEventListener('click', () => {
-    startSpeechRecognition({
-      langKey: convState.bottomLang,
-      onStart: () => {
-        convBottomMic.classList.add('is-listening');
-        convBottomMic.textContent = '🔴 Parla ora...';
-      },
-      onResult: async (transcript) => {
-        convState.bottomText = transcript;
-        updateConversationUI();
-        try {
-          const trans = await translateTextOnline(transcript, convState.bottomLang, convState.topLang);
-          convState.topText = trans;
-          convState.topSub = `"${transcript}"`;
-          updateConversationUI();
-          speakText(trans, convState.topLang, 0.95);
-        } catch (e) {
-          showToast('Errore traduzione conversazione');
-        }
-      },
-      onEnd: () => {
-        convBottomMic.classList.remove('is-listening');
-        convBottomMic.textContent = '🎤 Parla';
-      },
-      onError: () => {
-        convBottomMic.classList.remove('is-listening');
-        convBottomMic.textContent = '🎤 Parla';
-      }
-    });
-  });
-
-  document.getElementById('btnConvBottomSpeak')?.addEventListener('click', () => {
-    if (convState.bottomText) speakText(convState.bottomText, convState.bottomLang, 0.95);
-  });
-
-  // Conversazione: Controlli Interlocutore
-  const convTopMic = document.getElementById('btnConvTopMic');
-  convTopMic?.addEventListener('click', () => {
-    startSpeechRecognition({
-      langKey: convState.topLang,
-      onStart: () => {
-        convTopMic.classList.add('is-listening');
-        convTopMic.textContent = '🔴 Parla ora...';
-      },
-      onResult: async (transcript) => {
-        convState.topText = transcript;
-        updateConversationUI();
-        try {
-          const trans = await translateTextOnline(transcript, convState.topLang, convState.bottomLang);
-          convState.bottomText = trans;
-          convState.bottomSub = `"${transcript}"`;
-          updateConversationUI();
-          speakText(trans, convState.bottomLang, 0.95);
-        } catch (e) {
-          showToast('Errore traduzione conversazione');
-        }
-      },
-      onEnd: () => {
-        convTopMic.classList.remove('is-listening');
-        convTopMic.textContent = '🎤 Parla';
-      },
-      onError: () => {
-        convTopMic.classList.remove('is-listening');
-        convTopMic.textContent = '🎤 Parla';
-      }
-    });
-  });
-
-  document.getElementById('btnConvTopSpeak')?.addEventListener('click', () => {
-    if (convState.topText) speakText(convState.topText, convState.topLang, 0.95);
-  });
-
-  // Tap per digitare in conversazione
-  document.getElementById('convBottomMainText')?.addEventListener('click', () => {
-    const input = prompt('Digita una frase:', '');
-    if (input && input.trim()) {
-      convState.bottomText = input.trim();
-      updateConversationUI();
-      translateTextOnline(input.trim(), convState.bottomLang, convState.topLang).then(trans => {
-        convState.topText = trans;
-        convState.topSub = `"${input.trim()}"`;
-        updateConversationUI();
-        speakText(trans, convState.topLang, 0.95);
-      }).catch(() => showToast('Errore traduzione'));
-    }
-  });
-
-  document.getElementById('convTopMainText')?.addEventListener('click', () => {
-    const input = prompt('Digita una frase per interlocutore:', '');
-    if (input && input.trim()) {
-      convState.topText = input.trim();
-      updateConversationUI();
-      translateTextOnline(input.trim(), convState.topLang, convState.bottomLang).then(trans => {
-        convState.bottomText = trans;
-        convState.bottomSub = `"${input.trim()}"`;
-        updateConversationUI();
-        speakText(trans, convState.bottomLang, 0.95);
-      }).catch(() => showToast('Errore traduzione'));
     }
   });
 

@@ -3633,6 +3633,38 @@ button.accent,
   flex-shrink: 0 !important;
 }
 
+.btn-privacy-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+.btn-privacy-toggle:active {
+  transform: scale(0.92);
+  color: var(--text-primary);
+}
+.btn-privacy-toggle.active {
+  color: var(--accent);
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+/* Modalità Privacy attiva: blur nitido e non selezionabile */
+.privacy-masked {
+  filter: blur(6px) !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  transition: filter 0.18s ease;
+}
+
 .dash-compass-card-mobile {
   background: rgba(52, 211, 153, 0.10) !important;
   border-radius: 14px !important;
@@ -3747,120 +3779,6 @@ button.accent,
   100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
-/* OVERLAY CONVERSAZIONE 180° SCHERMO DIVISO */
-.conversation-split-overlay {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 10000 !important;
-  background: #0B0E11 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-}
-
-.conversation-split-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Due metà 50vh */
-.conv-half {
-  flex: 1;
-  height: 50vh;
-  display: flex;
-  flex-direction: column;
-  padding: 16px 20px calc(var(--sab) + 12px) 20px;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.conv-half-top {
-  background: #14181D;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
-  transform: rotate(180deg);
-  padding: 16px 20px calc(var(--sat) + 12px) 20px;
-}
-
-.conv-half-bottom {
-  background: #1A1F26;
-}
-
-.conv-half-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.conv-half-lang-tag {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.conv-half-content {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 8px 0;
-}
-
-.conv-half-text-main {
-  font-size: 24px;
-  font-weight: 800;
-  color: #FFFFFF;
-  line-height: 1.35;
-  word-break: break-word;
-}
-
-.conv-half-text-sub {
-  font-size: 13px;
-  color: #9BA3AB;
-  margin-top: 6px;
-  font-style: italic;
-}
-
-.conv-half-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-/* Pulsante centrale di chiusura */
-.conv-split-close-btn {
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  transform: translateY(-50%);
-  z-index: 10005;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(30, 35, 42, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  transition: all 0.2s ease;
-}
-
-.conv-split-close-btn:active {
-  transform: translateY(-50%) scale(0.92);
-}
-
 /* ==========================================================================
    TRANSLATOR & PHRASEBOOK FULLSCREEN PAGE (APPLE TRANSLATE / iOS STYLE)
    ========================================================================== */
@@ -3934,23 +3852,6 @@ button.accent,
   color: var(--text-primary);
   margin: 0;
   text-align: center;
-}
-
-.trans-header-btn-conv {
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 700;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(52, 211, 153, 0.16);
-  color: #34D399;
-  border: 1px solid rgba(52, 211, 153, 0.35);
-  cursor: pointer;
-}
-.trans-header-btn-conv:active {
-  transform: scale(0.96);
 }
 
 /* Segmented Control iOS Style */
@@ -4150,6 +4051,8 @@ button.accent,
   border: 1px solid rgba(52, 211, 153, 0.35);
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .trans-result-header {
@@ -4191,6 +4094,8 @@ button.accent,
   color: var(--text-primary);
   margin: 10px 0 14px 0;
   word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .trans-result-text-orig {
@@ -4199,6 +4104,9 @@ button.accent,
   margin-top: -8px;
   margin-bottom: 12px;
   font-style: italic;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 /* Griglia Azioni a 4 colonne uguali */
