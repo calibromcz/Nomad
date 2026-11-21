@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=30';
+} from './db.js?v=31';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -3155,8 +3155,8 @@ function renderTabWallet() {
         <h2 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0;">Apple Wallet</h2>
         <span style="font-size:12px; color:var(--text-secondary);">Pass, biglietti e documenti 100% offline</span>
       </div>
-      <button class="btn-glass-pill accent" id="btnOpenUploadFile" style="padding:7px 14px; font-size:12.5px; font-weight:600;">
-        + Aggiungi
+      <button class="wallet-add-btn-circle" id="btnOpenUploadFile" title="Aggiungi Documento" aria-label="Aggiungi Documento">
+        +
       </button>
     </div>
 
@@ -3479,13 +3479,9 @@ function renderTabWallet() {
   });
 
   // Tasti Aggiungi Documento
-  document.getElementById('btnOpenUploadFile')?.addEventListener('click', () => openSheet('sheetWalletUpload'));
-  document.getElementById('btnEmptyUploadFile')?.addEventListener('click', () => openSheet('sheetWalletUpload'));
-  document.getElementById('btnEmptyUploadVaultFile')?.addEventListener('click', () => {
-    const vaultCheckbox = document.getElementById('fieldWalletVault');
-    if (vaultCheckbox) vaultCheckbox.checked = true;
-    openSheet('sheetWalletUpload');
-  });
+  document.getElementById('btnOpenUploadFile')?.addEventListener('click', () => openWalletUploadModal(false));
+  document.getElementById('btnEmptyUploadFile')?.addEventListener('click', () => openWalletUploadModal(false));
+  document.getElementById('btnEmptyUploadVaultFile')?.addEventListener('click', () => openWalletUploadModal(true));
 
   // Azioni sulle card (Pin, Toggle Vault, Gate, Delete)
   container.querySelectorAll('[data-action]').forEach(btn => {
@@ -5675,21 +5671,43 @@ function setupEventListeners() {
 
   document.getElementById('formEvent')?.addEventListener('submit', saveEventFromForm);
 
+  // Trigger fotocamera / file picker per Wallet Upload
+  document.getElementById('btnPickCamera')?.addEventListener('click', () => {
+    const input = document.getElementById('fieldWalletCamera');
+    if (input) input.click();
+  });
+
+  document.getElementById('btnPickFile')?.addEventListener('click', () => {
+    const input = document.getElementById('fieldWalletFile');
+    if (input) input.click();
+  });
+
+  document.getElementById('fieldWalletCamera')?.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleSelectedWalletFile(e.target.files[0]);
+    }
+  });
+
+  document.getElementById('fieldWalletFile')?.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleSelectedWalletFile(e.target.files[0]);
+    }
+  });
+
   document.getElementById('formWalletUpload')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const fileInput = document.getElementById('fieldWalletFile');
     const title = document.getElementById('fieldWalletTitle').value.trim();
     const category = document.getElementById('fieldWalletCategory').value;
     const notes = document.getElementById('fieldWalletNotes').value.trim();
     const isPinned = Boolean(document.getElementById('fieldWalletPin')?.checked);
     const inVault = Boolean(document.getElementById('fieldWalletVault')?.checked);
 
-    if (!fileInput.files || fileInput.files.length === 0) {
-      showToast('Seleziona un file');
+    const file = selectedWalletFile;
+
+    if (!file) {
+      showToast('Seleziona o scatta una foto del documento');
       return;
     }
-
-    const file = fileInput.files[0];
 
     // Controllo dimensione max 10MB per PDF
     if (file.type === 'application/pdf' && file.size > 10 * 1024 * 1024) {
@@ -5708,6 +5726,7 @@ function setupEventListeners() {
       inVault
     });
 
+    clearWalletUploadFile();
     closeAllSheets();
     await refreshApplicationData();
     showToast(inVault ? 'Documento salvato in Cassaforte 🔒' : 'Documento archiviato nel Wallet!');
@@ -5754,6 +5773,84 @@ function setupEventListeners() {
     e.preventDefault();
     await saveTripFromForm();
   });
+}
+
+let selectedWalletFile = null;
+
+function clearWalletUploadFile() {
+  selectedWalletFile = null;
+  const cameraInput = document.getElementById('fieldWalletCamera');
+  const fileInput = document.getElementById('fieldWalletFile');
+  if (cameraInput) cameraInput.value = '';
+  if (fileInput) fileInput.value = '';
+
+  const previewContainer = document.getElementById('walletFilePreviewContainer');
+  const pickerGrid = document.getElementById('walletPickerGrid');
+  if (previewContainer) {
+    previewContainer.innerHTML = '';
+    previewContainer.style.display = 'none';
+  }
+  if (pickerGrid) {
+    pickerGrid.style.display = 'grid';
+  }
+}
+
+function handleSelectedWalletFile(file) {
+  if (!file) return;
+  selectedWalletFile = file;
+
+  // Auto-compila titolo se vuoto
+  const titleInput = document.getElementById('fieldWalletTitle');
+  if (titleInput && !titleInput.value.trim()) {
+    const cleanName = file.name ? file.name.replace(/\.[^/.]+$/, '') : 'Documento';
+    titleInput.value = cleanName;
+  }
+
+  const previewContainer = document.getElementById('walletFilePreviewContainer');
+  const pickerGrid = document.getElementById('walletPickerGrid');
+  if (!previewContainer) return;
+
+  const sizeKb = (file.size / 1024).toFixed(1);
+  const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+  const sizeText = file.size >= 1024 * 1024 ? `${sizeMb} MB` : `${sizeKb} KB`;
+
+  const isImg = file.type.startsWith('image/');
+  let thumbHtml = '';
+  if (isImg) {
+    const url = URL.createObjectURL(file);
+    thumbHtml = `<img src="${url}" class="wallet-preview-thumb" alt="Anteprima">`;
+  } else {
+    thumbHtml = `<div class="wallet-preview-file-icon">📄</div>`;
+  }
+
+  previewContainer.innerHTML = `
+    <div class="wallet-preview-card">
+      ${thumbHtml}
+      <div class="wallet-preview-info">
+        <div class="wallet-preview-name">${escapeHTML(file.name || 'Documento')}</div>
+        <div class="wallet-preview-size">${escapeHTML(file.type || 'file')} • ${sizeText}</div>
+      </div>
+      <button type="button" class="wallet-preview-remove-btn" id="btnRemoveWalletPreview" title="Rimuovi file" aria-label="Rimuovi file">✕</button>
+    </div>
+  `;
+
+  previewContainer.style.display = 'block';
+  if (pickerGrid) pickerGrid.style.display = 'none';
+
+  document.getElementById('btnRemoveWalletPreview')?.addEventListener('click', () => {
+    clearWalletUploadFile();
+  });
+}
+
+function openWalletUploadModal(presetVault = false) {
+  clearWalletUploadFile();
+  const form = document.getElementById('formWalletUpload');
+  if (form) form.reset();
+
+  const vaultCheckbox = document.getElementById('fieldWalletVault');
+  if (vaultCheckbox) vaultCheckbox.checked = Boolean(presetVault);
+
+  openSheet('sheetWalletUpload');
 }
 
 function openEditTripSheet(tripToEdit = null) {

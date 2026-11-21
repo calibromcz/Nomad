@@ -20,9 +20,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=30) -->
-  <link rel="stylesheet" href="./styles.css?v=30">
-  <link rel="modulepreload" href="./db.js?v=30">
+  <!-- Stylesheet (Cache-Busting ?v=31) -->
+  <link rel="stylesheet" href="./styles.css?v=31">
+  <link rel="modulepreload" href="./db.js?v=31">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -535,9 +535,26 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">File (Immagine o PDF) *</label>
-          <input type="file" id="fieldWalletFile" class="form-input" accept="image/*,application/pdf" required>
-          <span style="font-size:11px; color:var(--text-tertiary); margin-top:3px; display:block;">
+          <label class="form-label">File (Foto o PDF) *</label>
+          <!-- 2 bottoni affiancati Stile Pulse -->
+          <div class="wallet-upload-picker-grid" id="walletPickerGrid">
+            <button type="button" class="wallet-picker-btn" id="btnPickCamera">
+              <span class="wallet-picker-icon">📷</span>
+              <span>Scatta Foto</span>
+            </button>
+            <button type="button" class="wallet-picker-btn" id="btnPickFile">
+              <span class="wallet-picker-icon">📁</span>
+              <span>Carica File</span>
+            </button>
+          </div>
+          <!-- Input reali nascosti -->
+          <input type="file" id="fieldWalletCamera" accept="image/*" capture="environment" style="display:none;">
+          <input type="file" id="fieldWalletFile" accept="image/*,application/pdf" style="display:none;">
+          
+          <!-- Mini Anteprima File Selezionato -->
+          <div id="walletFilePreviewContainer" style="display:none;"></div>
+
+          <span style="font-size:11px; color:var(--text-tertiary); margin-top:5px; display:block;">
             Immagini compresse automaticamente in WebP (max 1600px). PDF max 10MB.
           </span>
         </div>
@@ -778,7 +795,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
-  <script type="module" src="./app.js?v=30"></script>
+  <script type="module" src="./app.js?v=31"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>
