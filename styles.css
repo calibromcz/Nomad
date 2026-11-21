@@ -1,33 +1,33 @@
 /* ==========================================================================
-   NOMAD DESIGN SYSTEM — APPLE CUPERTINO CLEAN & AIRPLANE-MODE FIRST
-   Grigio Apple Trasparente, Bordi Verde Smeraldo, Tipografia Pulita
+   NOMAD DESIGN SYSTEM — LIQUID GLASS FRIENDLY & AIRPLANE-MODE FIRST
+   Card Arrotondate (24px), Bordi Verde Smeraldo, Top/Bottom Bar Verde e Tasti Bianchi
    100% Offline, Airplane-Mode First
    ========================================================================== */
 
 :root {
-  /* Color Palette — Light Mode (Apple Cupertino) */
-  --bg-app: #F2F4F3;
-  --bg-card: rgba(235, 238, 237, 0.72);
-  --bg-input: rgba(225, 228, 227, 0.6);
+  /* Color Palette — Light Mode (Liquid Glass Friendly) */
+  --bg-app: #F2F6F4;
+  --bg-card: rgba(255, 255, 255, 0.78);
+  --bg-input: rgba(235, 240, 238, 0.7);
   --text-primary: #1C1C1E;
-  --text-secondary: #636366;
-  --text-tertiary: #8E8E93;
-  --text-quaternary: #C7C7CC;
-  --border-color: rgba(16, 185, 129, 0.55);
+  --text-secondary: #526058;
+  --text-tertiary: #7E8C85;
+  --text-quaternary: #C2CEC8;
+  --border-color: rgba(16, 185, 129, 0.72);
   --border-strong: #10B981;
 
   /* Aliasing per componenti */
   --bg-base: var(--bg-app);
   --bg-surface: var(--bg-card);
-  --bg-surface-elevated: rgba(255, 255, 255, 0.85);
+  --bg-surface-elevated: rgba(255, 255, 255, 0.9);
   --bg-glass-input: var(--bg-input);
-  --bg-card-subtle: rgba(235, 238, 237, 0.5);
+  --bg-card-subtle: rgba(240, 246, 243, 0.6);
   --border-glass: var(--border-color);
-  --border-subtle: rgba(16, 185, 129, 0.25);
+  --border-subtle: rgba(16, 185, 129, 0.3);
   --border-focus: #10B981;
 
-  /* Accenti Apple Cupertino */
-  --accent: #10B981;           /* Emerald Green Cupertino */
+  /* Accenti Emerald Friendly */
+  --accent: #10B981;
   --accent-orange: #10B981;
   --accent-yellow: #F59E0B;
   --accent-blue: #0284C7;
@@ -43,18 +43,18 @@
   --status-danger: var(--accent-red);
   --status-info: var(--accent-blue);
 
-  /* Apple Soft Shadows */
-  --hardware-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  /* Friendly Soft Shadows */
+  --hardware-shadow: 0 8px 24px rgba(16, 185, 129, 0.08);
   --keycap-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --glass-shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --glass-shadow: 0 8px 24px rgba(16, 185, 129, 0.08);
+  --glass-shadow-elevated: 0 12px 32px rgba(16, 185, 129, 0.12);
 
-  /* Radii */
-  --radius-sm: 10px;
-  --radius-md: 18px;
-  --radius-lg: 18px;
-  --radius-xl: 22px;
+  /* Radii Più Tondeggianti & Friendly */
+  --radius-sm: 12px;
+  --radius-md: 24px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
   --radius-pill: 9999px;
 
   /* Typography */
@@ -62,7 +62,7 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-family: var(--font-ui);
 
-  /* Animations morbide Apple */
+  /* Animations morbide */
   --duration-fast: 0.12s;
   --duration-normal: 0.22s;
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
@@ -76,36 +76,36 @@
 }
 
 [data-theme="dark"] {
-  /* Color Palette — Dark Mode (Apple Charcoal Soft) */
-  --bg-app: #1C1E21;
-  --bg-card: rgba(58, 62, 68, 0.55);
-  --bg-input: rgba(45, 48, 54, 0.65);
-  --text-primary: #F2F2F7;
-  --text-secondary: #A1A1A6;
-  --text-tertiary: #8E8E93;
-  --text-quaternary: #48484A;
-  --border-color: rgba(16, 185, 129, 0.55);
-  --border-strong: #10B981;
+  /* Color Palette — Dark Mode (Liquid Glass Smeraldo Riposante) */
+  --bg-app: #11181C;
+  --bg-card: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 45%, rgba(16, 185, 129, 0.06) 100%);
+  --bg-input: rgba(255, 255, 255, 0.07);
+  --text-primary: #F2F5F4;
+  --text-secondary: #A0B2AA;
+  --text-tertiary: #7D8F87;
+  --text-quaternary: #46554F;
+  --border-color: rgba(52, 211, 153, 0.65);
+  --border-strong: #34D399;
 
   /* Aliasing Dark Mode */
   --bg-base: var(--bg-app);
   --bg-surface: var(--bg-card);
-  --bg-surface-elevated: rgba(65, 70, 77, 0.7);
+  --bg-surface-elevated: rgba(255, 255, 255, 0.1);
   --bg-glass-input: var(--bg-input);
-  --bg-card-subtle: rgba(45, 48, 54, 0.5);
+  --bg-card-subtle: rgba(255, 255, 255, 0.05);
   --border-glass: var(--border-color);
-  --border-subtle: rgba(16, 185, 129, 0.25);
-  --border-focus: #10B981;
+  --border-subtle: rgba(52, 211, 153, 0.3);
+  --border-focus: #34D399;
 
-  --hardware-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --hardware-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   --keycap-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-  --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  --glass-shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --glass-shadow-elevated: 0 14px 36px rgba(0, 0, 0, 0.45);
 
-  --bottom-bar-bg: rgba(58, 62, 68, 0.55);
-  --sheet-bg: #1C1E21;
-  --sheet-bg-elevated: #282B30;
+  --bottom-bar-bg: rgba(13, 118, 83, 0.92);
+  --sheet-bg: #11181C;
+  --sheet-bg-elevated: #162226;
 }
 
 /* Base Reset */
@@ -123,11 +123,15 @@ html, body {
   background-color: var(--bg-app);
   color: var(--text-primary);
   font-family: var(--font-ui);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
   -webkit-user-select: none;
+}
+
+[data-theme="dark"] body {
+  background: radial-gradient(circle at 50% 20%, #162226 0%, #11181C 100%);
 }
 
 /* Font Monospazio per tutti i dati numerici, codici ed etichette tecniche */
@@ -138,21 +142,21 @@ html, body {
   font-variant-numeric: tabular-nums !important;
 }
 
-/* Texture Scocca Hardware Industriale (Niente Mesh Gradients Morbidi) */
+/* Texture Scocca & Bagliori Morbidi */
 .mesh-gradient-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background-color: var(--bg-app);
-  background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-  background-size: 16px 16px;
+  background-image: radial-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 [data-theme="dark"] .mesh-gradient-bg {
-  background-color: var(--bg-app);
-  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 16px 16px;
+  background: radial-gradient(circle at 50% 15%, #162226 0%, #11181C 100%);
+  background-image: radial-gradient(rgba(52, 211, 153, 0.06) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
 }
 
 #app {
@@ -166,7 +170,7 @@ html, body {
 }
 
 /* ==========================================================================
-   TOP BAR (Apple Cupertino Blur)
+   TOP BAR (Liquid Glass Green Header)
    ========================================================================== */
 .top-bar-icons-only {
   position: fixed;
@@ -177,40 +181,47 @@ html, body {
   align-items: center;
   justify-content: space-around;
   padding: calc(var(--sat) + 8px) 14px 10px 14px;
-  background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(16, 185, 129, 0.25);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  background: rgba(16, 148, 102, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
   z-index: 50;
   transition: background var(--duration-normal) ease;
+}
+
+[data-theme="dark"] .top-bar-icons-only {
+  background: rgba(13, 118, 83, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .top-icon-btn {
   width: 40px;
   height: 40px;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  box-shadow: none;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
+  color: #FFFFFF !important;
   cursor: pointer;
   position: relative;
-  transition: transform var(--duration-fast) ease, background var(--duration-fast) ease;
+  transition: transform var(--duration-fast) ease, opacity var(--duration-fast) ease;
 }
 
 .top-icon-btn:active {
-  transform: scale(0.95);
-  box-shadow: none;
-  background: rgba(16, 185, 129, 0.15);
+  transform: scale(0.92);
+  opacity: 0.85;
 }
 
 .top-icon-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
+  stroke: #FFFFFF !important;
   transition: stroke var(--duration-fast) ease;
 }
 
@@ -221,14 +232,14 @@ html, body {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--text-quaternary);
-  border: 1px solid var(--bg-card);
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(13, 118, 83, 0.8);
   transition: background var(--duration-fast) ease;
 }
 
 .top-badge-dot.active {
-  background: #10B981;
-  box-shadow: none;
+  background: #FFFFFF;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
 }
 
 .top-badge-count {
@@ -238,16 +249,18 @@ html, body {
   min-width: 17px;
   height: 17px;
   padding: 0 4px;
-  border-radius: 4px;
-  background: #10B981;
-  color: #FFFFFF;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  color: #0F8A5F;
   font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   font-variant-numeric: tabular-nums;
+  border: none;
+}
   border: 1px solid var(--border-strong);
 }
 
@@ -411,7 +424,7 @@ html, body {
 }
 
 /* ==========================================================================
-   BOTTOM NAVIGATION BAR (5 TAB — Apple Cupertino Translucent)
+   BOTTOM NAVIGATION BAR (5 TAB — Liquid Glass Green Footer)
    ========================================================================== */
 .bottom-nav {
   position: absolute;
@@ -422,12 +435,19 @@ html, body {
   align-items: center;
   justify-content: space-around;
   padding: 6px 10px calc(var(--sab) + 6px) 10px;
-  background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(16, 185, 129, 0.25);
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+  background: rgba(16, 148, 102, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
   z-index: 20;
+}
+
+[data-theme="dark"] .bottom-nav {
+  background: rgba(13, 118, 83, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .nav-tab-btn {
@@ -440,21 +460,21 @@ html, body {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: #8E8E93;
+  color: rgba(255, 255, 255, 0.62) !important;
   font-family: var(--font-ui);
   font-size: 10px;
   font-weight: 500;
   cursor: pointer;
   padding: 6px 4px;
   border-radius: var(--radius-sm);
-  transition: color var(--duration-fast) ease;
+  transition: color var(--duration-fast) ease, opacity var(--duration-fast) ease;
   position: relative;
 }
 
 .nav-tab-btn svg {
   width: 20px;
   height: 20px;
-  stroke: #8E8E93;
+  stroke: rgba(255, 255, 255, 0.62) !important;
   transition: stroke var(--duration-fast) ease;
 }
 
@@ -462,57 +482,82 @@ html, body {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: #10B981 !important;
-  font-weight: 600;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+  font-weight: 700;
 }
 
 .nav-tab-btn.active svg {
-  stroke: #10B981 !important;
+  stroke: #FFFFFF !important;
   transform: none;
   filter: none !important;
 }
 
 .nav-tab-btn.active::after {
-  display: none !important;
+  content: '';
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  display: block !important;
 }
 
 [data-theme="dark"] .nav-tab-btn.active svg {
-  stroke: #10B981 !important;
+  stroke: #FFFFFF !important;
   filter: none;
 }
 
 /* ==========================================================================
-   APPLE CUPERTINO GLASS CARDS & BENTO
+   LIQUID GLASS CARDS & BENTO (Friendly 24px)
    ========================================================================== */
 .glass-card {
   background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(16, 185, 129, 0.55);
-  border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  padding: 16px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 2px solid rgba(16, 185, 129, 0.72);
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.08);
+  padding: 18px;
   margin-bottom: 14px;
   position: relative;
   overflow: hidden;
 }
 
 [data-theme="dark"] .glass-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(16, 185, 129, 0.55);
-  border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 45%, rgba(16, 185, 129, 0.06) 100%);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 2px solid rgba(52, 211, 153, 0.65);
+  border-radius: 24px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.28), inset 0 -1px 1px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.12) 0%, transparent 40%);
+  border-radius: 24px;
 }
 
 .glass-card-elevated {
   background: var(--bg-surface-elevated);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1.5px solid rgba(16, 185, 129, 0.65);
-  border-radius: 18px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 2px solid rgba(16, 185, 129, 0.8);
+  border-radius: 24px;
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.12);
+}
+
+[data-theme="dark"] .glass-card-elevated {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 45%, rgba(52, 211, 153, 0.08) 100%);
+  border: 2px solid rgba(52, 211, 153, 0.8);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 1px rgba(0, 0, 0, 0.25), 0 14px 36px rgba(0, 0, 0, 0.45);
 }
 
 .bento-grid {
@@ -619,31 +664,34 @@ html, body {
   stroke: var(--accent);
 }
 
-/* Clean Apple Cupertino Buttons */
+/* Clean Friendly White Buttons */
 .btn-glass-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 8px 16px;
-  background: var(--bg-card);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  border-radius: 12px;
+  background: #FFFFFF;
+  color: #0F8A5F;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 14px;
   font-family: var(--font-ui);
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: transform var(--duration-fast) ease, background var(--duration-fast) ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
 
 [data-theme="dark"] .btn-glass-pill {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: #FFFFFF;
+  color: #0F8A5F;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .btn-glass-pill:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
   box-shadow: none;
 }
 
@@ -652,21 +700,25 @@ html, body {
 }
 
 .btn-glass-pill.accent {
-  background: #10B981;
-  color: #FFFFFF;
-  border: 1px solid #10B981;
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25);
+  background: #FFFFFF;
+  color: #0F8A5F;
+  font-weight: 700;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 [data-theme="dark"] .btn-glass-pill.accent {
-  background: #10B981;
-  color: #FFFFFF;
-  border: 1px solid #10B981;
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+  background: #FFFFFF;
+  color: #0F8A5F;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .btn-glass-pill.accent:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
   box-shadow: none;
 }
 
@@ -1145,17 +1197,21 @@ html, body {
 }
 
 .wallet-card {
-  border-radius: var(--radius-md);
-  padding: 12px;
+  border-radius: 24px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   margin-bottom: 0;
   background: var(--bg-card);
-  border: 1.5px solid var(--border-color);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 2px solid var(--border-color);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.08);
   transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
   position: relative;
+}
+
+[data-theme="dark"] .wallet-card {
+  border: 2px solid rgba(52, 211, 153, 0.65);
 }
 
 .wallet-card:active {
@@ -1166,7 +1222,7 @@ html, body {
 .wallet-preview-box {
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: var(--radius-sm);
+  border-radius: 16px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   display: flex;
@@ -2256,10 +2312,10 @@ html, body {
   padding: 12px 14px;
   background: var(--bg-input);
   border: 1.5px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 16px;
   font-size: 14.5px;
-  font-weight: 600;
-  font-family: var(--font-mono);
+  font-weight: 500;
+  font-family: var(--font-ui);
   color: var(--text-primary);
   outline: none;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -3068,12 +3124,16 @@ input:checked + .toggle-slider:before {
 /* Widget Card Full-Width Pulita */
 /* Header Tecnico Widget Dashboard stile Teenage Engineering */
 .dash-widget-card {
-  padding: 16px;
-  margin-bottom: 12px;
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--border-color);
+  padding: 18px;
+  margin-bottom: 14px;
+  border-radius: 24px;
+  border: 2px solid var(--border-color);
   background: var(--bg-card);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="dark"] .dash-widget-card {
+  border: 2px solid rgba(52, 211, 153, 0.65);
 }
 
 .dash-widget-header {
@@ -3214,9 +3274,11 @@ button.accent,
 [data-theme="dark"] .btn-glass-pill.accent,
 [data-theme="dark"] .btn-primary,
 [data-theme="dark"] button.accent {
-  color: #062417 !important;
-  background: var(--accent-gradient) !important;
+  color: #0F8A5F !important;
+  background: #FFFFFF !important;
   font-weight: 700 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
 }
 
 
@@ -4461,13 +4523,17 @@ button.accent,
 
 /* SLOT 2: Card Input Testo */
 .trans-input-card {
-  border-radius: var(--radius-md);
-  padding: 14px;
+  border-radius: 24px;
+  padding: 16px;
   background: var(--bg-card);
-  border: 1.5px solid var(--border-color);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 2px solid var(--border-color);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.08);
   display: flex;
   flex-direction: column;
+}
+
+[data-theme="dark"] .trans-input-card {
+  border: 2px solid rgba(52, 211, 153, 0.65);
 }
 
 .trans-textarea-clean {
@@ -4574,15 +4640,19 @@ button.accent,
 
 /* SLOT 3: Card Risultato */
 .trans-result-card {
-  border-radius: var(--radius-md);
-  padding: 16px;
+  border-radius: 24px;
+  padding: 18px;
   background: var(--bg-card);
-  border: 1.5px solid var(--border-color);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 2px solid var(--border-color);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.08);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   width: 100%;
+}
+
+[data-theme="dark"] .trans-result-card {
+  border: 2px solid rgba(52, 211, 153, 0.65);
 }
 
 .trans-result-header {
