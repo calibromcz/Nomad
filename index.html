@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Nomad — Airplane-Mode First</title>
+  
+  <!-- Mobile & PWA Meta Tags (Cupertino & Standalone) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nomad">
+  <meta name="theme-color" content="#15803D">
+  <meta name="description" content="Nomad — Compagno di viaggio 100% offline, privacy first (Suite indie 00 Work).">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2334D399'/%3E%3Cstop offset='100%25' stop-color='%2315803D'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Cpath d='M256 120 L276 236 L392 256 L276 276 L256 392 L236 276 L120 256 L236 236 Z' fill='none' stroke='%23ffffff' stroke-width='28' stroke-linejoin='round'/%3E%3Ccircle cx='256' cy='256' r='36' fill='%23ffffff'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%2315803D'/%3E%3Cpath d='M50 20 L55 45 L80 50 L55 55 L50 80 L45 55 L20 50 L45 45 Z' fill='%23ffffff'/%3E%3C/svg%3E">
+
+  <!-- Leaflet CSS per Mappa Offline -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Stylesheet (Cache-Busting ?v=5) -->
+  <link rel="stylesheet" href="./styles.css?v=26">
+  <link rel="modulepreload" href="./db.js?v=26">
+  <!-- Runtime Error Banner (Diagnostica live a schermo) -->
+  <script>
+    (function() {
+      function displayRuntimeError(msg, src, lineno, colno, error) {
+        let box = document.getElementById('nomad-runtime-error-box');
+        if (!box) {
+          box = document.createElement('div');
+          box.id = 'nomad-runtime-error-box';
+          box.style.position = 'fixed';
+          box.style.top = '0';
+          box.style.left = '0';
+          box.style.right = '0';
+          box.style.zIndex = '999999';
+          box.style.background = '#FF4D6D';
+          box.style.color = '#FFFFFF';
+          box.style.padding = '14px 18px';
+          box.style.fontFamily = '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, monospace';
+          box.style.fontSize = '13px';
+          box.style.lineHeight = '1.45';
+          box.style.boxShadow = '0 6px 20px rgba(255, 77, 109, 0.5)';
+          box.style.borderBottom = '2px solid rgba(255,255,255,0.4)';
+          box.innerHTML = '<strong>⚠️ Nomad Runtime Error:</strong><br><div id="nomad-runtime-error-text"></div>';
+          document.body ? document.body.prepend(box) : document.documentElement.appendChild(box);
+        }
+        const textEl = document.getElementById('nomad-runtime-error-text');
+        const detail = error && error.stack ? error.stack : (msg + (src ? (' (' + src + ':' + lineno + ')') : ''));
+        if (textEl) {
+          textEl.textContent = detail;
+        }
+      }
+      window.onerror = function(msg, src, lineno, colno, error) {
+        displayRuntimeError(msg, src, lineno, colno, error);
+        return false;
+      };
+      window.onunhandledrejection = function(event) {
+        displayRuntimeError('Unhandled Promise Rejection: ' + (event.reason ? (event.reason.stack || event.reason) : 'Unknown'), '', '', '', event.reason);
+      };
+    })();
+  </script>
+</head>
+<body>
+  <!-- Mesh Gradient Background Radiale Fisso (Ombreggiature Verdi) -->
+  <div class="mesh-gradient-bg"></div>
+
+  <!-- App Main Viewport -->
+  <div id="app">
+    
+    <!-- TOP BAR (Fissa Liquid Glass: 5 Utility Icon SF Symbols - Nessun nome viaggio) -->
+    <header class="top-bar top-bar-icons-only">
+      <!-- 1. Selettore Viaggi (SF Symbol Suitcase) -->
+      <button id="btnTopTrips" class="top-icon-btn" aria-label="I miei viaggi" title="I miei viaggi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2.5" ry="2.5"></rect>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+      </button>
+
+      <!-- 2. Mappa Offline con status dot -->
+      <button id="btnTopMap" class="top-icon-btn" aria-label="Mappa Offline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+        <span class="top-badge-dot" id="topMapStatusDot"></span>
+      </button>
+
+      <!-- 3. Piano del Giorno (Notifica / Tappe oggi) -->
+      <button id="btnTopDayPlan" class="top-icon-btn" aria-label="Piano del Giorno">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="3" ry="3"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+          <circle cx="8" cy="14" r="1.2" fill="currentColor"></circle>
+          <circle cx="12" cy="14" r="1.2" fill="currentColor"></circle>
+          <circle cx="16" cy="14" r="1.2" fill="currentColor"></circle>
+          <circle cx="8" cy="18" r="1.2" fill="currentColor"></circle>
+          <circle cx="12" cy="18" r="1.2" fill="currentColor"></circle>
+        </svg>
+        <span class="top-badge-count" id="topPlanBadgeCount">0</span>
+      </button>
+
+      <!-- 4. Traduttore & Frasario (A / 文) -->
+      <button id="btnTopManual" class="top-icon-btn" aria-label="Traduttore & Frasario" title="Traduttore & Frasario">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 8l6 0"></path>
+          <path d="M8 5v6c0 2-1 4-4 5"></path>
+          <path d="M6 13c1.5 1 3 2 4.5 2.5"></path>
+          <path d="M13 19l4-9 4 9"></path>
+          <path d="M14.5 16h5"></path>
+        </svg>
+      </button>
+
+      <!-- 5. Toggle Light/Dark Mode -->
+      <button id="btnThemeToggle" class="top-icon-btn" aria-label="Cambia tema">
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+    </header>
+
+    <!-- MAIN SCROLLABLE VIEWPORT -->
+    <main class="main-viewport" id="mainContainer">
+      
+      <!-- Selettore Viaggio Sotto la Top Bar (Pillola / Tip Tendina interattiva) -->
+      <div class="trip-dropdown-strip" style="display:none;">
+        <button id="btnTripSelector" class="trip-dropdown-pill" aria-label="Seleziona o Cambia Viaggio">
+          <span class="trip-pill-dot"></span>
+          <span class="trip-pill-name" id="topBarTripName">Caricamento...</span>
+          <svg class="trip-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- TAB 1: DASHBOARD (Centro di Controllo Bento) -->
+      <section id="tab-dashboard" class="tab-pane active">
+        <div id="dashboardTabContent"></div>
+      </section>
+
+      <!-- TAB 2: VIAGGIO (Piano + Alloggio + Mappa Offline) -->
+      <section id="tab-trip" class="tab-pane">
+        <div id="tripTabContent"></div>
+      </section>
+
+      <!-- TAB 3: WALLET (Documenti, Biglietti & Gate Mode) -->
+      <section id="tab-wallet" class="tab-pane">
+        <div id="walletTabContent"></div>
+      </section>
+
+      <!-- TAB 4: SPESE (Budget & Convertitore Offline) -->
+      <section id="tab-expenses" class="tab-pane">
+        <div id="expensesTabContent"></div>
+      </section>
+
+      <!-- TAB 5: PROFILO (Impostazioni, Gestione Cache & Backup) -->
+      <section id="tab-profile" class="tab-pane">
+        <div id="profileTabContent"></div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION (5 TAB: Dashboard al centro) -->
+    <nav class="bottom-nav">
+      <!-- 1. Viaggio -->
+      <button class="nav-tab-btn" data-tab="trip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+        </svg>
+        <span>Viaggio</span>
+      </button>
+
+      <!-- 2. Wallet -->
+      <button class="nav-tab-btn" data-tab="wallet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+        <span>Wallet</span>
+      </button>
+
+      <!-- 3. Dashboard (Al Centro) -->
+      <button class="nav-tab-btn active nav-tab-center" data-tab="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
+          <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
+          <rect x="14" y="12" width="7" height="9" rx="1.5"></rect>
+          <rect x="3" y="16" width="7" height="5" rx="1.5"></rect>
+        </svg>
+        <span>Dashboard</span>
+      </button>
+
+      <!-- 4. Spese -->
+      <button class="nav-tab-btn" data-tab="expenses">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+          <circle cx="12" cy="12" r="2"></circle>
+          <path d="M6 12h.01M18 12h.01"></path>
+        </svg>
+        <span>Spese</span>
+      </button>
+
+      <!-- 5. Profilo -->
+      <button class="nav-tab-btn" data-tab="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Profilo</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==========================================================================
+       OVERLAY 1: TAXI CARD (Feature Killer - Screen Wake Lock)
+       ========================================================================== -->
+  <div id="taxiCardOverlay" class="fullscreen-overlay" role="dialog" aria-modal="true">
+    <div class="overlay-header">
+      <span class="wake-lock-badge">Schermo Sempre Acceso</span>
+      <button id="btnCloseTaxiCard" class="overlay-close-btn" aria-label="Chiudi Taxi Card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="taxi-content-body">
+      <div class="taxi-badge">Destinazione Alloggio</div>
+      <div class="taxi-hotel-name" id="taxiHotelName">The PuLi Hotel & Spa</div>
+      
+      <!-- Box ad altissimo contrasto con lingua locale (caratteri enormi) -->
+      <div class="taxi-local-box">
+        <div class="taxi-local-text" id="taxiHotelLocal">上海市静安区常德路1号（近延安中路）</div>
+      </div>
+
+      <div class="taxi-latin-address" id="taxiHotelLatin">1 Changde Rd, Jing'an District, Shanghai</div>
+
+      <a id="taxiCallBtn" href="tel:" class="taxi-call-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        <span id="taxiCallText">Chiama Alloggio</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       OVERLAY 2: MODALITÀ GATE (Document / Pass Viewer Fullscreen)
+       ========================================================================== -->
+  <div id="gateModeOverlay" class="fullscreen-overlay" role="dialog" aria-modal="true">
+    <div class="overlay-header">
+      <span class="wake-lock-badge">Gate Mode • No Sleep</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button id="btnGateTogglePin" class="overlay-close-btn" aria-label="Pinna documento in Dashboard" style="color:#666;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="17" x2="12" y2="22"></line>
+            <path d="M5 17h14v-2l-2-3V5a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v7l-2 3v2z"></path>
+          </svg>
+        </button>
+        <button id="btnCloseGateMode" class="overlay-close-btn" aria-label="Chiudi Gate Mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="gate-content-body" id="gateContentContainer"></div>
+
+    <div class="gate-footer-actions">
+      <div id="gateDocTitle" style="font-weight: 700; font-size: 15px; color: #111;">Carta d'Imbarco</div>
+      <div style="display:flex; gap:10px;">
+        <button id="btnGateDownload" class="btn-glass-pill" style="background:#f0f0f0; border:none; color:#111;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Salva
+        </button>
+        <button id="btnGateDelete" class="btn-glass-pill" style="background:#ffecec; border:none; color:#d93025;">
+          Elimina
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       BOTTOM SHEETS & MODALI INTERATTIVI
+       ========================================================================== -->
+  <div id="sheetBackdrop" class="sheet-backdrop"></div>
+
+  <!-- 1. Sheet Gestione Viaggi -->
+  <div id="sheetTrips" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">I Miei Viaggi</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetTrips">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <div id="tripsListContainer"></div>
+      <button id="btnAddNewTripOpen" class="btn-glass-pill accent btn-full-width">
+        + Crea Nuovo Viaggio
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Sheet Crea/Modifica Viaggio -->
+  <div id="sheetEditTrip" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="editTripSheetTitle">Nuovo Viaggio</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetEditTrip">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <form id="formTrip">
+        <input type="hidden" id="fieldTripId">
+        
+        <div class="form-group">
+          <label class="form-label">Nome Viaggio</label>
+          <input type="text" id="fieldTripName" class="form-input" placeholder="es. Tokyo & Kyoto" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Destinazione</label>
+          <input type="text" id="fieldTripDestination" class="form-input" placeholder="es. Giappone" required>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Data Inizio</label>
+            <input type="date" id="fieldTripStartDate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data Fine</label>
+            <input type="date" id="fieldTripEndDate" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Valuta Locale</label>
+            <select id="fieldTripDestCurrency" class="form-input" style="appearance:auto; -webkit-appearance:menulist;" required>
+              <option value="CNY">CNY - Yuan Cinese (¥)</option>
+              <option value="JPY">JPY - Yen Giapponese (¥)</option>
+              <option value="USD">USD - Dollaro USA ($)</option>
+              <option value="GBP">GBP - Sterlina (£)</option>
+              <option value="CHF">CHF - Franco Svizzero</option>
+              <option value="THB">THB - Baht Thailandese (฿)</option>
+              <option value="EUR">EUR - Euro (€)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Budget Totale (€)</label>
+            <input type="number" inputmode="decimal" min="0" step="any" id="fieldTripBudget" class="form-input tabular-nums" placeholder="es. 1500">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Tasso Cambio (1 EUR = X)</label>
+            <input type="number" step="0.0001" id="fieldTripExchangeRate" class="form-input tabular-nums" placeholder="es. 7.85">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fuso Orario IANA</label>
+            <input type="text" id="fieldTripDestTimeZone" class="form-input" placeholder="Asia/Shanghai" value="Asia/Shanghai">
+          </div>
+        </div>
+
+
+
+        <div class="settings-section-title">Alloggio Principale</div>
+
+        <div class="form-group">
+          <label class="form-label">Nome Alloggio</label>
+          <input type="text" id="fieldTripHotelName" class="form-input" placeholder="Hotel Century Southern Tower">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Indirizzo Standard</label>
+          <input type="text" id="fieldTripHotelAddress" class="form-input" placeholder="2-2-1 Yoyogi, Shibuya-ku, Tokyo">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Indirizzo in Lingua Locale (per Taxi Card)</label>
+          <textarea id="fieldTripHotelAddressLocal" class="form-textarea" placeholder="東京都渋谷区代々木2-2-1"></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Orario Check-in</label>
+            <input type="text" id="fieldTripHotelCheckIn" class="form-input" placeholder="15:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefono Alloggio</label>
+            <input type="tel" id="fieldTripHotelPhone" class="form-input" placeholder="+81 3 5354 0111">
+          </div>
+        </div>
+
+        <div class="settings-section-title">Codici di Emergenza & Accesso</div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">PNR Volo</label>
+            <input type="text" id="fieldTripPnr" class="form-input" placeholder="K89X4P">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Codice Check-in/Porta</label>
+            <input type="text" id="fieldTripLockbox" class="form-input" placeholder="8492#">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Wi-Fi (Rete / Password)</label>
+          <input type="text" id="fieldTripWifi" class="form-input" placeholder="Hotel_Wifi / pass2026">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Polizza Assicurativa + H24</label>
+          <input type="text" id="fieldTripInsurance" class="form-input" placeholder="Allianz #IT9941 (+39 02 2660)">
+        </div>
+
+        <div class="form-group" style="margin-top:14px;">
+          <label class="form-label">Compagni di Viaggio (Mini-Splitwise)</label>
+          <input type="text" id="fieldTripParticipants" class="form-input" placeholder="Io, Marco, Giulia">
+          <span style="font-size:11px; color:var(--text-secondary); margin-top:3px; display:block;">Nomi separati da virgola per dividere le spese.</span>
+        </div>
+
+        <button type="submit" class="btn-glass-pill accent btn-full-width" style="margin-top: 14px; font-weight:800;">
+          Salva Viaggio
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Sheet Aggiungi Tappa Itinerario (con Geo Nominatim / Coordinate) -->
+  <div id="sheetEvent" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="eventSheetTitle">Nuova Tappa</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetEvent">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <form id="formEvent">
+        <input type="hidden" id="fieldEventId">
+        <input type="hidden" id="fieldEventDayId">
+        <input type="hidden" id="fieldEventLat">
+        <input type="hidden" id="fieldEventLng">
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Orario</label>
+            <input type="time" id="fieldEventTime" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categoria</label>
+            <select id="fieldEventCategory" class="form-select">
+              <option value="Volo/Treno">Volo/Treno</option>
+              <option value="Cibo">Cibo</option>
+              <option value="Visita">Visita</option>
+              <option value="Alloggio">Alloggio</option>
+              <option value="Lavoro">Lavoro</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Titolo Tappa</label>
+          <input type="text" id="fieldEventTitle" class="form-input" placeholder="es. Visita Tempio Senso-ji" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Indirizzo / Luogo Mappe</label>
+          <input type="text" id="fieldEventLocation" class="form-input" placeholder="es. 2-3-1 Asakusa, Taito City">
+          <span style="font-size:11px; color:var(--text-tertiary);">Se online, le coordinate geografiche verranno ricavate automaticamente per la Mappa Offline.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Note Rapide</label>
+          <textarea id="fieldEventNotes" class="form-textarea" placeholder="Biglietti all'ingresso, scarpe facili da togliere..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-glass-pill accent btn-full-width">
+          Salva Tappa
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Sheet Carica Documento Wallet (7 Categorie Distinte) -->
+  <div id="sheetWalletUpload" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Carica Documento / Pass</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetWalletUpload">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <form id="formWalletUpload">
+        <div class="form-group">
+          <label class="form-label">Seleziona File (Immagine o PDF)</label>
+          <input type="file" id="fieldWalletFile" class="form-input" accept="image/*,application/pdf" required>
+          <span style="font-size:11.5px; color:var(--text-tertiary); margin-top:2px;">
+            Compresso a max 1800px in WebP/JPEG per nitidezza e salvataggio 100% offline.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Titolo Documento</label>
+          <input type="text" id="fieldWalletTitle" class="form-input" placeholder="es. Carta Imbarco Milano - Tokyo" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <select id="fieldWalletCategory" class="form-select">
+            <option value="flight">✈️ Volo</option>
+            <option value="train">🚆 Treno</option>
+            <option value="bus">🚌 Bus</option>
+            <option value="ferry">🚢 Nave / Traghetto</option>
+            <option value="accommodation">🏨 Alloggio</option>
+            <option value="documents">🛂 Documenti (Passaporto/Visti - Sfocato di default)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Note aggiuntive (opzionale)</label>
+          <input type="text" id="fieldWalletNotes" class="form-input" placeholder="Posto 14A, Terminal 2">
+        </div>
+
+        <button type="submit" class="btn-glass-pill accent btn-full-width">
+          Salva nel Wallet Offline
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Sheet Valigia Completa (Aperto da Dashboard Card Valigia) -->
+  <div id="sheetPackingFull" class="bottom-sheet" role="dialog" style="max-height: 94dvh;">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Checklist Valigia</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetPackingFull">✕</button>
+    </div>
+    <div class="sheet-scroll-body" id="packingSheetBody"></div>
+  </div>
+
+  <!-- 6. Sheet Template Valigia -->
+  <div id="sheetPackingTemplates" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Template Valigia</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetPackingTemplates">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <div class="settings-section-title">Preimpostazioni Veloci</div>
+      <div id="packingTemplatesList" class="settings-card-group"></div>
+
+      <div class="settings-section-title" style="margin-top:14px;">Salva Valigia Attuale</div>
+      <div class="form-group">
+        <input type="text" id="fieldNewTemplateName" class="form-input" placeholder="Nome del nuovo template...">
+      </div>
+      <button id="btnSaveCurrentAsTemplate" class="btn-glass-pill btn-full-width">
+        Salva Lista Attuale come Template
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. Sheet Modifica Tasso Cambio Manuale -->
+  <div id="sheetExchangeRate" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Aggiorna Tasso Offline</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetExchangeRate">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <form id="formExchangeRate">
+        <div class="form-group">
+          <label class="form-label" id="lblExchangeFormula">1 EUR = X Valuta</label>
+          <input type="number" step="0.0001" id="fieldManualRate" class="form-input" style="font-size: 22px; font-weight:700;" required>
+          <span style="font-size:12px; color:var(--text-tertiary);">
+            Modifica manuale istantanea in aereo o senza connessione internet.
+          </span>
+        </div>
+        <button type="submit" class="btn-glass-pill accent btn-full-width">
+          Salva Tasso
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7b. Sheet Registrazione Nuova Spesa / Uscita (con Dividi Conto Mini-Splitwise) -->
+  <div id="sheetAddExpense" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Registra Spesa</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetAddExpense">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <form id="formAddExpense">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Importo</label>
+            <input type="number" step="any" id="fieldExpenseAmount" class="form-input" placeholder="0.00" style="font-size:20px; font-weight:700;" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Valuta</label>
+            <select id="fieldExpenseCurrency" class="form-select"></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <select id="fieldExpenseCategory" class="form-select">
+            <option value="Cibo">🍽️ Cibo & Ristoranti</option>
+            <option value="Trasporti">🚇 Trasporti & Taxi</option>
+            <option value="Alloggio">🏨 Alloggio</option>
+            <option value="Shopping">🛍️ Shopping & Souvenir</option>
+            <option value="Extra">✨ Extra & Varie</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nota Spesa (opzionale)</label>
+          <input type="text" id="fieldExpenseNotes" class="form-input" placeholder="es. Pranzo ramen a Shibuya">
+        </div>
+
+        <!-- Sezione Mini-Splitwise / Dividi Conto -->
+        <div class="splitwise-box-container">
+          <div class="splitwise-toggle-row">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:16px;">👥</span>
+              <div>
+                <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">Dividi conto</div>
+                <div style="font-size:11px; color:var(--text-tertiary);">Ripartisci con i compagni di viaggio</div>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="fieldExpenseIsSplit">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div id="splitwiseDetailsSection" style="display:none; margin-top:12px; padding-top:10px; border-top:1px solid var(--border-subtle);">
+            <div class="form-group" style="margin-bottom:10px;">
+              <label class="form-label">Chi ha pagato?</label>
+              <select id="fieldExpensePaidBy" class="form-select"></select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:10px;">
+              <label class="form-label">Dividi tra:</label>
+              <div id="splitParticipantsChips" class="split-chips-container"></div>
+            </div>
+
+            <div id="splitPreviewBanner" class="split-preview-banner">
+              Quota a testa: 0.00 €
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-glass-pill accent btn-full-width" style="margin-top:16px;">
+          Salva Spesa
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7c. Sheet Gestione Compagni di Viaggio (Partecipanti) -->
+  <div id="sheetParticipants" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Compagni di Viaggio</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetParticipants">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <div id="participantsListContainer" class="settings-card-group" style="margin-bottom:14px;"></div>
+      
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <input type="text" id="fieldNewParticipantName" class="form-input" placeholder="Nome compagno (es. Luca)...">
+        <button id="btnAddParticipant" class="btn-glass-pill accent" style="white-space:nowrap;">+ Aggiungi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Sheet Calcolatrice iOS (Utility Top Bar 1) -->
+  <div id="sheetCalculator" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Calcolatrice da Viaggio</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetCalculator">✕</button>
+    </div>
+    <div class="sheet-scroll-body" style="padding-bottom:calc(var(--sab) + 20px);">
+      <div class="calc-container">
+        <div class="calc-display tabular-nums" id="calcDisplay">0</div>
+        <div class="calc-keypad">
+          <button class="calc-btn fn" data-calc="C">C</button>
+          <button class="calc-btn fn" data-calc="+/-">±</button>
+          <button class="calc-btn fn" data-calc="%">%</button>
+          <button class="calc-btn op" data-calc="/">÷</button>
+
+          <button class="calc-btn num" data-calc="7">7</button>
+          <button class="calc-btn num" data-calc="8">8</button>
+          <button class="calc-btn num" data-calc="9">9</button>
+          <button class="calc-btn op" data-calc="*">×</button>
+
+          <button class="calc-btn num" data-calc="4">4</button>
+          <button class="calc-btn num" data-calc="5">5</button>
+          <button class="calc-btn num" data-calc="6">6</button>
+          <button class="calc-btn op" data-calc="-">−</button>
+
+          <button class="calc-btn num" data-calc="1">1</button>
+          <button class="calc-btn num" data-calc="2">2</button>
+          <button class="calc-btn num" data-calc="3">3</button>
+          <button class="calc-btn op" data-calc="+">+</button>
+
+          <button class="calc-btn num wide" data-calc="0">0</button>
+          <button class="calc-btn num" data-calc=",">,</button>
+          <button class="calc-btn op eq" data-calc="=">=</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Sheet Piano del Giorno / Notifiche (Utility Top Bar 3) -->
+  <div id="sheetDayPlanNotification" class="bottom-sheet" role="dialog">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="dayPlanSheetTitle">Tappe del Giorno</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetDayPlanNotification">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <div id="dayPlanEventsContainer"></div>
+      <button id="btnGoToFullPlan" class="btn-glass-pill accent btn-full-width" style="margin-top:10px;">
+        Apri Itinerario Completo
+      </button>
+    </div>
+  </div>
+
+  
+
+  <!-- TOAST NOTIFICATION FLUTTUANTE IN ALTO -->
+  <div id="toastNotification" class="toast-banner" role="status" aria-live="polite">
+    <span class="toast-dot"></span>
+    <span id="toastMessage">Messaggio</span>
+  </div>
+
+  <!-- Leaflet JS da CDN (cachato nel Service Worker per funzionamento offline) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
+  <script type="module" src="./app.js?v=26"></script>
+<!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
+  <div class="bottom-sheet" id="sheetTaxiCodes">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="dash-widget-icon-badge" style="background:rgba(52, 211, 153, 0.15); color:var(--accent);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.7 2 11 2 11.4V16c0 .6.4 1 1 1h2"></path>
+            <circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle>
+          </svg>
+        </div>
+        <h3 class="sheet-title" style="margin:0;">Taxi & Codici Rapidi</h3>
+      </div>
+      <button class="sheet-close-btn" data-close-sheet aria-label="Chiudi">✕</button>
+    </div>
+    <div class="bottom-sheet-content" id="sheetTaxiCodesContent" style="padding:16px;">
+      <!-- Content populated dynamically -->
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET: METEO DELLA SETTIMANA (7 GIORNI) -->
+  <div class="bottom-sheet" id="sheetWeatherForecast">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="dash-widget-icon-badge icon-badge-weather">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </div>
+        <h3 class="sheet-title" style="margin:0;" id="sheetWeatherTitle">Meteo della Settimana</h3>
+      </div>
+      <button class="sheet-close-btn" data-close-sheet aria-label="Chiudi">✕</button>
+    </div>
+    <div class="bottom-sheet-content" id="sheetWeatherContent" style="padding:16px;">
+      <!-- Content populated dynamically -->
+    </div>
+  </div>
+
+  <!-- 6. Manuale di Viaggio / Traduttore & Frasario (Utility Top Bar 4) -->
+  <!-- OVERLAY DEDICATO A SCHERMO INTERO: TRADUTTORE & FRASARIO (APPLE TRANSLATE / iOS STYLE) -->
+  <div id="pageTravelManual" class="translator-fullscreen-page" role="dialog" aria-modal="true">
+    <!-- Header fisso sticky -->
+    <header class="trans-sticky-header">
+      <button id="btnCloseTravelPage" class="trans-header-btn-close" aria-label="Chiudi Traduttore">
+        <span style="font-size:18px; line-height:1;">‹</span> Indietro
+      </button>
+      <h2 class="trans-header-title">Traduttore</h2>
+      <button id="btnOpenConversationMode" class="trans-header-btn-conv" aria-label="Modalità Conversazione">
+        ⇄ 180°
+      </button>
+    </header>
+
+    <!-- Segmented Control iOS Style -->
+    <div class="trans-segmented-wrapper">
+      <div class="trans-segmented-bar">
+        <button class="trans-segmented-btn active" id="tabBtnTranslator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M5 8l6 6M4 14l6-6 3-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
+          Traduttore
+        </button>
+        <button class="trans-segmented-btn" id="tabBtnPhrasebook">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          Frasario Offline
+        </button>
+      </div>
+    </div>
+
+    <!-- Area contenuto scrollabile principale -->
+    <div class="trans-scroll-area">
+      <!-- ===================================================================
+           TAB 1: TRADUTTORE (4 SLOT PULITI)
+           =================================================================== -->
+      <div id="sectionTranslator" style="display:flex; flex-direction:column; gap:14px;">
+        <!-- SLOT 1: Barra Lingue (Griglia rigida 3 colonne 1fr 44px 1fr) -->
+        <div class="trans-langs-grid">
+          <select id="transLangFrom" class="trans-lang-select-box" aria-label="Lingua di partenza"></select>
+          <button id="btnTransSwapLang" class="trans-swap-circle-btn" aria-label="Inverti lingue" title="Inverti lingue">⇄</button>
+          <select id="transLangTo" class="trans-lang-select-box" aria-label="Lingua di destinazione"></select>
+        </div>
+
+        <!-- SLOT 2: Card Input (Testo da tradurre) -->
+        <div class="trans-input-card">
+          <textarea id="transInputText" class="trans-textarea-clean" placeholder="Scrivi una frase o tocca Parla..." rows="3"></textarea>
+          <div class="trans-input-toolbar">
+            <div class="trans-input-toolbar-left">
+              <button id="btnTransVoiceInput" class="trans-btn-mic-pill btn-mic-pulse" aria-label="Dettatura vocale">
+                🎤 Parla
+              </button>
+              <button id="btnTransClearInput" class="trans-btn-clear-input" aria-label="Cancella testo" title="Cancella">✕</button>
+            </div>
+            <button id="btnDoTranslate" class="trans-btn-translate-primary" aria-label="Traduci ora">
+              Traduci
+            </button>
+          </div>
+        </div>
+
+        <!-- SLOT 3: Card Risultato (Traduzione + Griglia Azioni a 4 colonne) -->
+        <div id="transResultBox" class="trans-result-card" style="display:none;">
+          <div class="trans-result-header">
+            <span class="trans-result-lang-label" id="transResultLangBadge">Traduzione</span>
+            <button id="btnTransSaveOffline" class="trans-btn-save-pill" aria-label="Salva frase offline">
+              ★ Salva
+            </button>
+          </div>
+          <div class="trans-result-text-main" id="transResultTranslated"></div>
+          <div class="trans-result-text-orig" id="transResultOriginal"></div>
+
+          <!-- Barra Azioni a 4 colonne uguali (Icona sopra, label piccola sotto) -->
+          <div class="trans-result-actions-grid">
+            <button id="btnTransSpeakNormal" class="trans-action-col-btn" aria-label="Ascolta pronuncia normale">
+              <span class="action-icon">🔊</span>
+              <span class="action-label">Ascolta</span>
+            </button>
+            <button id="btnTransSpeakSlow" class="trans-action-col-btn" aria-label="Ascolta pronuncia lenta">
+              <span class="action-icon">🐢</span>
+              <span class="action-label">Lenta</span>
+            </button>
+            <button id="btnTransCopy" class="trans-action-col-btn" aria-label="Copia traduzione">
+              <span class="action-icon">📋</span>
+              <span class="action-label">Copia</span>
+            </button>
+            <button id="btnTransShowBig" class="trans-action-col-btn" aria-label="Schermo intero">
+              <span class="action-icon">⛶</span>
+              <span class="action-label">Schermo</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SLOT 4: Cronologia Recenti (Ultime 20 Offline) -->
+        <div style="margin-top:4px;">
+          <div class="trans-recent-header">
+            <span class="trans-recent-title">Recenti (Offline) • <span id="transSavedCount" style="color:var(--accent);">0</span></span>
+            <button id="btnClearTranslationHistory" class="trans-recent-clear-btn">Svuota</button>
+          </div>
+          <div id="transSavedList"></div>
+        </div>
+      </div>
+
+      <!-- ===================================================================
+           TAB 2: FRASARIO OFFLINE (BARRA CATEGORIE SCROLLABILE + CARD PULITE)
+           =================================================================== -->
+      <div id="sectionPhrasebook" style="display:none; flex-direction:column; gap:12px;">
+        <!-- Barra Lingua Destinazione Frasario -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Lingua Frasario:</span>
+          <select id="phrasebookTargetLang" class="trans-lang-select-box" style="height:36px; width:auto; min-width:140px; padding:0 8px; font-size:12.5px;"></select>
+        </div>
+
+        <!-- Barra Categorie Scrollabile Orizzontalmente -->
+        <div class="phrasebook-categories-strip" id="phrasebookCatStrip">
+          <button class="phrasebook-cat-pill active" data-cat="all">Tutte</button>
+          <button class="phrasebook-cat-pill" data-cat="Numeri & Contrattazione">🔢 Numeri</button>
+          <button class="phrasebook-cat-pill" data-cat="Emergenze">🚨 Emergenze</button>
+          <button class="phrasebook-cat-pill" data-cat="Ristorante">🍜 Ristorante</button>
+          <button class="phrasebook-cat-pill" data-cat="Trasporti">🚕 Trasporti</button>
+          <button class="phrasebook-cat-pill" data-cat="Shopping">🛍 Shopping</button>
+        </div>
+
+        <!-- Lista Frasi -->
+        <div id="phrasebookContainer" style="display:flex; flex-direction:column;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE MODIFICA BUDGET AL VOLO -->
+  <div id="sheetEditBudget" class="bottom-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:20px;">💰</span>
+        <div class="sheet-title" style="margin:0;">Imposta Budget Viaggio</div>
+      </div>
+      <button class="sheet-close-btn" data-close-sheet="sheetEditBudget" aria-label="Chiudi">✕</button>
+    </div>
+    <form id="formEditBudget" onsubmit="saveTripBudget(event)" style="padding: 16px 20px 32px 20px;">
+      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:14px; line-height:1.45;">
+        Imposta o modifica il budget totale del viaggio in EUR per calcolare la tua <strong>Bussola Giornaliera</strong>:
+      </div>
+      <div class="form-group" style="margin-bottom:18px;">
+        <label class="form-label" style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:6px; display:block;">Budget Totale (€)</label>
+        <input type="number" inputmode="decimal" min="0" step="any" id="inputEditBudgetVal" class="form-input tabular-nums" placeholder="es. 1500" required autofocus style="font-size:26px; font-weight:800; padding:12px 14px; width:100%; box-sizing:border-box; border-radius:14px;">
+      </div>
+      <button type="submit" id="btnSaveBudgetConfirm" class="btn-glass-pill accent" style="width:100%; padding:14px; font-size:15px; font-weight:800; justify-content:center; border-radius:16px; cursor:pointer;">
+        Salva Budget
+      </button>
+    </form>
+  </div>
+
+  <!-- OVERLAY MOSTRA FRASE GRANDE (STILE TAXI CARD: BIANCO + TESTO GIGANTE + WAKE LOCK) -->
+  <div id="phraseBigOverlay" class="fullscreen-overlay" role="dialog" aria-modal="true">
+    <div class="overlay-header">
+      <span class="wake-lock-badge">Schermo Sempre Acceso</span>
+      <button id="btnClosePhraseBig" class="overlay-close-btn" aria-label="Chiudi Schermo Intero">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="taxi-content-body" style="padding-top:20px;">
+      <div class="taxi-badge" id="phraseBigCategory">Traduzione / Frase</div>
+      <div class="taxi-hotel-name" id="phraseBigItalian" style="font-size:18px; margin-bottom:12px; color:#1C2128;"></div>
+      <div class="taxi-local-box" style="margin: 10px 0 16px 0; min-height: 180px; display:flex; align-items:center; justify-content:center;">
+        <div class="taxi-local-text" id="phraseBigTarget" style="font-size:38px; line-height:1.3; font-weight:800;"></div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:10px; margin-bottom:14px;">
+        <button id="btnBigSpeakNormal" class="btn-glass-pill" style="background:#16191D; color:#FFFFFF; border:1px solid #333; padding:8px 18px; font-size:14px; font-weight:700; border-radius:12px;">
+          🔊 Ascolta
+        </button>
+        <button id="btnBigSpeakSlow" class="btn-glass-pill" style="background:#16191D; color:#FFFFFF; border:1px solid #333; padding:8px 18px; font-size:14px; font-weight:700; border-radius:12px;">
+          🐢 Lenta
+        </button>
+      </div>
+      <div style="font-size:13px; color:#57606A; text-align:center;">
+        Mostra questo schermo al tassista, negoziante o interlocutore locale.
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY MODALITÀ CONVERSAZIONE SCHERMO DIVISO 180° -->
+  <div id="conversationSplitOverlay" class="conversation-split-overlay" role="dialog" aria-modal="true">
+    <button id="btnCloseConversationMode" class="conv-split-close-btn" aria-label="Chiudi Conversazione">✕</button>
+
+    <!-- Metà Superiore (Ruotata 180° verso l'interlocutore) -->
+    <div class="conv-half conv-half-top">
+      <div class="conv-half-header">
+        <span class="conv-half-lang-tag" id="convTopLangTag">🇨🇳 Cinese</span>
+        <span style="font-size:11px; color:#9BA3AB;">Interlocutore (Ruotato 180°)</span>
+      </div>
+      <div class="conv-half-content">
+        <div class="conv-half-text-main" id="convTopMainText">Premi "Parla" o tocca per iniziare</div>
+        <div class="conv-half-text-sub" id="convTopSubText"></div>
+      </div>
+      <div class="conv-half-controls">
+        <button id="btnConvTopSpeak" class="btn-glass-pill" style="padding:10px 18px; font-size:13.5px; font-weight:700;">
+          🔊 Ascolta
+        </button>
+        <button id="btnConvTopMic" class="btn-glass-pill accent btn-mic-pulse" style="padding:10px 22px; font-size:14px; font-weight:800;">
+          🎤 Parla
+        </button>
+      </div>
+    </div>
+
+    <!-- Metà Inferiore (Dritta verso di te) -->
+    <div class="conv-half conv-half-bottom">
+      <div class="conv-half-header">
+        <span class="conv-half-lang-tag" id="convBottomLangTag">🇮🇹 Italiano</span>
+        <span style="font-size:11px; color:#9BA3AB;">Tu</span>
+      </div>
+      <div class="conv-half-content">
+        <div class="conv-half-text-main" id="convBottomMainText">Tocca "Parla" per registrare</div>
+        <div class="conv-half-text-sub" id="convBottomSubText"></div>
+      </div>
+      <div class="conv-half-controls">
+        <button id="btnConvBottomSpeak" class="btn-glass-pill" style="padding:10px 18px; font-size:13.5px; font-weight:700;">
+          🔊 Ascolta
+        </button>
+        <button id="btnConvBottomMic" class="btn-glass-pill accent btn-mic-pulse" style="padding:10px 22px; font-size:14px; font-weight:800;">
+          🎤 Parla
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
