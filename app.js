@@ -12,11 +12,12 @@ import {
   deleteFromStore,
   clearStore,
   processAndStoreFile,
+  compressImageToWebP,
   ensureStoragePersistence,
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=29';
+} from './db.js?v=30';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -31,7 +32,9 @@ const state = {
   activeTab: 'dashboard',         // 'dashboard' | 'trip' | 'wallet' | 'expenses' | 'profile'
   currentDayIndex: 0,
   tripSubView: 'plan',            // 'plan' | 'map'
-  activeWalletFilter: 'Tutti',    // 'Tutti' | 'flight' | 'train' | 'bus' | 'ferry' | 'accommodation' | 'documents'
+  activeWalletFilter: 'Tutti',    // 'Tutti' | 'flight' | 'hotel' | 'train' | 'event' | 'documents' | 'other'
+  walletSubView: 'docs',          // 'docs' | 'vault'
+  vaultUnlocked: false,
   privacyCodesHidden: true,
   budgetHidden: localStorage.getItem('nomad_budget_hidden') === 'true',
   wakeLockSentinel: null,
@@ -3093,96 +3096,334 @@ function latLngToTileXY(lat, lng, zoom) {
 /* ==========================================================================
    TAB 3: WALLET (7 Categorie & Gate Mode)
    ========================================================================== */
+/* ==========================================================================
+   TAB 3: WALLET APPLE STYLE (3 BLOCCHI: TAXI & CODICI, DOCS, CASSAFORTE)
+   ========================================================================== */
+let vaultEnteredPin = '';
+
+async function hashPinCode(pin) {
+  if (window.crypto && window.crypto.subtle) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode('nomad_vault_salt_' + pin);
+    const hash = await window.crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  // Fallback se SubtleCrypto non è attivo (es. contesti http non sicuri)
+  let h = 0;
+  for (let i = 0; i < pin.length; i++) {
+    h = ((h << 5) - h) + pin.charCodeAt(i);
+    h |= 0;
+  }
+  return 'fallback_' + h;
+}
+
+function getCategoryBadgeData(cat) {
+  switch (cat) {
+    case 'flight': return { label: '✈️ Volo', cls: 'badge-cat-flight' };
+    case 'hotel':
+    case 'accommodation': return { label: '🏨 Hotel', cls: 'badge-cat-hotel' };
+    case 'train':
+    case 'bus':
+    case 'ferry': return { label: '🚆 Trasporti', cls: 'badge-cat-transport' };
+    case 'event': return { label: '🎟️ Evento', cls: 'badge-cat-event' };
+    case 'documents': return { label: '🛂 Visto / Assicurazione', cls: 'badge-cat-doc' };
+    default: return { label: '📄 Altro', cls: 'badge-cat-doc' };
+  }
+}
+
 function renderTabWallet() {
   const container = document.getElementById('walletTabContent');
   if (!container || !state.activeTrip) return;
 
+  const trip = state.activeTrip;
+  const hotel = trip.accommodation || {};
+  const codes = trip.codes || {
+    pnr: 'AF116-K89X4P',
+    lockbox: 'A-7492#',
+    wifi: 'PuLi_Guest / SilkRoad2026',
+    insurance: 'Allianz Global Care — Polizza #IT-948190'
+  };
+
   const files = state.walletFiles || [];
+  const vaultPinHash = localStorage.getItem('nomad_vault_pin_hash');
+  const isVaultTab = state.walletSubView === 'vault';
 
-  const filterCategories = [
-    { id: 'Tutti', label: 'Tutti', icon: '🗂️' },
-    { id: 'flight', label: 'Volo', icon: '✈️' },
-    { id: 'train', label: 'Treno', icon: '🚆' },
-    { id: 'bus', label: 'Bus', icon: '🚌' },
-    { id: 'ferry', label: 'Nave', icon: '🚢' },
-    { id: 'accommodation', label: 'Alloggio', icon: '🏨' },
-    { id: 'documents', label: 'Documenti', icon: '🛂' }
-  ];
-
-  let filterBarHtml = `<div class="wallet-filter-strip">`;
-  filterCategories.forEach(c => {
-    const isActive = state.activeWalletFilter === c.id;
-    filterBarHtml += `
-      <button class="wallet-filter-item ${isActive ? 'active' : ''}" data-filter="${c.id}">
-        <span>${c.icon}</span>
-        <span>${c.label}</span>
-      </button>
-    `;
-  });
-  filterBarHtml += `</div>`;
-
-  const filteredFiles = files.filter(f => {
-    if (state.activeWalletFilter === 'Tutti') return true;
-    return f.category === state.activeWalletFilter;
-  });
-
-  let contentHtml = `
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-      <span style="font-size:13px; font-weight:600; color:var(--text-secondary);">${filteredFiles.length} file salvati offline</span>
-      <button class="btn-glass-pill accent" id="btnOpenUploadFile">
+  // 1. BLOCCO 1: HEADER + PULSANTE AGGIUNGI
+  let html = `
+    <div class="wallet-header-row">
+      <div>
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0;">Apple Wallet</h2>
+        <span style="font-size:12px; color:var(--text-secondary);">Pass, biglietti e documenti 100% offline</span>
+      </div>
+      <button class="btn-glass-pill accent" id="btnOpenUploadFile" style="padding:7px 14px; font-size:12.5px; font-weight:600;">
         + Aggiungi
       </button>
     </div>
+
+    <!-- 2. BLOCCO 2: CARD RAPIDA TAXI & CODICI -->
+    <div class="wallet-taxi-card">
+      <div class="wallet-taxi-header">
+        <div class="wallet-taxi-title">
+          <span>🚕</span>
+          <span>Taxi Card & Codici Rapidi</span>
+        </div>
+        <button id="btnWalletEditTripCodes" class="btn-glass-pill" style="padding:4px 10px; font-size:11.5px; font-weight:600;">
+          ✎ Modifica
+        </button>
+      </div>
+
+      <div class="wallet-taxi-address">
+        <strong>${escapeHTML(hotel.nameLocal || hotel.name || 'Alloggio Principale')}</strong>
+        ${hotel.addressLocal ? `<div style="font-size:13px; font-weight:600; color:var(--text-primary); margin-top:2px;">${escapeHTML(hotel.addressLocal)}</div>` : ''}
+        ${hotel.address ? `<div style="font-size:11.5px; color:var(--text-tertiary);">${escapeHTML(hotel.address)}</div>` : ''}
+      </div>
+
+      <div class="wallet-taxi-actions">
+        <button id="btnWalletOpenTaxiCard" class="btn-glass-pill accent" style="width:100%; justify-content:center; padding:9px 14px; font-size:13px; font-weight:700;">
+          🚕 Apri Taxi Card (Schermo Intero)
+        </button>
+      </div>
+
+      <div class="wallet-taxi-codes-grid">
+        ${codes.pnr ? `
+          <div class="wallet-code-chip" data-copy-val="${escapeHTML(codes.pnr)}" data-copy-desc="PNR Volo">
+            <div class="wallet-code-info">
+              <span class="wallet-code-label">PNR Volo</span>
+              <span class="wallet-code-val tabular-nums">${escapeHTML(codes.pnr)}</span>
+            </div>
+            <span style="font-size:12px; color:var(--text-tertiary);">📋</span>
+          </div>
+        ` : ''}
+        ${codes.lockbox ? `
+          <div class="wallet-code-chip" data-copy-val="${escapeHTML(codes.lockbox)}" data-copy-desc="Codice Porta">
+            <div class="wallet-code-info">
+              <span class="wallet-code-label">Lockbox</span>
+              <span class="wallet-code-val tabular-nums">${escapeHTML(codes.lockbox)}</span>
+            </div>
+            <span style="font-size:12px; color:var(--text-tertiary);">📋</span>
+          </div>
+        ` : ''}
+        ${codes.wifi ? `
+          <div class="wallet-code-chip" data-copy-val="${escapeHTML(codes.wifi)}" data-copy-desc="Password Wi-Fi">
+            <div class="wallet-code-info">
+              <span class="wallet-code-label">Wi-Fi</span>
+              <span class="wallet-code-val">${escapeHTML(codes.wifi)}</span>
+            </div>
+            <span style="font-size:12px; color:var(--text-tertiary);">📋</span>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+
+    <!-- 3. BLOCCO 3: SEGMENTED CONTROL (DOCUMENTI | CASSAFORTE) -->
+    <div style="margin-bottom:14px;">
+      <div class="trans-segmented-bar">
+        <button class="trans-segmented-btn ${!isVaultTab ? 'active' : ''}" id="btnWalletTabDocs">
+          📄 Documenti (${files.filter(f => !f.inVault).length})
+        </button>
+        <button class="trans-segmented-btn ${isVaultTab ? 'active' : ''}" id="btnWalletTabVault">
+          🔒 Cassaforte (${files.filter(f => f.inVault).length})
+        </button>
+      </div>
+    </div>
   `;
 
-  if (filteredFiles.length > 0) {
-    contentHtml += `<div class="wallet-grid">`;
-    filteredFiles.forEach(file => {
-      const isDocument = file.category === 'documents';
-      const isPdf = file.type === 'application/pdf';
+  // CONTENUTO TAB DOCUMENTI NORMALI
+  if (!isVaultTab) {
+    const filterCategories = [
+      { id: 'Tutti', label: 'Tutti', icon: '🗂️' },
+      { id: 'flight', label: 'Volo', icon: '✈️' },
+      { id: 'hotel', label: 'Hotel', icon: '🏨' },
+      { id: 'train', label: 'Trasporti', icon: '🚆' },
+      { id: 'event', label: 'Eventi', icon: '🎟️' },
+      { id: 'documents', label: 'Visti/Assicurazione', icon: '🛂' }
+    ];
 
-      contentHtml += `
-        <div class="glass-card wallet-card" data-file-id="${file.id}">
-          <!-- Bottone Pin Documento -->
-          <button class="wallet-card-pin-btn ${file.isPinned ? 'pinned' : ''}" data-pin-id="${file.id}" aria-label="Pinna documento">
-            <svg viewBox="0 0 24 24" fill="${file.isPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="17" x2="12" y2="22"></line>
-              <path d="M5 17h14v-2l-2-3V5a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v7l-2 3v2z"></path>
-            </svg>
-          </button>
+    html += `<div class="wallet-filter-strip">`;
+    filterCategories.forEach(c => {
+      const isActive = state.activeWalletFilter === c.id;
+      html += `
+        <button class="wallet-filter-item ${isActive ? 'active' : ''}" data-filter="${c.id}">
+          <span>${c.icon}</span>
+          <span>${c.label}</span>
+        </button>
+      `;
+    });
+    html += `</div>`;
 
-          <div class="wallet-preview-box">
-            ${isPdf ? `
-              <div class="wallet-pdf-badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                <span style="font-size:11px; font-weight:700;">PDF DOCUMENT</span>
-              </div>
-            ` : `
-              <img class="wallet-preview-img ${isDocument ? 'blurred' : ''}" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
-            `}
+    const docFiles = files.filter(f => !f.inVault);
+    const filteredFiles = docFiles.filter(f => {
+      if (state.activeWalletFilter === 'Tutti') return true;
+      if (state.activeWalletFilter === 'train') return f.category === 'train' || f.category === 'bus' || f.category === 'ferry';
+      if (state.activeWalletFilter === 'hotel') return f.category === 'hotel' || f.category === 'accommodation';
+      return f.category === state.activeWalletFilter;
+    });
+
+    if (filteredFiles.length > 0) {
+      html += `<div class="wallet-grid">`;
+      filteredFiles.forEach(file => {
+        const isPdf = file.type === 'application/pdf';
+        const badge = getCategoryBadgeData(file.category);
+
+        html += `
+          <div class="glass-card wallet-card" data-file-id="${file.id}">
+            <div class="wallet-preview-box">
+              ${isPdf ? `
+                <div class="wallet-pdf-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  <span style="font-size:11px; font-weight:700;">PDF DOCUMENT</span>
+                </div>
+              ` : `
+                <img class="wallet-preview-img" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
+              `}
+            </div>
+
+            <div style="margin-bottom:4px;">
+              <span class="taxi-badge ${badge.cls}" style="font-size:10px; padding:2px 6px;">${badge.label}</span>
+            </div>
+            <div class="wallet-card-title">${escapeHTML(file.title)}</div>
+            ${file.notes ? `<div style="font-size:11px; color:var(--text-tertiary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px;">${escapeHTML(file.notes)}</div>` : ''}
+            <div style="font-size:10.5px; color:var(--text-quaternary);">${formatFileSize(file.size)}</div>
+
+            <!-- Azioni Rapide sulla Card -->
+            <div class="wallet-card-actions">
+              <button class="wallet-action-btn ${file.isPinned ? 'active' : ''}" data-action="pin" data-file-id="${file.id}" title="${file.isPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin">
+                📌
+              </button>
+              <button class="wallet-action-btn" data-action="toggle-vault" data-file-id="${file.id}" title="Sposta in Cassaforte" aria-label="Cassaforte">
+                🔒
+              </button>
+              <button class="wallet-action-btn" data-action="gate" data-file-id="${file.id}" title="Modalità Gate" aria-label="Gate">
+                ⛶
+              </button>
+              <button class="wallet-action-btn" data-action="delete" data-file-id="${file.id}" title="Elimina" aria-label="Elimina" style="color:#EF4444;">
+                🗑
+              </button>
+            </div>
           </div>
-          <div class="wallet-card-title">${escapeHTML(file.title)}</div>
-          <div class="wallet-card-meta">
-            <span>${getCategoryBadgeLabel(file.category)}</span>
-            <span class="tabular-nums">${formatFileSize(file.size)}</span>
+        `;
+      });
+      html += `</div>`;
+    } else {
+      html += `
+        <div class="glass-card" style="text-align:center; padding:32px 16px; border-radius:14px;">
+          <p style="color:var(--text-secondary); font-size:13.5px; margin-bottom:12px;">Nessun pass o documento in questa sezione.</p>
+          <button class="btn-glass-pill accent" id="btnEmptyUploadFile">+ Aggiungi Documento</button>
+        </div>
+      `;
+    }
+  } else {
+    // CONTENUTO TAB CASSAFORTE 🔒
+    const vaultFiles = files.filter(f => f.inVault);
+
+    if (!state.vaultUnlocked) {
+      // Schermata di sblocco PIN
+      html += `
+        <div class="glass-card vault-pin-container">
+          <div style="font-size:38px; margin-bottom:8px;">🔒</div>
+          <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
+            ${vaultPinHash ? 'Cassaforte Protetta' : 'Imposta il tuo PIN'}
+          </h3>
+          <p style="font-size:12.5px; color:var(--text-secondary); max-width:280px; margin-bottom:6px;">
+            ${vaultPinHash ? 'Inserisci il PIN a 4 cifre per accedere ai tuoi documenti sensibili.' : 'Crea un PIN a 4 cifre per proteggere passaporto, carte e visti.'}
+          </p>
+
+          <div class="vault-pin-dots">
+            <div class="vault-pin-dot ${vaultEnteredPin.length >= 1 ? 'filled' : ''}"></div>
+            <div class="vault-pin-dot ${vaultEnteredPin.length >= 2 ? 'filled' : ''}"></div>
+            <div class="vault-pin-dot ${vaultEnteredPin.length >= 3 ? 'filled' : ''}"></div>
+            <div class="vault-pin-dot ${vaultEnteredPin.length >= 4 ? 'filled' : ''}"></div>
+          </div>
+
+          <div class="vault-keypad">
+            ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => `
+              <button class="vault-key-btn" data-key="${num}">${num}</button>
+            `).join('')}
+            <button class="vault-key-btn" data-key="clear" style="font-size:15px; color:var(--text-tertiary);">✕</button>
+            <button class="vault-key-btn" data-key="0">0</button>
+            <button class="vault-key-btn" data-key="backspace" style="font-size:18px;">⌫</button>
           </div>
         </div>
       `;
-    });
-    contentHtml += `</div>`;
-  } else {
-    contentHtml += `
-      <div class="glass-card" style="text-align:center; padding:36px 16px;">
-        <p style="color:var(--text-secondary); font-size:14px; margin-bottom:12px;">Nessun pass o documento in questa sezione.</p>
-        <button class="btn-glass-pill accent" id="btnEmptyUploadFile">+ Aggiungi Documento</button>
-      </div>
-    `;
+    } else {
+      // Cassaforte SBLOCCATA
+      html += `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding:10px 14px; border-radius:12px; background:rgba(16, 185, 129, 0.10); border:1px solid rgba(16, 185, 129, 0.25);">
+          <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--accent);">
+            <span>🔓</span>
+            <span>Cassaforte Sbloccata</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button id="btnVaultChangePin" style="background:none; border:none; color:var(--text-secondary); font-size:11.5px; cursor:pointer; text-decoration:underline;">
+              Cambia PIN
+            </button>
+            <button id="btnVaultLockNow" class="btn-glass-pill" style="padding:4px 10px; font-size:11.5px; font-weight:700;">
+              🔒 Blocca ora
+            </button>
+          </div>
+        </div>
+      `;
+
+      if (vaultFiles.length > 0) {
+        html += `<div class="wallet-grid">`;
+        vaultFiles.forEach(file => {
+          const isPdf = file.type === 'application/pdf';
+          const badge = getCategoryBadgeData(file.category);
+
+          html += `
+            <div class="glass-card wallet-card" data-file-id="${file.id}">
+              <div class="wallet-preview-box">
+                ${isPdf ? `
+                  <div class="wallet-pdf-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span style="font-size:11px; font-weight:700;">PDF PROTETTO</span>
+                  </div>
+                ` : `
+                  <img class="wallet-preview-img" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
+                `}
+              </div>
+
+              <div style="margin-bottom:4px;">
+                <span class="taxi-badge ${badge.cls}" style="font-size:10px; padding:2px 6px;">${badge.label}</span>
+              </div>
+              <div class="wallet-card-title">${escapeHTML(file.title)}</div>
+              ${file.notes ? `<div style="font-size:11px; color:var(--text-tertiary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px;">${escapeHTML(file.notes)}</div>` : ''}
+              <div style="font-size:10.5px; color:var(--text-quaternary);">${formatFileSize(file.size)}</div>
+
+              <!-- Azioni Rapide sulla Card -->
+              <div class="wallet-card-actions">
+                <button class="wallet-action-btn ${file.isPinned ? 'active' : ''}" data-action="pin" data-file-id="${file.id}" title="${file.isPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin">
+                  📌
+                </button>
+                <button class="wallet-action-btn active" data-action="toggle-vault" data-file-id="${file.id}" title="Rimuovi da Cassaforte" aria-label="Togli da Cassaforte">
+                  🔓
+                </button>
+                <button class="wallet-action-btn" data-action="gate" data-file-id="${file.id}" title="Modalità Gate" aria-label="Gate">
+                  ⛶
+                </button>
+                <button class="wallet-action-btn" data-action="delete" data-file-id="${file.id}" title="Elimina" aria-label="Elimina" style="color:#EF4444;">
+                  🗑
+                </button>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      } else {
+        html += `
+          <div class="glass-card" style="text-align:center; padding:32px 16px; border-radius:14px;">
+            <p style="color:var(--text-secondary); font-size:13.5px; margin-bottom:12px;">Nessun documento in cassaforte.</p>
+            <button class="btn-glass-pill accent" id="btnEmptyUploadVaultFile">+ Aggiungi Documento Protetto</button>
+          </div>
+        `;
+      }
+    }
   }
 
-  container.innerHTML = filterBarHtml + contentHtml;
+  container.innerHTML = html;
 
-  // Caricamento asincrono miniature
-  filteredFiles.forEach(file => {
+  // Caricamento miniature asincrono
+  files.forEach(file => {
     if (!file.type.includes('pdf')) {
       const imgElem = document.getElementById(`thumb_${file.id}`);
       if (imgElem && file.blob) {
@@ -3193,7 +3434,43 @@ function renderTabWallet() {
     }
   });
 
-  // Bind filtri
+  // BINDING EVENTI
+  // Toggle Tab Documenti / Cassaforte
+  document.getElementById('btnWalletTabDocs')?.addEventListener('click', () => {
+    state.walletSubView = 'docs';
+    renderTabWallet();
+  });
+  document.getElementById('btnWalletTabVault')?.addEventListener('click', () => {
+    state.walletSubView = 'vault';
+    vaultEnteredPin = '';
+    renderTabWallet();
+  });
+
+  // Apri Taxi Card e Modifica Alloggio
+  document.getElementById('btnWalletOpenTaxiCard')?.addEventListener('click', () => openTaxiCard());
+  document.getElementById('btnWalletEditTripCodes')?.addEventListener('click', () => {
+    openEditTripSheet(state.activeTrip);
+  });
+
+  // Copia codici rapidi
+  container.querySelectorAll('.wallet-code-chip').forEach(chip => {
+    chip.addEventListener('click', async () => {
+      const val = chip.getAttribute('data-copy-val');
+      const desc = chip.getAttribute('data-copy-desc') || 'Codice';
+      if (val) {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(val);
+          }
+          showToast(`${desc} copiato!`);
+        } catch (e) {
+          showToast(`Copiato: ${val}`);
+        }
+      }
+    });
+  });
+
+  // Filtri pillola Documenti
   container.querySelectorAll('.wallet-filter-item').forEach(pill => {
     pill.addEventListener('click', () => {
       state.activeWalletFilter = pill.getAttribute('data-filter');
@@ -3201,45 +3478,127 @@ function renderTabWallet() {
     });
   });
 
+  // Tasti Aggiungi Documento
   document.getElementById('btnOpenUploadFile')?.addEventListener('click', () => openSheet('sheetWalletUpload'));
   document.getElementById('btnEmptyUploadFile')?.addEventListener('click', () => openSheet('sheetWalletUpload'));
+  document.getElementById('btnEmptyUploadVaultFile')?.addEventListener('click', () => {
+    const vaultCheckbox = document.getElementById('fieldWalletVault');
+    if (vaultCheckbox) vaultCheckbox.checked = true;
+    openSheet('sheetWalletUpload');
+  });
 
-  // Pin toggle su card Wallet
-  container.querySelectorAll('[data-pin-id]').forEach(btn => {
+  // Azioni sulle card (Pin, Toggle Vault, Gate, Delete)
+  container.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const fileId = btn.getAttribute('data-pin-id');
+      const action = btn.getAttribute('data-action');
+      const fileId = btn.getAttribute('data-file-id');
       const file = files.find(f => f.id === fileId);
-      if (file) {
+      if (!file) return;
+
+      if (action === 'pin') {
         file.isPinned = !file.isPinned;
         await putToStore('files_store', file);
         await refreshApplicationData();
         showToast(file.isPinned ? 'Pinnato in Dashboard' : 'Rimosso dalla Dashboard');
+      } else if (action === 'toggle-vault') {
+        file.inVault = !file.inVault;
+        await putToStore('files_store', file);
+        await refreshApplicationData();
+        showToast(file.inVault ? 'Spostato in Cassaforte 🔒' : 'Spostato in Documenti standard');
+      } else if (action === 'gate') {
+        openGateMode(file);
+      } else if (action === 'delete') {
+        if (confirm(`Eliminare definitivamente "${file.title}"?`)) {
+          await deleteFromStore('files_store', file.id);
+          await refreshApplicationData();
+          showToast('Documento eliminato');
+        }
       }
     });
   });
 
-  // Apertura Modalità Gate
+  // Tap su card intera -> Modalità Gate
   container.querySelectorAll('.wallet-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      if (e.target.closest('[data-pin-id]')) return;
+      if (e.target.closest('[data-action]')) return;
       const fileId = card.getAttribute('data-file-id');
       const file = files.find(f => f.id === fileId);
       if (file) openGateMode(file);
     });
   });
-}
 
-function getCategoryBadgeLabel(cat) {
-  switch (cat) {
-    case 'flight': return '✈️ Volo';
-    case 'train': return '🚆 Treno';
-    case 'bus': return '🚌 Bus';
-    case 'ferry': return '🚢 Nave';
-    case 'accommodation': return '🏨 Alloggio';
-    case 'documents': return '🛂 Documento';
-    default: return 'Altro';
+  // Tasti Cassaforte (Sblocco, Tastierino PIN, Cambio PIN)
+  if (isVaultTab && !state.vaultUnlocked) {
+    container.querySelectorAll('.vault-key-btn').forEach(keyBtn => {
+      keyBtn.addEventListener('click', async () => {
+        const k = keyBtn.getAttribute('data-key');
+        if (k === 'clear') {
+          vaultEnteredPin = '';
+          renderTabWallet();
+        } else if (k === 'backspace') {
+          vaultEnteredPin = vaultEnteredPin.slice(0, -1);
+          renderTabWallet();
+        } else if (vaultEnteredPin.length < 4) {
+          vaultEnteredPin += k;
+          renderTabWallet();
+
+          if (vaultEnteredPin.length === 4) {
+            setTimeout(async () => {
+              const currentHash = localStorage.getItem('nomad_vault_pin_hash');
+              const enteredHash = await hashPinCode(vaultEnteredPin);
+
+              if (!currentHash) {
+                // Primo setup PIN
+                localStorage.setItem('nomad_vault_pin_hash', enteredHash);
+                state.vaultUnlocked = true;
+                vaultEnteredPin = '';
+                showToast('PIN Cassaforte impostato con successo!');
+                renderTabWallet();
+              } else if (currentHash === enteredHash) {
+                // PIN corretto
+                state.vaultUnlocked = true;
+                vaultEnteredPin = '';
+                showToast('Cassaforte sbloccata');
+                renderTabWallet();
+              } else {
+                // PIN errato
+                vaultEnteredPin = '';
+                showToast('PIN errato, riprova');
+                renderTabWallet();
+              }
+            }, 120);
+          }
+        }
+      });
+    });
   }
+
+  // Blocca ora / Cambia PIN
+  document.getElementById('btnVaultLockNow')?.addEventListener('click', () => {
+    state.vaultUnlocked = false;
+    showToast('Cassaforte bloccata');
+    renderTabWallet();
+  });
+
+  document.getElementById('btnVaultChangePin')?.addEventListener('click', async () => {
+    const oldPin = prompt('Inserisci il PIN attuale a 4 cifre:');
+    if (!oldPin) return;
+    const currentHash = localStorage.getItem('nomad_vault_pin_hash');
+    const oldHash = await hashPinCode(oldPin);
+    if (oldHash !== currentHash) {
+      showToast('PIN attuale errato');
+      return;
+    }
+    const newPin = prompt('Inserisci il NUOVO PIN a 4 cifre:');
+    if (newPin && newPin.length === 4 && /^\d+$/.test(newPin)) {
+      const newHash = await hashPinCode(newPin);
+      localStorage.setItem('nomad_vault_pin_hash', newHash);
+      showToast('Nuovo PIN impostato!');
+    } else {
+      showToast('PIN non valido (richieste 4 cifre)');
+    }
+  });
 }
 
 /* ==========================================================================
@@ -3303,7 +3662,19 @@ async function openGateMode(fileRecord) {
   if (fileRecord.type === 'application/pdf') {
     container.innerHTML = `<iframe src="${state.currentGateDocBlobUrl}" class="gate-pdf-iframe"></iframe>`;
   } else {
-    container.innerHTML = `<img src="${state.currentGateDocBlobUrl}" class="gate-image" alt="${escapeHTML(fileRecord.title)}">`;
+    container.innerHTML = `<img src="${state.currentGateDocBlobUrl}" class="gate-image" id="gateImageEl" alt="${escapeHTML(fileRecord.title)}">`;
+    const imgEl = document.getElementById('gateImageEl');
+    imgEl?.addEventListener('click', () => {
+      imgEl.classList.toggle('zoomed');
+    });
+  }
+
+  const btnZoom = document.getElementById('btnGateZoom');
+  if (btnZoom) {
+    btnZoom.onclick = () => {
+      const imgEl = document.getElementById('gateImageEl');
+      if (imgEl) imgEl.classList.toggle('zoomed');
+    };
   }
 
   const btnDownload = document.getElementById('btnGateDownload');
@@ -4335,6 +4706,11 @@ function switchTab(tabName) {
     }
   }
 
+  // Auto-blocco Cassaforte quando si cambia tab
+  if (state.activeTab === 'wallet' && tabName !== 'wallet') {
+    state.vaultUnlocked = false;
+  }
+
   state.activeTab = tabName;
 
   document.querySelectorAll('.nav-tab-btn').forEach(btn => {
@@ -4630,16 +5006,27 @@ function startSpeechRecognition({ langKey, onStart, onResult, onEnd, onError }) 
 // ==========================================================================
 // OVERLAY SCHERMO INTERO TESTO GIGANTE
 // ==========================================================================
-function openPhraseBigOverlay(targetText, italianText, categoryName, langKey = 'zh') {
+function openPhraseBigOverlay(targetText, italianText, categoryName, langKey = 'zh', phoneticText = '') {
   const overlay = document.getElementById('phraseBigOverlay');
   const targetEl = document.getElementById('phraseBigTarget');
   const itaEl = document.getElementById('phraseBigItalian');
   const catEl = document.getElementById('phraseBigCategory');
+  const phonEl = document.getElementById('phraseBigPhonetic');
   if (!overlay || !targetEl) return;
 
   targetEl.textContent = targetText || '';
   if (itaEl) itaEl.textContent = italianText ? `"${italianText}"` : '';
   if (catEl) catEl.textContent = categoryName || 'Frase / Traduzione';
+
+  if (phonEl) {
+    if (phoneticText && phoneticText.trim()) {
+      phonEl.textContent = phoneticText.trim();
+      phonEl.style.display = 'block';
+    } else {
+      phonEl.textContent = '';
+      phonEl.style.display = 'none';
+    }
+  }
 
   currentBigOverlayData = {
     text: targetText || '',
@@ -4829,22 +5216,27 @@ function renderSurvivalPhrasebook(targetLang = 'zh') {
     const phon = (p.phonetics && p.phonetics[langKey]) || '';
 
     html += `
-      <div class="phrasebook-card-item" data-target-text="${escapeHTML(tr)}" data-ita-text="${escapeHTML(p.it)}" data-cat="${escapeHTML(p.category || 'Frasario')}" data-lang="${langKey}">
+      <div class="phrasebook-card-item" data-target-text="${escapeHTML(tr)}" data-ita-text="${escapeHTML(p.it)}" data-cat="${escapeHTML(p.category || 'Frasario')}" data-lang="${langKey}" data-phonetic="${escapeHTML(phon)}">
         <div class="phrasebook-card-main">
           <div class="phrasebook-ita-text">${escapeHTML(p.it)}</div>
           <div class="phrasebook-target-text">${escapeHTML(tr)}</div>
           ${phon ? `<div class="phrasebook-phonetic-text">${escapeHTML(phon)}</div>` : ''}
         </div>
-        <button class="phrasebook-speak-circle-btn btn-speak-phrase-row" data-speak-text="${escapeHTML(tr)}" data-lang="${langKey}" title="Ascolta pronuncia" aria-label="Ascolta pronuncia">
-          🔊
-        </button>
+        <div class="phrasebook-actions-right">
+          <button class="phrasebook-show-btn" data-target-text="${escapeHTML(tr)}" data-ita-text="${escapeHTML(p.it)}" data-cat="${escapeHTML(p.category || 'Frasario')}" data-lang="${langKey}" data-phonetic="${escapeHTML(phon)}" title="Mostra a schermo intero" aria-label="Mostra a schermo intero">
+            ⛶ Mostra
+          </button>
+          <button class="phrasebook-speak-circle-btn btn-speak-phrase-row" data-speak-text="${escapeHTML(tr)}" data-lang="${langKey}" title="Ascolta pronuncia" aria-label="Ascolta pronuncia">
+            🔊
+          </button>
+        </div>
       </div>
     `;
   });
 
   html += `
     <div style="font-size:11px; color:var(--text-tertiary); text-align:center; padding:12px 14px 6px 14px; line-height:1.4;">
-      💡 <em>Tocca una card per mostrarla a <strong>Schermo Intero</strong>. L'audio usa le voci native del dispositivo (funziona offline).</em>
+      💡 <em>Tocca <strong>⛶ Mostra</strong> o la card per visualizzarla a <strong>Schermo Intero</strong>. L'audio usa le voci native del dispositivo (funziona offline).</em>
     </div>
   `;
 
@@ -4859,14 +5251,27 @@ function renderSurvivalPhrasebook(targetLang = 'zh') {
     });
   });
 
+  container.querySelectorAll('.phrasebook-show-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetText = btn.getAttribute('data-target-text');
+      const itaText = btn.getAttribute('data-ita-text');
+      const cat = btn.getAttribute('data-cat');
+      const l = btn.getAttribute('data-lang') || langKey;
+      const phon = btn.getAttribute('data-phonetic') || '';
+      openPhraseBigOverlay(targetText, itaText, cat, l, phon);
+    });
+  });
+
   container.querySelectorAll('.phrasebook-card-item').forEach(el => {
     el.addEventListener('click', (e) => {
-      if (e.target.closest('.btn-speak-phrase-row')) return;
+      if (e.target.closest('.btn-speak-phrase-row') || e.target.closest('.phrasebook-show-btn')) return;
       const targetText = el.getAttribute('data-target-text');
       const itaText = el.getAttribute('data-ita-text');
       const cat = el.getAttribute('data-cat');
       const l = el.getAttribute('data-lang') || langKey;
-      openPhraseBigOverlay(targetText, itaText, cat, l);
+      const phon = el.getAttribute('data-phonetic') || '';
+      openPhraseBigOverlay(targetText, itaText, cat, l, phon);
     });
   });
 }
@@ -5276,6 +5681,8 @@ function setupEventListeners() {
     const title = document.getElementById('fieldWalletTitle').value.trim();
     const category = document.getElementById('fieldWalletCategory').value;
     const notes = document.getElementById('fieldWalletNotes').value.trim();
+    const isPinned = Boolean(document.getElementById('fieldWalletPin')?.checked);
+    const inVault = Boolean(document.getElementById('fieldWalletVault')?.checked);
 
     if (!fileInput.files || fileInput.files.length === 0) {
       showToast('Seleziona un file');
@@ -5283,18 +5690,27 @@ function setupEventListeners() {
     }
 
     const file = fileInput.files[0];
+
+    // Controllo dimensione max 10MB per PDF
+    if (file.type === 'application/pdf' && file.size > 10 * 1024 * 1024) {
+      showToast('Il file PDF supera la dimensione massima di 10MB');
+      return;
+    }
+
     showToast('Salvataggio offline in corso...');
 
     await processAndStoreFile(file, {
       tripId: state.activeTrip.id,
       title,
       category,
-      notes
+      notes,
+      isPinned,
+      inVault
     });
 
     closeAllSheets();
     await refreshApplicationData();
-    showToast('File archiviato offline!');
+    showToast(inVault ? 'Documento salvato in Cassaforte 🔒' : 'Documento archiviato nel Wallet!');
   });
 
   document.getElementById('formExchangeRate')?.addEventListener('submit', async (e) => {

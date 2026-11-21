@@ -106,7 +106,7 @@ export async function processAndStoreFile(file, metadata = {}) {
   let finalBlob = file;
 
   if (file.type.startsWith('image/')) {
-    finalBlob = await compressImage(file, 1800, 0.82);
+    finalBlob = await compressImageToWebP(file, 1600, 0.80);
   }
 
   const fileRecord = {
@@ -120,6 +120,7 @@ export async function processAndStoreFile(file, metadata = {}) {
     title: metadata.title || file.name,
     notes: metadata.notes || '',
     isPinned: Boolean(metadata.isPinned || false),
+    inVault: Boolean(metadata.inVault || false),
     blob: finalBlob
   };
 
@@ -127,8 +128,8 @@ export async function processAndStoreFile(file, metadata = {}) {
   return fileRecord;
 }
 
-function compressImage(file, maxSide = 1800, quality = 0.82) {
-  return new Promise((resolve, reject) => {
+export function compressImageToWebP(file, maxSide = 1600, quality = 0.80) {
+  return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
 
@@ -153,7 +154,6 @@ function compressImage(file, maxSide = 1800, quality = 0.82) {
       ctx.drawImage(img, 0, 0, width, height);
 
       // Supporto WebP con fallback JPEG
-      const mimeType = 'image/webp';
       canvas.toBlob(
         (blob) => {
           if (blob) {
@@ -163,18 +163,22 @@ function compressImage(file, maxSide = 1800, quality = 0.82) {
             canvas.toBlob((jpegBlob) => resolve(jpegBlob || file), 'image/jpeg', quality);
           }
         },
-        mimeType,
+        'image/webp',
         quality
       );
     };
 
-    img.onerror = (err) => {
+    img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(err);
+      resolve(file);
     };
 
     img.src = url;
   });
+}
+
+function compressImage(file, maxSide = 1600, quality = 0.80) {
+  return compressImageToWebP(file, maxSide, quality);
 }
 
 /**

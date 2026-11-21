@@ -20,9 +20,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=29) -->
-  <link rel="stylesheet" href="./styles.css?v=29">
-  <link rel="modulepreload" href="./db.js?v=29">
+  <!-- Stylesheet (Cache-Busting ?v=30) -->
+  <link rel="stylesheet" href="./styles.css?v=30">
+  <link rel="modulepreload" href="./db.js?v=30">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -267,6 +267,9 @@
     <div class="overlay-header">
       <span class="wake-lock-badge">Gate Mode • No Sleep</span>
       <div style="display:flex; align-items:center; gap:8px;">
+        <button id="btnGateZoom" class="overlay-close-btn" aria-label="Ingrandisci / Zoom" title="Zoom" style="font-size:15px;">
+          🔍
+        </button>
         <button id="btnGateTogglePin" class="overlay-close-btn" aria-label="Pinna documento in Dashboard" style="color:#666;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="17" x2="12" y2="22"></line>
@@ -509,39 +512,50 @@
   <div id="sheetWalletUpload" class="bottom-sheet" role="dialog">
     <div class="sheet-handle-bar"></div>
     <div class="sheet-header">
-      <div class="sheet-title">Carica Documento / Pass</div>
+      <div class="sheet-title">Aggiungi Documento / Pass</div>
       <button class="sheet-close-btn" data-close-sheet="sheetWalletUpload">✕</button>
     </div>
     <div class="sheet-scroll-body">
       <form id="formWalletUpload">
         <div class="form-group">
-          <label class="form-label">Seleziona File (Immagine o PDF)</label>
-          <input type="file" id="fieldWalletFile" class="form-input" accept="image/*,application/pdf" required>
-          <span style="font-size:11.5px; color:var(--text-tertiary); margin-top:2px;">
-            Compresso a max 1800px in WebP/JPEG per nitidezza e salvataggio 100% offline.
-          </span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Titolo Documento</label>
-          <input type="text" id="fieldWalletTitle" class="form-input" placeholder="es. Carta Imbarco Milano - Tokyo" required>
+          <label class="form-label">Titolo Documento *</label>
+          <input type="text" id="fieldWalletTitle" class="form-input" placeholder="es. Volo Andata Shanghai, Hotel Yiwu" required>
         </div>
 
         <div class="form-group">
           <label class="form-label">Categoria</label>
           <select id="fieldWalletCategory" class="form-select">
             <option value="flight">✈️ Volo</option>
-            <option value="train">🚆 Treno</option>
-            <option value="bus">🚌 Bus</option>
-            <option value="ferry">🚢 Nave / Traghetto</option>
-            <option value="accommodation">🏨 Alloggio</option>
-            <option value="documents">🛂 Documenti (Passaporto/Visti - Sfocato di default)</option>
+            <option value="hotel">🏨 Hotel</option>
+            <option value="train">🚆 Treni / Trasporti</option>
+            <option value="event">🎟️ Biglietti / Eventi</option>
+            <option value="documents">🛂 Visto / Assicurazione</option>
+            <option value="other">📄 Altro</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Note aggiuntive (opzionale)</label>
-          <input type="text" id="fieldWalletNotes" class="form-input" placeholder="Posto 14A, Terminal 2">
+          <label class="form-label">File (Immagine o PDF) *</label>
+          <input type="file" id="fieldWalletFile" class="form-input" accept="image/*,application/pdf" required>
+          <span style="font-size:11px; color:var(--text-tertiary); margin-top:3px; display:block;">
+            Immagini compresse automaticamente in WebP (max 1600px). PDF max 10MB.
+          </span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px; margin:14px 0;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
+            <input type="checkbox" id="fieldWalletPin" style="width:18px; height:18px; accent-color:var(--accent);">
+            <span>📌 Pinna in Dashboard (Home)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
+            <input type="checkbox" id="fieldWalletVault" style="width:18px; height:18px; accent-color:var(--accent);">
+            <span>🔒 Metti in Cassaforte (protetta da PIN)</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Note rapide (opzionale)</label>
+          <input type="text" id="fieldWalletNotes" class="form-input" placeholder="es. Posto 14A, Terminal 2, Gate K43">
         </div>
 
         <button type="submit" class="btn-glass-pill accent btn-full-width">
@@ -764,7 +778,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
-  <script type="module" src="./app.js?v=29"></script>
+  <script type="module" src="./app.js?v=30"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>
@@ -981,9 +995,10 @@
     </div>
     <div class="taxi-content-body" style="padding-top:20px;">
       <div class="taxi-badge" id="phraseBigCategory">Traduzione / Frase</div>
-      <div class="taxi-hotel-name" id="phraseBigItalian" style="font-size:18px; margin-bottom:12px; color:#1C2128;"></div>
-      <div class="taxi-local-box" style="margin: 10px 0 16px 0; min-height: 180px; display:flex; align-items:center; justify-content:center;">
-        <div class="taxi-local-text" id="phraseBigTarget" style="font-size:38px; line-height:1.3; font-weight:800;"></div>
+      <div class="taxi-hotel-name" id="phraseBigItalian" style="font-size:16px; margin-bottom:12px; color:#4B5563;"></div>
+      <div class="taxi-local-box" style="margin: 10px 0 16px 0; min-height: 180px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div class="taxi-local-text phrase-big-card-target" id="phraseBigTarget"></div>
+        <div class="phrase-big-phonetic" id="phraseBigPhonetic" style="display:none;"></div>
       </div>
       <div style="display:flex; justify-content:center; gap:10px; margin-bottom:14px;">
         <button id="btnBigSpeakNormal" class="btn-glass-pill" style="background:#16191D; color:#FFFFFF; border:1px solid #333; padding:8px 18px; font-size:14px; font-weight:700; border-radius:12px;">
