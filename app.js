@@ -16,7 +16,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=27';
+} from './db.js?v=28';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -4399,6 +4399,7 @@ let currentBigOverlayData = null;
 let cachedVoices = [];
 let activeSpeechRecognition = null;
 let selectedPhrasebookCategory = 'all';
+let phrasebookSearchQuery = '';
 
 let convState = {
   topLang: 'zh',
@@ -4427,6 +4428,7 @@ function getBestVoice(bcp47Lang) {
 
   const targetLang = (bcp47Lang || 'en-US').toLowerCase();
   const targetPrefix = targetLang.split('-')[0];
+  const isOffline = !navigator.onLine;
 
   const compatible = voices.filter(v => {
     const vLang = (v.lang || '').toLowerCase();
@@ -4440,11 +4442,18 @@ function getBestVoice(bcp47Lang) {
     const name = (v.name || '').toLowerCase();
     const vLang = (v.lang || '').toLowerCase();
 
+    // In modalità offline, favorisci voci scaricate localmente ed escludi/penalizza voci remote Online
+    if (isOffline) {
+      if (v.localService === true) score += 200;
+      if (name.includes('online')) score -= 500;
+    } else {
+      if (name.includes('online')) score += 80;
+    }
+
     if (name.includes('natural')) score += 120;
     if (name.includes('neural')) score += 110;
     if (name.includes('premium')) score += 100;
     if (name.includes('enhanced')) score += 90;
-    if (name.includes('online')) score += 80;
     if (name.includes('siri')) score += 75;
     if (name.includes('google')) score += 70;
 
@@ -4474,7 +4483,10 @@ function speakText(text, langKey, rate = 0.95) {
   }
 
   try {
-    window.speechSynthesis.cancel();
+    // FIX iOS Safari: cancella SOLO se c'è un audio attivo o in coda, per non bloccare il sintetizzatore
+    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+      window.speechSynthesis.cancel();
+    }
 
     const utterance = new SpeechSynthesisUtterance(text);
     const langInfo = LANG_MAP[langKey] || LANG_MAP['en'];
@@ -4487,13 +4499,41 @@ function speakText(text, langKey, rate = 0.95) {
     const bestVoice = getBestVoice(ttsCode);
     if (bestVoice) {
       utterance.voice = bestVoice;
+    } else {
+      utterance.voice = null;
     }
 
+    // Chiamata immediata e sincrona per non perdere il contesto del tocco utente su iOS Safari
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn('Speech synthesis error:', err);
   }
 }
+
+// ==========================================================================
+// MONITORAGGIO STATO ONLINE / OFFLINE NEL TRADUTTORE
+// ==========================================================================
+function updateTranslatorOnlineStatus() {
+  const banner = document.getElementById('transOfflineBanner');
+  const isOnline = navigator.onLine;
+
+  if (banner) {
+    banner.style.display = isOnline ? 'none' : 'flex';
+  }
+
+  const convNotice = document.getElementById('convOfflineNotice');
+  if (convNotice) {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!isOnline || !SpeechRec) {
+      convNotice.style.display = 'block';
+    } else {
+      convNotice.style.display = 'none';
+    }
+  }
+}
+
+window.addEventListener('online', updateTranslatorOnlineStatus);
+window.addEventListener('offline', updateTranslatorOnlineStatus);
 
 // ==========================================================================
 // APERTURA & CHIUSURA PAGINA TRADUTTORE FULLSCREEN
@@ -4504,6 +4544,7 @@ function openTravelManualPage() {
 
   populateLanguageSelects();
   renderSavedTranslationsList();
+  updateTranslatorOnlineStatus();
 
   const langSelect = document.getElementById('phrasebookTargetLang');
   renderSurvivalPhrasebook(langSelect ? langSelect.value : 'zh');
@@ -4597,6 +4638,7 @@ function openConversationMode() {
   convState.topLang = (sTo ? sTo.value : 'zh').toLowerCase();
 
   updateConversationUI();
+  updateTranslatorOnlineStatus();
   overlay.classList.add('active');
   acquireWakeLock();
 }
@@ -4791,7 +4833,7 @@ function renderSavedTranslationsList() {
 }
 
 // ==========================================================================
-// FRASARIO OFFLINE CON CATEGORIE A PILLOLA SCROLLABILE
+// FRASARIO OFFLINE CON CATEGORIE A PILLOLA SCROLLABILE E RICERCA RAPIDA
 // ==========================================================================
 function renderSurvivalPhrasebook(targetLang = 'zh') {
   const container = document.getElementById('phrasebookContainer');
@@ -4804,14 +4846,25 @@ function renderSurvivalPhrasebook(targetLang = 'zh') {
 
   const langKey = targetLang.toLowerCase();
 
-  const filtered = (selectedPhrasebookCategory === 'all')
+  let filtered = (selectedPhrasebookCategory === 'all')
     ? allPhrases
     : allPhrases.filter(p => p.category === selectedPhrasebookCategory);
 
+  if (phrasebookSearchQuery && phrasebookSearchQuery.trim()) {
+    const q = phrasebookSearchQuery.trim().toLowerCase();
+    filtered = filtered.filter(p => {
+      const itMatch = (p.it || '').toLowerCase().includes(q);
+      const catMatch = (p.category || '').toLowerCase().includes(q);
+      const trMatch = ((p.translations && p.translations[langKey]) || '').toLowerCase().includes(q);
+      const enMatch = ((p.translations && p.translations['en']) || '').toLowerCase().includes(q);
+      return itMatch || catMatch || trMatch || enMatch;
+    });
+  }
+
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div style="font-size:12.5px; color:var(--text-tertiary); text-align:center; padding:20px; background:var(--bg-card-subtle); border-radius:14px; margin-top:8px;">
-        Nessuna frase in questa categoria.
+      <div style="font-size:12.5px; color:var(--text-tertiary); text-align:center; padding:24px 16px; background:var(--bg-card-subtle); border-radius:14px; margin-top:8px;">
+        ${phrasebookSearchQuery ? `Nessuna frase trovata per "<strong>${escapeHTML(phrasebookSearchQuery)}</strong>".` : 'Nessuna frase in questa categoria.'}
       </div>
     `;
     return;
@@ -4838,7 +4891,7 @@ function renderSurvivalPhrasebook(targetLang = 'zh') {
 
   html += `
     <div style="font-size:11px; color:var(--text-tertiary); text-align:center; padding:12px 14px 6px 14px; line-height:1.4;">
-      💡 <em>L'audio usa le voci native del telefono (funziona offline se la lingua è scaricata nelle impostazioni del dispositivo).</em>
+      💡 <em>Tocca una card per mostrarla a <strong>Schermo Intero</strong>. L'audio usa le voci native del dispositivo (funziona offline).</em>
     </div>
   `;
 
@@ -4937,6 +4990,30 @@ function setupTravelManualSheet() {
   // Selettore lingua Frasario
   document.getElementById('phrasebookTargetLang')?.addEventListener('change', (e) => {
     renderSurvivalPhrasebook(e.target.value);
+  });
+
+  // Ricerca Rapida Frasario
+  const searchInput = document.getElementById('inputSearchPhrasebook');
+  const clearSearchBtn = document.getElementById('btnClearPhraseSearch');
+
+  searchInput?.addEventListener('input', (e) => {
+    phrasebookSearchQuery = e.target.value || '';
+    if (clearSearchBtn) {
+      clearSearchBtn.style.display = phrasebookSearchQuery ? 'block' : 'none';
+    }
+    const langSelect = document.getElementById('phrasebookTargetLang');
+    renderSurvivalPhrasebook(langSelect ? langSelect.value : 'zh');
+  });
+
+  clearSearchBtn?.addEventListener('click', () => {
+    if (searchInput) {
+      searchInput.value = '';
+      phrasebookSearchQuery = '';
+      clearSearchBtn.style.display = 'none';
+      searchInput.focus();
+    }
+    const langSelect = document.getElementById('phrasebookTargetLang');
+    renderSurvivalPhrasebook(langSelect ? langSelect.value : 'zh');
   });
 
   // Swap lingue Traduttore

@@ -20,9 +20,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=27) -->
-  <link rel="stylesheet" href="./styles.css?v=27">
-  <link rel="modulepreload" href="./db.js?v=27">
+  <!-- Stylesheet (Cache-Busting ?v=28) -->
+  <link rel="stylesheet" href="./styles.css?v=28">
+  <link rel="modulepreload" href="./db.js?v=28">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -764,7 +764,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
-  <script type="module" src="./app.js?v=27"></script>
+  <script type="module" src="./app.js?v=28"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>
@@ -842,6 +842,12 @@
            TAB 1: TRADUTTORE (4 SLOT PULITI)
            =================================================================== -->
       <div id="sectionTranslator" style="display:flex; flex-direction:column; gap:14px;">
+        <!-- Banner Offline Dinamico -->
+        <div id="transOfflineBanner" style="display:none; padding:10px 14px; border-radius:12px; background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.35); color:#FBBF24; font-size:12px; line-height:1.45; align-items:center; gap:8px;">
+          <span style="font-size:16px; flex-shrink:0;">📡</span>
+          <div><strong>Modalità Offline</strong> — Traduzione libera e microfono richiedono rete. Usa <em>Frasario Offline</em> e <em>Recenti</em> qui sotto.</div>
+        </div>
+
         <!-- SLOT 1: Barra Lingue (Griglia rigida 3 colonne 1fr 44px 1fr) -->
         <div class="trans-langs-grid">
           <select id="transLangFrom" class="trans-lang-select-box" aria-label="Lingua di partenza"></select>
@@ -911,6 +917,12 @@
            TAB 2: FRASARIO OFFLINE (BARRA CATEGORIE SCROLLABILE + CARD PULITE)
            =================================================================== -->
       <div id="sectionPhrasebook" style="display:none; flex-direction:column; gap:12px;">
+        <!-- Barra Ricerca Rapida Frasario -->
+        <div style="position:relative;">
+          <input type="search" id="inputSearchPhrasebook" class="trans-lang-select-box" placeholder="🔍 Cerca frase in italiano (es. taxi, medico, allergico)..." style="height:40px; font-size:13px; font-weight:500; padding:0 34px 0 12px; border-radius:12px;">
+          <button id="btnClearPhraseSearch" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-tertiary); font-size:13px; cursor:pointer; display:none; padding:4px;">✕</button>
+        </div>
+
         <!-- Barra Lingua Destinazione Frasario -->
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Lingua Frasario:</span>
@@ -920,11 +932,13 @@
         <!-- Barra Categorie Scrollabile Orizzontalmente -->
         <div class="phrasebook-categories-strip" id="phrasebookCatStrip">
           <button class="phrasebook-cat-pill active" data-cat="all">Tutte</button>
-          <button class="phrasebook-cat-pill" data-cat="Numeri & Contrattazione">🔢 Numeri</button>
+          <button class="phrasebook-cat-pill" data-cat="Saluti & Cortesia">👋 Saluti</button>
           <button class="phrasebook-cat-pill" data-cat="Emergenze">🚨 Emergenze</button>
-          <button class="phrasebook-cat-pill" data-cat="Ristorante">🍜 Ristorante</button>
           <button class="phrasebook-cat-pill" data-cat="Trasporti">🚕 Trasporti</button>
-          <button class="phrasebook-cat-pill" data-cat="Shopping">🛍 Shopping</button>
+          <button class="phrasebook-cat-pill" data-cat="Hotel">🏨 Hotel</button>
+          <button class="phrasebook-cat-pill" data-cat="Ristorante">🍜 Cibo & Allergie</button>
+          <button class="phrasebook-cat-pill" data-cat="Shopping">🛍 Shopping & Pagamenti</button>
+          <button class="phrasebook-cat-pill" data-cat="Numeri & Contrattazione">🔢 Numeri</button>
         </div>
 
         <!-- Lista Frasi -->
@@ -990,6 +1004,12 @@
   <!-- OVERLAY MODALITÀ CONVERSAZIONE SCHERMO DIVISO 180° -->
   <div id="conversationSplitOverlay" class="conversation-split-overlay" role="dialog" aria-modal="true">
     <button id="btnCloseConversationMode" class="conv-split-close-btn" aria-label="Chiudi Conversazione">✕</button>
+
+    <!-- Avviso Offline / No Speech in Conversazione -->
+    <div id="convOfflineNotice" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index:50; width:90%; max-width:340px; padding:12px 16px; border-radius:14px; background:rgba(20, 27, 33, 0.95); border:1px solid rgba(245, 158, 11, 0.45); color:#FBBF24; font-size:12px; line-height:1.45; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.6); pointer-events:none;">
+      📡 <strong>Modalità Offline</strong><br>
+      La dettatura vocale richiede connessione internet. Usa il <strong>Frasario Offline</strong> o digita direttamente nel Traduttore.
+    </div>
 
     <!-- Metà Superiore (Ruotata 180° verso l'interlocutore) -->
     <div class="conv-half conv-half-top">
