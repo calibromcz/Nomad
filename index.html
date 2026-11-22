@@ -22,9 +22,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=38) -->
-  <link rel="stylesheet" href="./styles.css?v=38">
-  <link rel="modulepreload" href="./db.js?v=38">
+  <!-- Stylesheet (Cache-Busting ?v=39) -->
+  <link rel="stylesheet" href="./styles.css?v=39">
+  <link rel="modulepreload" href="./db.js?v=39">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -72,8 +72,15 @@
   <!-- App Main Viewport -->
   <div id="app">
     
-    <!-- TOP BAR (Fissa Liquid Glass: 5 Utility Icon SF Symbols - Nessun nome viaggio) -->
+    <!-- TOP BAR (Fissa Liquid Glass: Logo N + 5 Utility Icon SF Symbols) -->
     <header class="top-bar top-bar-icons-only">
+      <!-- Logo N (Simbolo Nomad senza sfondo) -->
+      <span class="nomad-logo-n" aria-label="Nomad" title="Nomad">
+        <svg viewBox="0 0 100 100" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 22 80 L 22 20 L 78 80 L 78 20" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+
       <!-- 1. Selettore Viaggi (SF Symbol Suitcase) -->
       <button id="btnTopTrips" class="top-icon-btn" aria-label="I miei viaggi" title="I miei viaggi">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -797,7 +804,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
-  <script type="module" src="./app.js?v=38"></script>
+  <script type="module" src="./app.js?v=39"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>

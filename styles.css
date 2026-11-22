@@ -187,7 +187,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: calc(var(--sat) + 8px) 16px 10px 16px;
+  padding: calc(var(--sat) + 8px) 14px 10px 14px;
   background: #1B6B4D;
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
@@ -198,6 +198,24 @@ body {
 [data-theme="dark"] .top-bar-icons-only {
   background: #1B6B4D;
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.nomad-logo-n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  opacity: 0.95;
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0;
+  margin-right: -4px;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.nomad-logo-n svg {
+  display: block;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.20));
 }
 
 .top-icon-btn {
