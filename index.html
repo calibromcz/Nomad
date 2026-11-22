@@ -1,33 +1,37 @@
 <!DOCTYPE html>
 <html lang="it" data-theme="dark">
+
 <head>
   <meta charset="UTF-8">
   <title>Nomad — Airplane-Mode First</title>
-  
+
   <!-- Mobile & PWA Meta Tags (Cupertino & Standalone) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Nomad">
   <meta name="theme-color" content="#1B6B4D">
   <meta name="description" content="Nomad — Compagno di viaggio 100% offline, privacy first (Suite indie 00 Work).">
-  
+
   <!-- Manifest -->
   <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2334D399'/%3E%3Cstop offset='100%25' stop-color='%2315803D'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Cpath d='M256 120 L276 236 L392 256 L276 276 L256 392 L236 276 L120 256 L236 236 Z' fill='none' stroke='%23ffffff' stroke-width='28' stroke-linejoin='round'/%3E%3Ccircle cx='256' cy='256' r='36' fill='%23ffffff'/%3E%3C/svg%3E">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%2315803D'/%3E%3Cpath d='M50 20 L55 45 L80 50 L55 55 L50 80 L45 55 L20 50 L45 45 Z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2334D399'/%3E%3Cstop offset='100%25' stop-color='%2315803D'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Cpath d='M256 120 L276 236 L392 256 L276 276 L256 392 L236 276 L120 256 L236 236 Z' fill='none' stroke='%23ffffff' stroke-width='28' stroke-linejoin='round'/%3E%3Ccircle cx='256' cy='256' r='36' fill='%23ffffff'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%2315803D'/%3E%3Cpath d='M50 20 L55 45 L80 50 L55 55 L50 80 L45 55 L20 50 L45 45 Z' fill='%23ffffff'/%3E%3C/svg%3E">
 
   <!-- System Font Stack Unificato (Zero Font Esterni, 100% Offline e Leggero) -->
 
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=41) -->
-  <link rel="stylesheet" href="./styles.css?v=41">
-  <link rel="modulepreload" href="./db.js?v=41">
+  <!-- Stylesheet (Cache-Busting ?v=42) -->
+  <link rel="stylesheet" href="./styles.css?v=42">
+  <link rel="modulepreload" href="./db.js?v=42">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
-    (function() {
+    (function () {
       function displayRuntimeError(msg, src, lineno, colno, error) {
         let box = document.getElementById('nomad-runtime-error-box');
         if (!box) {
@@ -55,28 +59,30 @@
           textEl.textContent = detail;
         }
       }
-      window.onerror = function(msg, src, lineno, colno, error) {
+      window.onerror = function (msg, src, lineno, colno, error) {
         displayRuntimeError(msg, src, lineno, colno, error);
         return false;
       };
-      window.onunhandledrejection = function(event) {
+      window.onunhandledrejection = function (event) {
         displayRuntimeError('Unhandled Promise Rejection: ' + (event.reason ? (event.reason.stack || event.reason) : 'Unknown'), '', '', '', event.reason);
       };
     })();
   </script>
 </head>
+
 <body>
   <!-- Mesh Gradient Background Radiale Fisso (Ombreggiature Verdi) -->
   <div class="mesh-gradient-bg"></div>
 
   <!-- App Main Viewport -->
   <div id="app">
-    
+
     <!-- TOP BAR (Fissa Liquid Glass: 5 Utility Icon SF Symbols) -->
     <header class="top-bar top-bar-icons-only">
       <!-- 1. Selettore Viaggi (SF Symbol Suitcase) -->
       <button id="btnTopTrips" class="top-icon-btn" aria-label="I miei viaggi" title="I miei viaggi">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+          stroke-linejoin="round">
           <rect x="2" y="7" width="20" height="14" rx="2.5" ry="2.5"></rect>
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
         </svg>
@@ -84,7 +90,8 @@
 
       <!-- 2. Mappa Offline con status dot -->
       <button id="btnTopMap" class="top-icon-btn" aria-label="Mappa Offline">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+          stroke-linejoin="round">
           <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
           <line x1="8" y1="2" x2="8" y2="18"></line>
           <line x1="16" y1="6" x2="16" y2="22"></line>
@@ -94,7 +101,8 @@
 
       <!-- 3. Piano del Giorno (Notifica / Tappe oggi) -->
       <button id="btnTopDayPlan" class="top-icon-btn" aria-label="Piano del Giorno">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+          stroke-linejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="3" ry="3"></rect>
           <line x1="16" y1="2" x2="16" y2="6"></line>
           <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -110,7 +118,8 @@
 
       <!-- 4. Traduttore & Frasario (A / 文) -->
       <button id="btnTopManual" class="top-icon-btn" aria-label="Traduttore & Frasario" title="Traduttore & Frasario">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+          stroke-linejoin="round">
           <path d="M5 8l6 0"></path>
           <path d="M8 5v6c0 2-1 4-4 5"></path>
           <path d="M6 13c1.5 1 3 2 4.5 2.5"></path>
@@ -121,7 +130,8 @@
 
       <!-- 5. Toggle Light/Dark Mode -->
       <button id="btnThemeToggle" class="top-icon-btn" aria-label="Cambia tema">
-        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+          stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"></circle>
           <line x1="12" y1="1" x2="12" y2="3"></line>
           <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -137,18 +147,19 @@
 
     <!-- MAIN SCROLLABLE VIEWPORT -->
     <main class="main-viewport" id="mainContainer">
-      
+
       <!-- Selettore Viaggio Sotto la Top Bar (Pillola / Tip Tendina interattiva) -->
       <div class="trip-dropdown-strip" style="display:none;">
         <button id="btnTripSelector" class="trip-dropdown-pill" aria-label="Seleziona o Cambia Viaggio">
           <span class="trip-pill-dot"></span>
           <span class="trip-pill-name" id="topBarTripName">Caricamento...</span>
-          <svg class="trip-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="trip-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
       </div>
-      
+
       <!-- TAB 1: DASHBOARD (Centro di Controllo Bento) -->
       <section id="tab-dashboard" class="tab-pane active">
         <div id="dashboardTabContent"></div>
@@ -180,7 +191,8 @@
     <nav class="bottom-nav">
       <!-- 1. Viaggio -->
       <button class="nav-tab-btn" data-tab="trip">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
         </svg>
@@ -189,7 +201,8 @@
 
       <!-- 2. Wallet -->
       <button class="nav-tab-btn" data-tab="wallet">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          stroke-linejoin="round">
           <rect x="2" y="5" width="20" height="14" rx="2"></rect>
           <line x1="2" y1="10" x2="22" y2="10"></line>
         </svg>
@@ -198,7 +211,8 @@
 
       <!-- 3. Dashboard (Al Centro) -->
       <button class="nav-tab-btn active nav-tab-center" data-tab="dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
           <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
           <rect x="14" y="12" width="7" height="9" rx="1.5"></rect>
@@ -209,7 +223,8 @@
 
       <!-- 4. Spese -->
       <button class="nav-tab-btn" data-tab="expenses">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          stroke-linejoin="round">
           <rect x="2" y="6" width="20" height="12" rx="2"></rect>
           <circle cx="12" cy="12" r="2"></circle>
           <path d="M6 12h.01M18 12h.01"></path>
@@ -219,7 +234,8 @@
 
       <!-- 5. Profilo -->
       <button class="nav-tab-btn" data-tab="profile">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
@@ -235,17 +251,18 @@
     <div class="overlay-header">
       <span class="wake-lock-badge">Schermo Sempre Acceso</span>
       <button id="btnCloseTaxiCard" class="overlay-close-btn" aria-label="Chiudi Taxi Card">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+          stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
     </div>
-    
+
     <div class="taxi-content-body">
       <div class="taxi-badge">Destinazione Alloggio</div>
       <div class="taxi-hotel-name" id="taxiHotelName">The PuLi Hotel & Spa</div>
-      
+
       <!-- Box ad altissimo contrasto con lingua locale (caratteri enormi) -->
       <div class="taxi-local-box">
         <div class="taxi-local-text" id="taxiHotelLocal">上海市静安区常德路1号（近延安中路）</div>
@@ -254,8 +271,11 @@
       <div class="taxi-latin-address" id="taxiHotelLatin">1 Changde Rd, Jing'an District, Shanghai</div>
 
       <a id="taxiCallBtn" href="tel:" class="taxi-call-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path
+            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+          </path>
         </svg>
         <span id="taxiCallText">Chiama Alloggio</span>
       </a>
@@ -269,17 +289,21 @@
     <div class="overlay-header">
       <span class="wake-lock-badge">Gate Mode • No Sleep</span>
       <div style="display:flex; align-items:center; gap:8px;">
-        <button id="btnGateZoom" class="overlay-close-btn" aria-label="Ingrandisci / Zoom" title="Zoom" style="font-size:15px;">
+        <button id="btnGateZoom" class="overlay-close-btn" aria-label="Ingrandisci / Zoom" title="Zoom"
+          style="font-size:15px;">
           🔍
         </button>
-        <button id="btnGateTogglePin" class="overlay-close-btn" aria-label="Pinna documento in Dashboard" style="color:#666;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="btnGateTogglePin" class="overlay-close-btn" aria-label="Pinna documento in Dashboard"
+          style="color:#666;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
             <line x1="12" y1="17" x2="12" y2="22"></line>
             <path d="M5 17h14v-2l-2-3V5a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v7l-2 3v2z"></path>
           </svg>
         </button>
         <button id="btnCloseGateMode" class="overlay-close-btn" aria-label="Chiudi Gate Mode">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+            stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -293,7 +317,8 @@
       <div id="gateDocTitle" style="font-weight: 700; font-size: 15px; color: #111;">Carta d'Imbarco</div>
       <div style="display:flex; gap:10px;">
         <button id="btnGateDownload" class="btn-glass-pill" style="background:#f0f0f0; border:none; color:#111;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -337,7 +362,7 @@
     <div class="sheet-scroll-body">
       <form id="formTrip">
         <input type="hidden" id="fieldTripId">
-        
+
         <div class="form-group">
           <label class="form-label">Nome Viaggio</label>
           <input type="text" id="fieldTripName" class="form-input" placeholder="es. Tokyo & Kyoto" required>
@@ -362,7 +387,8 @@
         <div class="form-row-2">
           <div class="form-group">
             <label class="form-label">Valuta Locale</label>
-            <select id="fieldTripDestCurrency" class="form-input" style="appearance:auto; -webkit-appearance:menulist;" required>
+            <select id="fieldTripDestCurrency" class="form-input" style="appearance:auto; -webkit-appearance:menulist;"
+              required>
               <option value="CNY">CNY - Yuan Cinese (¥)</option>
               <option value="JPY">JPY - Yen Giapponese (¥)</option>
               <option value="USD">USD - Dollaro USA ($)</option>
@@ -374,18 +400,21 @@
           </div>
           <div class="form-group">
             <label class="form-label">Budget Totale (€)</label>
-            <input type="number" inputmode="decimal" min="0" step="any" id="fieldTripBudget" class="form-input tabular-nums" placeholder="es. 1500">
+            <input type="number" inputmode="decimal" min="0" step="any" id="fieldTripBudget"
+              class="form-input tabular-nums" placeholder="es. 1500">
           </div>
         </div>
 
         <div class="form-row-2">
           <div class="form-group">
             <label class="form-label">Tasso Cambio (1 EUR = X)</label>
-            <input type="number" step="0.0001" id="fieldTripExchangeRate" class="form-input tabular-nums" placeholder="es. 7.85">
+            <input type="number" step="0.0001" id="fieldTripExchangeRate" class="form-input tabular-nums"
+              placeholder="es. 7.85">
           </div>
           <div class="form-group">
             <label class="form-label">Fuso Orario IANA</label>
-            <input type="text" id="fieldTripDestTimeZone" class="form-input" placeholder="Asia/Shanghai" value="Asia/Shanghai">
+            <input type="text" id="fieldTripDestTimeZone" class="form-input" placeholder="Asia/Shanghai"
+              value="Asia/Shanghai">
           </div>
         </div>
 
@@ -400,7 +429,8 @@
 
         <div class="form-group">
           <label class="form-label">Indirizzo Standard</label>
-          <input type="text" id="fieldTripHotelAddress" class="form-input" placeholder="2-2-1 Yoyogi, Shibuya-ku, Tokyo">
+          <input type="text" id="fieldTripHotelAddress" class="form-input"
+            placeholder="2-2-1 Yoyogi, Shibuya-ku, Tokyo">
         </div>
 
         <div class="form-group">
@@ -445,7 +475,8 @@
         <div class="form-group" style="margin-top:14px;">
           <label class="form-label">Compagni di Viaggio (Mini-Splitwise)</label>
           <input type="text" id="fieldTripParticipants" class="form-input" placeholder="Io, Marco, Giulia">
-          <span style="font-size:11px; color:var(--text-secondary); margin-top:3px; display:block;">Nomi separati da virgola per dividere le spese.</span>
+          <span style="font-size:11px; color:var(--text-secondary); margin-top:3px; display:block;">Nomi separati da
+            virgola per dividere le spese.</span>
         </div>
 
         <button type="submit" class="btn-glass-pill accent btn-full-width" style="margin-top: 14px; font-weight:800;">
@@ -495,12 +526,14 @@
         <div class="form-group">
           <label class="form-label">Indirizzo / Luogo Mappe</label>
           <input type="text" id="fieldEventLocation" class="form-input" placeholder="es. 2-3-1 Asakusa, Taito City">
-          <span style="font-size:11px; color:var(--text-tertiary);">Se online, le coordinate geografiche verranno ricavate automaticamente per la Mappa Offline.</span>
+          <span style="font-size:11px; color:var(--text-tertiary);">Se online, le coordinate geografiche verranno
+            ricavate automaticamente per la Mappa Offline.</span>
         </div>
 
         <div class="form-group">
           <label class="form-label">Note Rapide</label>
-          <textarea id="fieldEventNotes" class="form-textarea" placeholder="Biglietti all'ingresso, scarpe facili da togliere..."></textarea>
+          <textarea id="fieldEventNotes" class="form-textarea"
+            placeholder="Biglietti all'ingresso, scarpe facili da togliere..."></textarea>
         </div>
 
         <button type="submit" class="btn-glass-pill accent btn-full-width">
@@ -521,7 +554,8 @@
       <form id="formWalletUpload">
         <div class="form-group">
           <label class="form-label">Titolo Documento *</label>
-          <input type="text" id="fieldWalletTitle" class="form-input" placeholder="es. Volo Andata Shanghai, Hotel Yiwu" required>
+          <input type="text" id="fieldWalletTitle" class="form-input" placeholder="es. Volo Andata Shanghai, Hotel Yiwu"
+            required>
         </div>
 
         <div class="form-group">
@@ -552,7 +586,7 @@
           <!-- Input reali nascosti -->
           <input type="file" id="fieldWalletCamera" accept="image/*" capture="environment" style="display:none;">
           <input type="file" id="fieldWalletFile" accept="image/*,application/pdf" style="display:none;">
-          
+
           <!-- Mini Anteprima File Selezionato -->
           <div id="walletFilePreviewContainer" style="display:none;"></div>
 
@@ -562,11 +596,13 @@
         </div>
 
         <div style="display:flex; flex-direction:column; gap:10px; margin:14px 0;">
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
+          <label
+            style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
             <input type="checkbox" id="fieldWalletPin" style="width:18px; height:18px; accent-color:var(--accent);">
             <span>📌 Pinna in Dashboard (Home)</span>
           </label>
-          <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
+          <label
+            style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
             <input type="checkbox" id="fieldWalletVault" style="width:18px; height:18px; accent-color:var(--accent);">
             <span>🔒 Metti in Cassaforte (protetta da PIN)</span>
           </label>
@@ -626,7 +662,8 @@
       <form id="formExchangeRate">
         <div class="form-group">
           <label class="form-label" id="lblExchangeFormula">1 EUR = X Valuta</label>
-          <input type="number" step="0.0001" id="fieldManualRate" class="form-input" style="font-size: 22px; font-weight:700;" required>
+          <input type="number" step="0.0001" id="fieldManualRate" class="form-input"
+            style="font-size: 22px; font-weight:700;" required>
           <span style="font-size:12px; color:var(--text-tertiary);">
             Modifica manuale istantanea in aereo o senza connessione internet.
           </span>
@@ -650,7 +687,8 @@
         <div class="form-row-2">
           <div class="form-group">
             <label class="form-label">Importo</label>
-            <input type="number" step="any" id="fieldExpenseAmount" class="form-input" placeholder="0.00" style="font-size:20px; font-weight:700;" required>
+            <input type="number" step="any" id="fieldExpenseAmount" class="form-input" placeholder="0.00"
+              style="font-size:20px; font-weight:700;" required>
           </div>
           <div class="form-group">
             <label class="form-label">Valuta</label>
@@ -690,7 +728,8 @@
             </label>
           </div>
 
-          <div id="splitwiseDetailsSection" style="display:none; margin-top:12px; padding-top:10px; border-top:1px solid var(--border-subtle);">
+          <div id="splitwiseDetailsSection"
+            style="display:none; margin-top:12px; padding-top:10px; border-top:1px solid var(--border-subtle);">
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label">Chi ha pagato?</label>
               <select id="fieldExpensePaidBy" class="form-select"></select>
@@ -723,7 +762,7 @@
     </div>
     <div class="sheet-scroll-body">
       <div id="participantsListContainer" class="settings-card-group" style="margin-bottom:14px;"></div>
-      
+
       <div style="display:flex; gap:8px; margin-top:10px;">
         <input type="text" id="fieldNewParticipantName" class="form-input" placeholder="Nome compagno (es. Luca)...">
         <button id="btnAddParticipant" class="btn-glass-pill accent" style="white-space:nowrap;">+ Aggiungi</button>
@@ -785,7 +824,7 @@
     </div>
   </div>
 
-  
+
 
   <!-- TOAST NOTIFICATION FLUTTUANTE IN ALTO -->
   <div id="toastNotification" class="toast-banner" role="status" aria-live="polite">
@@ -797,16 +836,20 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
-  <script type="module" src="./app.js?v=41"></script>
-<!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
+  <script type="module" src="./app.js?v=42"></script>
+  <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>
     <div class="bottom-sheet-header">
       <div style="display:flex; align-items:center; gap:8px;">
         <div class="dash-widget-icon-badge" style="background:rgba(52, 211, 153, 0.15); color:var(--accent);">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
-            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.7 2 11 2 11.4V16c0 .6.4 1 1 1h2"></path>
-            <circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle>
+            <path
+              d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.7 2 11 2 11.4V16c0 .6.4 1 1 1h2">
+            </path>
+            <circle cx="7" cy="17" r="2"></circle>
+            <path d="M9 17h6"></path>
+            <circle cx="17" cy="17" r="2"></circle>
           </svg>
         </div>
         <h3 class="sheet-title" style="margin:0;">Alloggio & Codici</h3>
@@ -831,10 +874,14 @@
         <div class="dash-widget-icon-badge icon-badge-weather">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
             <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
         </div>
         <h3 class="sheet-title" style="margin:0;" id="sheetWeatherTitle">Meteo della Settimana</h3>
@@ -862,11 +909,16 @@
     <div class="trans-segmented-wrapper">
       <div class="trans-segmented-bar">
         <button class="trans-segmented-btn active" id="tabBtnTranslator">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M5 8l6 6M4 14l6-6 3-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+            <path d="M5 8l6 6M4 14l6-6 3-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6" />
+          </svg>
           Traduttore
         </button>
         <button class="trans-segmented-btn" id="tabBtnPhrasebook">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
           Frasario Offline
         </button>
       </div>
@@ -879,27 +931,32 @@
            =================================================================== -->
       <div id="sectionTranslator" style="display:flex; flex-direction:column; gap:14px;">
         <!-- Banner Offline Dinamico -->
-        <div id="transOfflineBanner" style="display:none; padding:10px 14px; border-radius:12px; background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.35); color:#FBBF24; font-size:12px; line-height:1.45; align-items:center; gap:8px;">
+        <div id="transOfflineBanner"
+          style="display:none; padding:10px 14px; border-radius:12px; background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.35); color:#FBBF24; font-size:12px; line-height:1.45; align-items:center; gap:8px;">
           <span style="font-size:16px; flex-shrink:0;">📡</span>
-          <div><strong>Modalità Offline</strong> — Traduzione libera e microfono richiedono rete. Usa <em>Frasario Offline</em> e <em>Recenti</em> qui sotto.</div>
+          <div><strong>Modalità Offline</strong> — Traduzione libera e microfono richiedono rete. Usa <em>Frasario
+              Offline</em> e <em>Recenti</em> qui sotto.</div>
         </div>
 
         <!-- SLOT 1: Barra Lingue (Griglia rigida 3 colonne 1fr 44px 1fr) -->
         <div class="trans-langs-grid">
           <select id="transLangFrom" class="trans-lang-select-box" aria-label="Lingua di partenza"></select>
-          <button id="btnTransSwapLang" class="trans-swap-circle-btn" aria-label="Inverti lingue" title="Inverti lingue">⇄</button>
+          <button id="btnTransSwapLang" class="trans-swap-circle-btn" aria-label="Inverti lingue"
+            title="Inverti lingue">⇄</button>
           <select id="transLangTo" class="trans-lang-select-box" aria-label="Lingua di destinazione"></select>
         </div>
 
         <!-- SLOT 2: Card Input (Testo da tradurre) -->
         <div class="trans-input-card">
-          <textarea id="transInputText" class="trans-textarea-clean" placeholder="Scrivi una frase o tocca Parla..." rows="3"></textarea>
+          <textarea id="transInputText" class="trans-textarea-clean" placeholder="Scrivi una frase o tocca Parla..."
+            rows="3"></textarea>
           <div class="trans-input-toolbar">
             <div class="trans-input-toolbar-left">
               <button id="btnTransVoiceInput" class="trans-btn-mic-pill btn-mic-pulse" aria-label="Dettatura vocale">
                 🎤 Parla
               </button>
-              <button id="btnTransClearInput" class="trans-btn-clear-input" aria-label="Cancella testo" title="Cancella">✕</button>
+              <button id="btnTransClearInput" class="trans-btn-clear-input" aria-label="Cancella testo"
+                title="Cancella">✕</button>
             </div>
             <button id="btnDoTranslate" class="trans-btn-translate-primary" aria-label="Traduci ora">
               Traduci
@@ -942,7 +999,8 @@
         <!-- SLOT 4: Cronologia Recenti (Ultime 20 Offline) -->
         <div style="margin-top:4px;">
           <div class="trans-recent-header">
-            <span class="trans-recent-title">Recenti (Offline) • <span id="transSavedCount" style="color:var(--accent);">0</span></span>
+            <span class="trans-recent-title">Recenti (Offline) • <span id="transSavedCount"
+                style="color:var(--accent);">0</span></span>
             <button id="btnClearTranslationHistory" class="trans-recent-clear-btn">Svuota</button>
           </div>
           <div id="transSavedList"></div>
@@ -955,14 +1013,19 @@
       <div id="sectionPhrasebook" style="display:none; flex-direction:column; gap:12px;">
         <!-- Barra Ricerca Rapida Frasario -->
         <div style="position:relative;">
-          <input type="search" id="inputSearchPhrasebook" class="trans-lang-select-box" placeholder="🔍 Cerca frase in italiano (es. taxi, medico, allergico)..." style="height:40px; font-size:13px; font-weight:500; padding:0 34px 0 12px; border-radius:12px;">
-          <button id="btnClearPhraseSearch" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-tertiary); font-size:13px; cursor:pointer; display:none; padding:4px;">✕</button>
+          <input type="search" id="inputSearchPhrasebook" class="trans-lang-select-box"
+            placeholder="🔍 Cerca frase in italiano (es. taxi, medico, allergico)..."
+            style="height:40px; font-size:13px; font-weight:500; padding:0 34px 0 12px; border-radius:12px;">
+          <button id="btnClearPhraseSearch"
+            style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-tertiary); font-size:13px; cursor:pointer; display:none; padding:4px;">✕</button>
         </div>
 
         <!-- Barra Lingua Destinazione Frasario -->
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Lingua Frasario:</span>
-          <select id="phrasebookTargetLang" class="trans-lang-select-box" style="height:36px; width:auto; min-width:140px; padding:0 8px; font-size:12.5px;"></select>
+          <span style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Lingua
+            Frasario:</span>
+          <select id="phrasebookTargetLang" class="trans-lang-select-box"
+            style="height:36px; width:auto; min-width:140px; padding:0 8px; font-size:12.5px;"></select>
         </div>
 
         <!-- Barra Categorie Scrollabile Orizzontalmente -->
@@ -995,13 +1058,19 @@
     </div>
     <form id="formEditBudget" onsubmit="saveTripBudget(event)" style="padding: 16px 20px 32px 20px;">
       <div style="font-size:13px; color:var(--text-secondary); margin-bottom:14px; line-height:1.45;">
-        Imposta o modifica il budget totale del viaggio in EUR per calcolare la tua <strong>Bussola Giornaliera</strong>:
+        Imposta o modifica il budget totale del viaggio in EUR per calcolare la tua <strong>Bussola
+          Giornaliera</strong>:
       </div>
       <div class="form-group" style="margin-bottom:18px;">
-        <label class="form-label" style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:6px; display:block;">Budget Totale (€)</label>
-        <input type="number" inputmode="decimal" min="0" step="any" id="inputEditBudgetVal" class="form-input tabular-nums" placeholder="es. 1500" required autofocus style="font-size:26px; font-weight:800; padding:12px 14px; width:100%; box-sizing:border-box; border-radius:14px;">
+        <label class="form-label"
+          style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:6px; display:block;">Budget
+          Totale (€)</label>
+        <input type="number" inputmode="decimal" min="0" step="any" id="inputEditBudgetVal"
+          class="form-input tabular-nums" placeholder="es. 1500" required autofocus
+          style="font-size:26px; font-weight:800; padding:12px 14px; width:100%; box-sizing:border-box; border-radius:14px;">
       </div>
-      <button type="submit" id="btnSaveBudgetConfirm" class="btn-glass-pill accent" style="width:100%; padding:14px; font-size:15px; font-weight:800; justify-content:center; border-radius:16px; cursor:pointer;">
+      <button type="submit" id="btnSaveBudgetConfirm" class="btn-glass-pill accent"
+        style="width:100%; padding:14px; font-size:15px; font-weight:800; justify-content:center; border-radius:16px; cursor:pointer;">
         Salva Budget
       </button>
     </form>
@@ -1013,22 +1082,27 @@
       <span class="wake-lock-badge">Schermo Sempre Acceso</span>
       <button id="btnClosePhraseBig" class="overlay-close-btn" aria-label="Chiudi Schermo Intero">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
     </div>
     <div class="taxi-content-body" style="padding-top:20px;">
       <div class="taxi-badge" id="phraseBigCategory">Traduzione / Frase</div>
-      <div class="taxi-hotel-name" id="phraseBigItalian" style="font-size:16px; margin-bottom:12px; color:#4B5563;"></div>
-      <div class="taxi-local-box" style="margin: 10px 0 16px 0; min-height: 180px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <div class="taxi-hotel-name" id="phraseBigItalian" style="font-size:16px; margin-bottom:12px; color:#4B5563;">
+      </div>
+      <div class="taxi-local-box"
+        style="margin: 10px 0 16px 0; min-height: 180px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <div class="taxi-local-text phrase-big-card-target" id="phraseBigTarget"></div>
         <div class="phrase-big-phonetic" id="phraseBigPhonetic" style="display:none;"></div>
       </div>
       <div style="display:flex; justify-content:center; gap:10px; margin-bottom:14px;">
-        <button id="btnBigSpeakNormal" class="btn-glass-pill" style="background:#16191D; color:#FFFFFF; border:1px solid #333; padding:8px 18px; font-size:14px; font-weight:700; border-radius:12px;">
+        <button id="btnBigSpeakNormal" class="btn-glass-pill"
+          style="background:#16191D; color:#FFFFFF; border:1px solid #333; padding:8px 18px; font-size:14px; font-weight:700; border-radius:12px;">
           🔊 Ascolta
         </button>
-        <button id="btnBigSpeakSlow" class="btn-glass-pill" style="background:#16191D; color:#FFFFFF; border:1px solid #333; padding:8px 18px; font-size:14px; font-weight:700; border-radius:12px;">
+        <button id="btnBigSpeakSlow" class="btn-glass-pill"
+          style="background:#16191D; color:#FFFFFF; border:1px solid #333; padding:8px 18px; font-size:14px; font-weight:700; border-radius:12px;">
           🐢 Lenta
         </button>
       </div>
@@ -1038,4 +1112,5 @@
     </div>
   </div>
 </body>
+
 </html>

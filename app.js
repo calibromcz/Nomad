@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=41';
+} from './db.js?v=42';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -73,12 +73,18 @@ const state = {
 window.addEventListener('DOMContentLoaded', async () => {
   // Pre-render immediato della Dashboard per azzerare qualsiasi ritardo asincrono
   try {
+    const mainEl = document.getElementById('mainContainer');
+    if (mainEl) mainEl.scrollTop = 0;
+    window.scrollTo(0, 0);
     renderDashboard();
   } catch (e) {
     console.warn('Pre-render dashboard warning:', e);
   }
   await initAppSafely();
   try {
+    const mainEl = document.getElementById('mainContainer');
+    if (mainEl) mainEl.scrollTop = 0;
+    window.scrollTo(0, 0);
     renderDashboard();
   } catch (e) {
     console.error('Post-init renderDashboard error:', e);
@@ -4818,6 +4824,7 @@ function switchTab(tabName) {
 
   const viewport = document.getElementById('mainContainer');
   if (viewport) viewport.scrollTop = 0;
+  window.scrollTo(0, 0);
 
   if (tabName === 'dashboard') {
     renderDashboard();
