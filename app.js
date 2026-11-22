@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=46';
+} from './db.js?v=47';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -2127,47 +2127,25 @@ function initDashLeafletMapInstance() {
 
 
 /* ==========================================================================
-   TAB 2: VIAGGIO (Piano + Alloggio + Mappa Offline)
+   TAB 2: VIAGGIO (Piano + Luoghi Wikipedia + Valigia Checklist)
    ========================================================================== */
 function renderTabTrip() {
   const container = document.getElementById('tripTabContent');
   if (!container || !state.activeTrip) return;
 
   const trip = state.activeTrip;
-  if (!state.tripSubView) state.tripSubView = 'plan';
+  if (!state.tripSubView || state.tripSubView === 'map') state.tripSubView = 'plan';
 
   let html = `
-    <!-- Header compatto Alloggio -->
-    <div class="glass-card" style="padding:14px 16px; margin-bottom:12px;">
-      <div class="card-title-row" style="margin-bottom:6px;">
-        <span style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase;">Alloggio</span>
-        ${trip.accommodation?.checkIn ? `<span style="font-size:11.5px; color:var(--text-tertiary);">In: ${trip.accommodation.checkIn} / Out: ${trip.accommodation.checkOut || '11:00'}</span>` : ''}
-      </div>
-      <div style="font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:2px;">
-        ${escapeHTML(trip.accommodation?.name || 'Alloggio non impostato')}
-      </div>
-      <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:10px;">
-        ${escapeHTML(trip.accommodation?.address || 'Nessun indirizzo')}
-      </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn-glass-pill" id="btnTripCopyHotel" style="flex:1; padding:6px 12px; font-size:12.5px;">
-          Copia Indirizzo
-        </button>
-        <button class="btn-glass-pill accent" id="btnTripOpenTaxi" style="flex:1; padding:6px 12px; font-size:12.5px;">
-          Taxi Card
-        </button>
-      </div>
-    </div>
-
-    <!-- Segmented Control Apple Style a 3 segmenti (Piano | Mappa | Valigia) -->
-    <div class="segmented-control-bar">
+    <!-- Segmented Control Apple Style a 3 segmenti (Piano | Luoghi | Valigia) -->
+    <div class="segmented-control-bar" style="margin-bottom:14px;">
       <button class="segmented-control-btn ${state.tripSubView === 'plan' ? 'active' : ''}" id="btnSegmentPlan">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
         Piano
       </button>
-      <button class="segmented-control-btn ${state.tripSubView === 'map' ? 'active' : ''}" id="btnSegmentMap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
-        Mappa
+      <button class="segmented-control-btn ${state.tripSubView === 'places' ? 'active' : ''}" id="btnSegmentPlaces">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+        Luoghi
       </button>
       <button class="segmented-control-btn ${state.tripSubView === 'packing' ? 'active' : ''}" id="btnSegmentPacking">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="15" rx="3"></rect><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -2180,21 +2158,13 @@ function renderTabTrip() {
 
   container.innerHTML = html;
 
-  // Bind Alloggio buttons
-  document.getElementById('btnTripCopyHotel')?.addEventListener('click', () => {
-    if (trip.accommodation?.address) {
-      copyToClipboard(trip.accommodation.address, 'Indirizzo hotel copiato');
-    }
-  });
-  document.getElementById('btnTripOpenTaxi')?.addEventListener('click', openTaxiCard);
-
   // Segmented Control Bindings
   document.getElementById('btnSegmentPlan')?.addEventListener('click', () => {
     state.tripSubView = 'plan';
     renderTabTrip();
   });
-  document.getElementById('btnSegmentMap')?.addEventListener('click', () => {
-    state.tripSubView = 'map';
+  document.getElementById('btnSegmentPlaces')?.addEventListener('click', () => {
+    state.tripSubView = 'places';
     renderTabTrip();
   });
   document.getElementById('btnSegmentPacking')?.addEventListener('click', () => {
@@ -2202,13 +2172,262 @@ function renderTabTrip() {
     renderTabTrip();
   });
 
-  if (state.tripSubView === 'plan') {
-    renderPlanSubView();
-  } else if (state.tripSubView === 'map') {
-    renderMapSubView();
+  if (state.tripSubView === 'places') {
+    renderPlacesSubView();
   } else if (state.tripSubView === 'packing') {
     renderPackingSubView();
+  } else {
+    renderPlanSubView();
   }
+}
+
+/* ==========================================================================
+   WIKIPEDIA GEOSEARCH OFFLINE CACHE & SOTTO-VISTA LUOGHI
+   ========================================================================== */
+async function fetchWikipediaPlaces(lat, lon, force = false) {
+  if (!state.activeTrip) return [];
+  const trip = state.activeTrip;
+
+  if (!force && Array.isArray(trip.suggestedPlaces) && trip.suggestedPlaces.length > 0) {
+    return trip.suggestedPlaces;
+  }
+
+  if (!navigator.onLine) {
+    showToast("Offline: visualizzo i luoghi salvati");
+    return trip.suggestedPlaces || [];
+  }
+
+  try {
+    let places = await queryWikiGeo('it', lat, lon);
+    if (!places || places.length < 5) {
+      const enPlaces = await queryWikiGeo('en', lat, lon);
+      if (enPlaces && enPlaces.length > 0) {
+        // Unisci ed elimina duplicati per titolo
+        const existingTitles = new Set((places || []).map(p => p.title.toLowerCase()));
+        enPlaces.forEach(p => {
+          if (!existingTitles.has(p.title.toLowerCase())) {
+            places.push(p);
+          }
+        });
+      }
+    }
+
+    if (places && places.length > 0) {
+      trip.suggestedPlaces = places;
+      await putToStore('trips_store', trip);
+      showToast(`Trovati ${places.length} luoghi nei dintorni ✓`);
+      return places;
+    }
+  } catch (err) {
+    console.warn('Wiki GeoSearch error:', err);
+    showToast("Impossibile caricare suggerimenti da Wikipedia");
+  }
+
+  return trip.suggestedPlaces || [];
+}
+
+async function queryWikiGeo(lang, lat, lon) {
+  const url = `https://${lang}.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}|${lon}&ggsradius=10000&ggslimit=20&prop=extracts|pageimages|coordinates&exintro=1&explaintext=1&exsentences=2&piprop=thumbnail&pithumbsize=200&format=json&origin=*`;
+  const res = await fetch(url);
+  if (!res.ok) return [];
+  const data = await res.json();
+  if (!data || !data.query || !data.query.pages) return [];
+
+  const items = Object.values(data.query.pages);
+  return items.map(p => {
+    let pLat = null;
+    let pLng = null;
+    if (p.coordinates && p.coordinates.length > 0) {
+      pLat = p.coordinates[0].lat;
+      pLng = p.coordinates[0].lon;
+    }
+    return {
+      id: 'wiki_' + p.pageid,
+      title: p.title,
+      extract: p.extract || 'Nessuna descrizione disponibile.',
+      thumbnail: p.thumbnail?.source || null,
+      lat: pLat,
+      lng: pLng,
+      source: 'wikipedia',
+      lang: lang
+    };
+  });
+}
+
+async function renderPlacesSubView() {
+  const container = document.getElementById('tripSubViewContainer');
+  if (!container || !state.activeTrip) return;
+
+  const trip = state.activeTrip;
+  const cityName = (trip.destination || 'Città').split(',')[0].trim();
+  const coords = getTripCoordinates(trip);
+
+  let suggested = trip.suggestedPlaces || [];
+  const custom = trip.customPlaces || [];
+
+  let html = `
+    <div class="places-subview">
+      <!-- Barra superiore compatta: Nome Città + Tasti ↻ Suggerisci & + -->
+      <div class="places-top-bar">
+        <div class="places-city-title">
+          <span>📍</span>
+          <span>${escapeHTML(cityName)}</span>
+        </div>
+        <div class="places-top-actions">
+          <button class="btn-wiki-refresh" id="btnRefreshWikiPlaces" title="Aggiorna suggerimenti Wikipedia">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span>Suggerisci</span>
+          </button>
+          <button class="btn-add-place-pill" id="btnAddCustomPlace" aria-label="Aggiungi luogo personalizzato" title="Aggiungi Luogo">+</button>
+        </div>
+      </div>
+
+      <div class="places-list" id="placesListCards">
+  `;
+
+  const allPlaces = [...custom, ...suggested];
+
+  if (allPlaces.length === 0) {
+    html += `
+      <div class="glass-card" style="text-align:center; padding:32px 16px;">
+        <span style="font-size:32px; display:block; margin-bottom:8px;">🏛️</span>
+        <div style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:6px;">Nessun luogo salvato</div>
+        <div style="font-size:13px; color:var(--text-secondary); margin-bottom:14px;">Tocca <strong>↻ Suggerisci</strong> per caricare i punti di interesse attorno a te da Wikipedia o aggiungi una tappa manuale con <strong>+</strong>.</div>
+        <button class="btn-glass-pill accent" id="btnEmptyFetchWiki" style="padding:8px 16px; font-weight:700;">↻ Suggerisci Luoghi</button>
+      </div>
+    `;
+  } else {
+    allPlaces.forEach(place => {
+      const isCustom = place.source === 'custom';
+      const mapsUrl = place.lat && place.lng 
+        ? `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}` 
+        : getNativeMapsUrl(place.title);
+
+      html += `
+        <div class="place-card" data-place-id="${place.id}">
+          <div class="place-card-main">
+            ${place.thumbnail ? `
+              <img class="place-card-thumb" src="${escapeHTML(place.thumbnail)}" alt="${escapeHTML(place.title)}" loading="lazy">
+            ` : `
+              <div class="place-card-thumb-fallback">${isCustom ? '📌' : '🏛️'}</div>
+            `}
+            <div class="place-card-details">
+              <div class="place-card-header-row">
+                <div class="place-card-title">${escapeHTML(place.title)}</div>
+                <span class="place-card-cat-badge">${escapeHTML(place.category || (isCustom ? 'Personalizzato' : 'Wikipedia'))}</span>
+              </div>
+              <div class="place-card-extract">${escapeHTML(place.notes || place.extract || '')}</div>
+            </div>
+          </div>
+
+          <div class="place-card-footer">
+            <button class="place-btn-add-plan btn-place-add-to-plan" 
+              data-title="${escapeHTML(place.title)}" 
+              data-notes="${escapeHTML(place.notes || place.extract || '')}" 
+              data-lat="${place.lat || ''}" 
+              data-lng="${place.lng || ''}" 
+              data-category="${escapeHTML(place.category || 'Visita')}">
+              <span>+ Piano</span>
+            </button>
+            <div class="place-secondary-actions">
+              <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="place-icon-action" title="Apri Mappe">
+                📍
+              </a>
+              ${isCustom ? `
+                <button class="place-icon-action btn-delete-custom-place" data-place-id="${place.id}" title="Elimina" style="color:var(--text-quaternary);">
+                  🗑
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  html += `</div></div>`;
+  container.innerHTML = html;
+
+  // Auto-fetch se vuoto e online
+  if (suggested.length === 0 && custom.length === 0 && navigator.onLine) {
+    fetchWikipediaPlaces(coords.lat, coords.lng, false).then(() => {
+      renderPlacesSubView();
+    });
+  }
+
+  // Event Listeners
+  document.getElementById('btnRefreshWikiPlaces')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btnRefreshWikiPlaces');
+    if (btn) btn.style.opacity = '0.5';
+    await fetchWikipediaPlaces(coords.lat, coords.lng, true);
+    if (btn) btn.style.opacity = '1';
+    renderPlacesSubView();
+  });
+
+  document.getElementById('btnEmptyFetchWiki')?.addEventListener('click', async () => {
+    await fetchWikipediaPlaces(coords.lat, coords.lng, true);
+    renderPlacesSubView();
+  });
+
+  document.getElementById('btnAddCustomPlace')?.addEventListener('click', () => {
+    const form = document.getElementById('formAddCustomPlace');
+    if (form) form.reset();
+    openSheet('sheetAddCustomPlace');
+  });
+
+  container.querySelectorAll('.btn-place-add-to-plan').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const title = btn.getAttribute('data-title');
+      const notes = btn.getAttribute('data-notes');
+      const lat = btn.getAttribute('data-lat');
+      const lng = btn.getAttribute('data-lng');
+      const cat = btn.getAttribute('data-category');
+      openAddPlaceToPlanSheet(title, notes, lat, lng, cat);
+    });
+  });
+
+  container.querySelectorAll('.btn-delete-custom-place').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-place-id');
+      trip.customPlaces = (trip.customPlaces || []).filter(p => p.id !== id);
+      await putToStore('trips_store', trip);
+      renderPlacesSubView();
+      showToast('Luogo rimosso');
+    });
+  });
+}
+
+function openAddPlaceToPlanSheet(title, notes, lat, lng, category) {
+  const trip = state.activeTrip;
+  if (!trip) return;
+  const days = trip.itineraryDays || [];
+
+  const daySelect = document.getElementById('fieldPlacePlanDaySelect');
+  if (daySelect) {
+    if (days.length === 0) {
+      daySelect.innerHTML = `<option value="day_new">Giorno 1 (Crea nuovo)</option>`;
+    } else {
+      daySelect.innerHTML = days.map((d, idx) => `
+        <option value="${d.id}" ${idx === state.currentDayIndex ? 'selected' : ''}>${escapeHTML(d.title || `Giorno ${idx + 1}`)}</option>
+      `).join('');
+    }
+  }
+
+  document.getElementById('fieldPlacePlanTitle').value = title || '';
+  document.getElementById('fieldPlacePlanLocation').value = title || '';
+  document.getElementById('fieldPlacePlanNotes').value = notes || '';
+  document.getElementById('fieldPlacePlanLat').value = lat || '';
+  document.getElementById('fieldPlacePlanLng').value = lng || '';
+  document.getElementById('fieldPlacePlanCategory').value = category || 'Visita';
+  document.getElementById('fieldPlacePlanTime').value = '10:00';
+
+  const modalTitle = document.getElementById('addPlaceToPlanTitle');
+  if (modalTitle) modalTitle.textContent = `Aggiungi: ${title}`;
+
+  openSheet('sheetAddPlaceToPlan');
 }
 
 
@@ -2489,12 +2708,21 @@ function renderPlanSubView() {
       sortedEvents.forEach((ev) => {
         const mapsUrl = ev.location ? getNativeMapsUrl(ev.location) : '#';
         const hasCoords = ev.lat && ev.lng;
+        const isCompleted = ev.completed === true;
+
         timelineHtml += `
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
+          <div class="timeline-item ${isCompleted ? 'completed' : ''}">
+            <div class="timeline-dot" style="${isCompleted ? 'border-color:#1B6B4D; background:#1B6B4D;' : ''}"></div>
             <div class="glass-card timeline-content-card">
               <div class="event-time-category">
-                <span class="event-time tabular-nums">${escapeHTML(ev.time)}</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <button class="timeline-check-btn ${isCompleted ? 'checked' : ''} btn-toggle-event-done" data-event-id="${ev.id}" title="${isCompleted ? 'Segna come da fare' : 'Segna come visitata'}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  <span class="event-time tabular-nums">${escapeHTML(ev.time)}</span>
+                </div>
                 <span class="category-tag">${escapeHTML(ev.category || 'Tappa')}</span>
               </div>
               <div class="event-title">${escapeHTML(ev.title)}</div>
@@ -2551,6 +2779,21 @@ function renderPlanSubView() {
   document.getElementById('btnOpenAddEvent')?.addEventListener('click', openAddEventSheet);
   document.getElementById('btnEmptyAddEvent')?.addEventListener('click', openAddEventSheet);
 
+  container.querySelectorAll('.btn-toggle-event-done').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const evId = btn.getAttribute('data-event-id');
+      const activeDay = state.activeTrip.itineraryDays[state.currentDayIndex];
+      if (!activeDay || !activeDay.events) return;
+      const ev = activeDay.events.find(e => e.id === evId);
+      if (ev) {
+        ev.completed = !ev.completed;
+        await putToStore('trips_store', state.activeTrip);
+        renderPlanSubView();
+        showToast(ev.completed ? 'Tappa completata ✓' : 'Tappa ripristinata');
+      }
+    });
+  });
+
   container.querySelectorAll('.btn-copy-event-loc').forEach(btn => {
     btn.addEventListener('click', () => {
       const loc = btn.getAttribute('data-loc');
@@ -2563,14 +2806,15 @@ function renderPlanSubView() {
       const lat = parseFloat(btn.getAttribute('data-lat'));
       const lng = parseFloat(btn.getAttribute('data-lng'));
       const title = btn.getAttribute('data-title');
-      state.tripSubView = 'map';
-      renderTabTrip();
+      openSheet('sheetMapOffline');
       setTimeout(() => {
+        initLeafletMapInstance();
         if (state.leafletMap) {
+          state.leafletMap.invalidateSize();
           state.leafletMap.flyTo([lat, lng], 15);
           startGuidanceRadar(title, lat, lng);
         }
-      }, 300);
+      }, 250);
     });
   });
 
@@ -5585,8 +5829,11 @@ function setupEventListeners() {
   });
 
   document.getElementById('btnTopMap')?.addEventListener('click', () => {
-    state.tripSubView = 'map';
-    switchTab('trip');
+    openSheet('sheetMapOffline');
+    setTimeout(() => {
+      initLeafletMapInstance();
+      if (state.leafletMap) state.leafletMap.invalidateSize();
+    }, 200);
   });
 
   document.getElementById('btnTopDayPlan')?.addEventListener('click', () => {
@@ -5622,6 +5869,85 @@ function setupEventListeners() {
   document.getElementById('btnCloseGateMode')?.addEventListener('click', closeGateMode);
 
   document.getElementById('formEvent')?.addEventListener('submit', saveEventFromForm);
+
+  // Submit modal Aggiungi Luogo al Piano
+  document.getElementById('formAddPlaceToPlan')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!state.activeTrip) return;
+
+    const dayId = document.getElementById('fieldPlacePlanDaySelect').value;
+    const time = document.getElementById('fieldPlacePlanTime').value || '10:00';
+    const title = document.getElementById('fieldPlacePlanTitle').value.trim();
+    const location = document.getElementById('fieldPlacePlanLocation').value.trim();
+    const notes = document.getElementById('fieldPlacePlanNotes').value.trim();
+    const lat = document.getElementById('fieldPlacePlanLat').value ? parseFloat(document.getElementById('fieldPlacePlanLat').value) : null;
+    const lng = document.getElementById('fieldPlacePlanLng').value ? parseFloat(document.getElementById('fieldPlacePlanLng').value) : null;
+    const category = document.getElementById('fieldPlacePlanCategory').value || 'Visita';
+
+    let day = state.activeTrip.itineraryDays.find(d => d.id === dayId);
+    if (!day) {
+      if (state.activeTrip.itineraryDays.length === 0) {
+        await handleAddNewDay();
+        day = state.activeTrip.itineraryDays[0];
+      } else {
+        day = state.activeTrip.itineraryDays[state.currentDayIndex] || state.activeTrip.itineraryDays[0];
+      }
+    }
+
+    const newEvent = {
+      id: 'ev_' + Date.now(),
+      time,
+      category,
+      title,
+      location,
+      notes,
+      lat,
+      lng,
+      completed: false
+    };
+
+    day.events = day.events || [];
+    day.events.push(newEvent);
+
+    await putToStore('trips_store', state.activeTrip);
+    closeAllSheets();
+    showToast('Aggiunto al Piano ✓');
+    if (state.tripSubView === 'plan') {
+      renderPlanSubView();
+    }
+  });
+
+  // Submit modal Aggiungi Luogo Personalizzato
+  document.getElementById('formAddCustomPlace')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!state.activeTrip) return;
+
+    const name = document.getElementById('fieldCustomPlaceName').value.trim();
+    const category = document.getElementById('fieldCustomPlaceCategory').value;
+    const notes = document.getElementById('fieldCustomPlaceNotes').value.trim();
+
+    if (!name) return;
+
+    const newCustomPlace = {
+      id: 'cust_place_' + Date.now(),
+      title: name,
+      category,
+      notes,
+      source: 'custom',
+      lat: null,
+      lng: null
+    };
+
+    state.activeTrip.customPlaces = state.activeTrip.customPlaces || [];
+    state.activeTrip.customPlaces.unshift(newCustomPlace);
+
+    await putToStore('trips_store', state.activeTrip);
+    closeAllSheets();
+    showToast('Luogo aggiunto!');
+    if (state.tripSubView === 'places') {
+      renderPlacesSubView();
+    }
+  });
 
   // Trigger fotocamera / file picker per Wallet Upload
   document.getElementById('btnPickCamera')?.addEventListener('click', () => {
