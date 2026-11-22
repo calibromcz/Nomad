@@ -1,34 +1,33 @@
 /* ==========================================================================
-   NOMAD DESIGN SYSTEM — BACHECA DA VIAGGIO MINIMAL
-   Sughero Caldo / Lavagna Tecnica, Fogli Squadrati Allineati, Puntine 3D & Fili
-   100% Offline, Airplane-Mode First
+   NOMAD DESIGN SYSTEM — BACHECA DA VIAGGIO MINIMAL & PULITA
+   Sughero Caldo / Lavagna Tecnica, Fogli 14px Allineati, Sola Puntina 3D (Zero Fili)
+   Font Unico di Sistema, 100% Offline, Airplane-Mode First
    ========================================================================== */
 
 :root {
-  /* Color Palette — Light Mode (Sughero Minimal) */
-  --bg-app: #D9C5A9;
-  --bg-card: #FCFBF7;
-  --bg-input: #F3F1EC;
-  --text-primary: #1B1E1D;
+  /* Color Palette — Light Mode (Sughero Caldo Uniforme) */
+  --bg-app: #E6DAC6;
+  --bg-card: #FFFFFF;
+  --bg-input: #F4F2EC;
+  --text-primary: #1C1F1E;
   --text-secondary: #5F6462;
   --text-tertiary: #878E8A;
   --text-quaternary: #BDC4C0;
-  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color: rgba(0, 0, 0, 0.05);
   --border-strong: #1B6B4D;
 
   /* Aliasing per componenti */
   --bg-base: var(--bg-app);
   --bg-surface: var(--bg-card);
-  --bg-surface-elevated: #FFFFFF;
+  --bg-surface-elevated: #FCFBF8;
   --bg-glass-input: var(--bg-input);
-  --bg-card-subtle: #F6F4EE;
+  --bg-card-subtle: #F8F6F0;
   --border-glass: var(--border-color);
-  --border-subtle: rgba(27, 30, 29, 0.12);
+  --border-subtle: rgba(27, 30, 29, 0.10);
   --border-focus: #1B6B4D;
 
-  /* Puntina e Fili */
+  /* Sola Puntina (Zero Fili) */
   --pin-color: #D93829;
-  --string-color: rgba(217, 56, 41, 0.55);
 
   /* Accenti */
   --accent: #1B6B4D;
@@ -47,23 +46,23 @@
   --status-danger: var(--accent-red);
   --status-info: var(--accent-blue);
 
-  /* Ombre Foglio Appoggiato */
-  --hardware-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.08);
-  --keycap-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
-  --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.08);
-  --glass-shadow-elevated: 0 6px 16px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.10);
+  /* Ombreggiatura Elegante e Profonda */
+  --hardware-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
+  --keycap-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --glass-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
+  --glass-shadow-elevated: 0 14px 28px -5px rgba(0, 0, 0, 0.16), 0 6px 12px -2px rgba(0, 0, 0, 0.08);
 
-  /* Radii Foglio (Quasi Squadrati: 5px foglio, 8px input/bottoni) */
+  /* Radii Fogli (Ordinato & Moderno: 14px card, 8px input/bottoni) */
   --radius-sm: 8px;
-  --radius-md: 5px;
-  --radius-lg: 5px;
-  --radius-xl: 8px;
+  --radius-md: 14px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
   --radius-pill: 9999px;
 
-  /* Typography */
-  --font-ui: 'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Font Unico e Pulito in Tutta l'App */
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, sans-serif;
   --font-family: var(--font-ui);
 
   /* Animations */
@@ -80,15 +79,15 @@
 }
 
 [data-theme="dark"] {
-  /* Color Palette — Dark Mode (Lavagna Tecnica a Puntini) */
+  /* Color Palette — Dark Mode (Lavagna Tecnica con Puntini Discreti) */
   --bg-app: #13171A;
-  --bg-card: #FCFBF7;
-  --bg-input: #F3F1EC;
-  --text-primary: #1B1E1D;
+  --bg-card: #FCFBF8;
+  --bg-input: #F4F2EC;
+  --text-primary: #1C1F1E;
   --text-secondary: #5F6462;
   --text-tertiary: #878E8A;
   --text-quaternary: #BDC4C0;
-  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color: rgba(0, 0, 0, 0.06);
   --border-strong: #1B6B4D;
 
   /* Aliasing Dark Mode */
@@ -96,23 +95,22 @@
   --bg-surface: var(--bg-card);
   --bg-surface-elevated: #FFFFFF;
   --bg-glass-input: var(--bg-input);
-  --bg-card-subtle: #F6F4EE;
+  --bg-card-subtle: #F8F6F0;
   --border-glass: var(--border-color);
-  --border-subtle: rgba(27, 30, 29, 0.12);
+  --border-subtle: rgba(27, 30, 29, 0.10);
   --border-focus: #1B6B4D;
 
-  /* Puntina e Fili Dark Mode */
+  /* Sola Puntina Dark Mode */
   --pin-color: #10B981;
-  --string-color: rgba(16, 185, 129, 0.50);
 
-  --hardware-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.20);
+  --hardware-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.30);
   --keycap-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
-  --glass-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.20);
-  --glass-shadow-elevated: 0 6px 18px rgba(0, 0, 0, 0.40);
+  --glass-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.30);
+  --glass-shadow-elevated: 0 16px 32px -4px rgba(0, 0, 0, 0.55);
 
   --bottom-bar-bg: #1B6B4D;
-  --sheet-bg: #FCFBF7;
+  --sheet-bg: #FCFBF8;
   --sheet-bg-elevated: #FFFFFF;
 }
 
@@ -122,6 +120,7 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
 }
 
 html, body {
@@ -131,46 +130,40 @@ html, body {
   background-color: var(--bg-app);
   color: var(--text-primary);
   font-family: var(--font-ui);
-  letter-spacing: -0.015em;
+  letter-spacing: -0.012em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* Sfondo Sughero Procedurale Light Mode */
+/* Sfondo Sughero / Sabbia Chiaro Pulito Uniforme Light Mode */
 body {
-  background-color: #D9C5A9;
-  background-image: 
-    radial-gradient(rgba(140, 105, 65, 0.14) 1px, transparent 1px),
-    radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
-  background-size: 12px 12px, 20px 20px;
-  background-position: 0 0, 6px 6px;
+  background-color: #E6DAC6;
+  background-image: radial-gradient(rgba(140, 105, 65, 0.08) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: 0 0;
 }
 
-/* Sfondo Lavagna Tecnica a Puntini Dark Mode */
+/* Sfondo Lavagna Tecnica a Puntini Dark Mode (Zero Linee di Disturbo) */
 [data-theme="dark"] body {
   background-color: #13171A;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
   background-size: 20px 20px;
   background-position: 0 0;
 }
 
-/* Font Monospazio per tutti i dati numerici, codici ed etichette tecniche */
+/* Tabular Nums per tutti i dati numerici, orari e codici (senza cambiare famiglia di font) */
 .tabular-nums, .num, .time, .badge-count, .countdown-num, .currency-rate,
 .dash-countdown-pill-compact, .budget-col-val, .dash-conv-input, .dash-conv-result,
 .vault-pin-dots, .vault-key-btn, .wallet-taxi-codes-grid, .wallet-code-chip {
-  font-family: var(--font-mono) !important;
+  font-family: var(--font-ui) !important;
   font-variant-numeric: tabular-nums !important;
 }
 
 /* Texture Scocca Sottile */
 .mesh-gradient-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: transparent;
+  display: none !important;
 }
 
 #app {
@@ -263,7 +256,7 @@ body {
   border-radius: 9999px;
   background: #FFFFFF;
   color: #1B6B4D;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 10px;
   font-weight: 800;
   display: flex;
@@ -409,14 +402,14 @@ body {
 }
 
 /* ==========================================================================
-   MAIN CONTENT AREA & TABS (Bacheca Spaziatura & Fili di Sfondo)
+   MAIN CONTENT AREA & TABS (Flusso Verticale Pulito & Zero Fili)
    ========================================================================== */
 .main-viewport {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 24px 16px calc(var(--sab) + 90px) 16px;
+  padding: 16px 16px calc(var(--sab) + 84px) 16px;
   scroll-behavior: smooth;
   position: relative;
 }
@@ -425,53 +418,25 @@ body {
   display: none;
   animation: fadeIn 0.24s var(--ease-smooth);
   position: relative;
+  width: 100%;
 }
 
 .tab-pane.active {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 16px;
+  width: 100%;
 }
 
-/* Fili di collegamento discreti dietro le schede della Dashboard */
+/* Zero Fili o Linee Sovrapposte */
 #tab-dashboard {
   position: relative;
 }
 
-#tab-dashboard::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  bottom: 20px;
-  left: 50%;
-  width: 2px;
-  transform: translateX(-50%);
-  background-image: linear-gradient(
-    to bottom,
-    transparent 0px,
-    var(--string-color) 10px,
-    var(--string-color) calc(100% - 10px),
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
+#tab-dashboard::before,
 #tab-dashboard::after {
-  content: '';
-  position: absolute;
-  top: 20px;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
-  background: 
-    linear-gradient(135deg, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%),
-    linear-gradient(45deg, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%);
-  background-size: 100% 280px;
-  background-repeat: repeat-y;
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: 0;
+  display: none !important;
+  content: none !important;
 }
 
 @keyframes fadeIn {
@@ -560,30 +525,32 @@ body {
 }
 
 /* ==========================================================================
-   SCHEDE "FOGLIETTI" DRITTI + PUNTINE 3D (BACHECA)
+   SCHEDE "FOGLIETTI" PULITI (14px) + SOLA PUNTINA
    ========================================================================== */
 .glass-card {
   background: var(--bg-card) !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  border-radius: 5px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.08) !important;
-  padding: 20px 18px 18px 18px !important;
-  margin-bottom: 20px !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06) !important;
+  padding: 18px 16px !important;
+  margin-bottom: 16px !important;
   position: relative;
   z-index: 2 !important;
   overflow: visible !important;
-  color: #1B1E1D !important;
+  color: #1C1F1E !important;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 [data-theme="dark"] .glass-card {
-  background: #FCFBF7 !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-radius: 5px !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.20) !important;
-  color: #1B1E1D !important;
+  background: #FCFBF8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.30) !important;
+  color: #1C1F1E !important;
 }
 
-/* Puntina conficcata in cima a ogni foglietto (Home / Dashboard) */
+/* Sola Puntina 3D centrata in cima alla card (Home / Dashboard) - ZERO FILI */
 #tab-dashboard .glass-card::before,
 .dash-widget-card::before,
 .dash-single-trip-bar::before {
@@ -595,8 +562,8 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, var(--pin-color) 45%, #921A10 100%);
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, #D93829 45%, #921A10 100%);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
   z-index: 10;
   pointer-events: none;
   display: block !important;
@@ -606,25 +573,27 @@ body {
 [data-theme="dark"] .dash-widget-card::before,
 [data-theme="dark"] .dash-single-trip-bar::before {
   background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, #10B981 45%, #064E3B 100%);
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.40), inset 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 .glass-card-elevated {
   background: var(--bg-surface-elevated) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-radius: 5px !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.10) !important;
-  color: #1B1E1D !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 14px 28px -5px rgba(0, 0, 0, 0.16), 0 6px 12px -2px rgba(0, 0, 0, 0.08) !important;
+  color: #1C1F1E !important;
   position: relative;
   z-index: 2 !important;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 [data-theme="dark"] .glass-card-elevated {
   background: #FFFFFF !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-radius: 5px !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.40) !important;
-  color: #1B1E1D !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 32px -4px rgba(0, 0, 0, 0.55) !important;
+  color: #1C1F1E !important;
 }
 
 /* Forzatura testo nitido inchiostro su fogli bianchi */
@@ -633,14 +602,14 @@ body {
 .wallet-card, [data-theme="dark"] .wallet-card,
 .trans-input-card, [data-theme="dark"] .trans-input-card,
 .trans-result-card, [data-theme="dark"] .trans-result-card {
-  color: #1B1E1D !important;
+  color: #1C1F1E !important;
 }
 
 .glass-card h1, .glass-card h2, .glass-card h3, .glass-card h4,
 [data-theme="dark"] .glass-card h1, [data-theme="dark"] .glass-card h2, [data-theme="dark"] .glass-card h3, [data-theme="dark"] .glass-card h4,
 .dash-widget-card h1, .dash-widget-card h2, .dash-widget-card h3,
 [data-theme="dark"] .dash-widget-card h1, [data-theme="dark"] .dash-widget-card h2, [data-theme="dark"] .dash-widget-card h3 {
-  color: #1B1E1D !important;
+  color: #1C1F1E !important;
 }
 
 .bento-grid {
@@ -960,7 +929,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 1.4rem;
   font-weight: 700;
   line-height: 1;
@@ -1130,7 +1099,7 @@ body {
   gap: 6px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
 }
 
 .wallet-taxi-address {
@@ -1164,7 +1133,7 @@ body {
   border-radius: var(--radius-sm);
   padding: 6px 10px;
   cursor: pointer;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
 }
 .wallet-code-chip:active {
   transform: translateY(1px);
@@ -1242,7 +1211,7 @@ body {
   background: var(--bg-card);
   border: 1.5px solid var(--border-color);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -1281,37 +1250,38 @@ body {
 }
 
 .wallet-card {
-  border-radius: 5px;
+  border-radius: 14px;
   padding: 14px;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   margin-bottom: 0;
   background: var(--bg-card);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
   transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
   position: relative;
   z-index: 2;
-  color: #1B1E1D !important;
+  color: #1C1F1E !important;
+  box-sizing: border-box;
 }
 
 [data-theme="dark"] .wallet-card {
-  background: #FCFBF7 !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30) !important;
-  color: #1B1E1D !important;
+  background: #FCFBF8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.30) !important;
+  color: #1C1F1E !important;
 }
 
 .wallet-card:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .wallet-preview-box {
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   display: flex;
@@ -1408,7 +1378,7 @@ body {
   background: var(--bg-card);
   border: 1.5px solid var(--border-strong);
   color: var(--text-primary);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 22px;
   font-weight: 700;
   display: flex;
@@ -1596,7 +1566,7 @@ body {
   background: var(--bg-card);
   border: 1.5px solid var(--border-color);
   color: #1B6B4D;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -2066,7 +2036,7 @@ body {
 }
 
 .expense-date-time {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   color: #5E6461 !important;
 }
@@ -2079,7 +2049,7 @@ body {
 }
 
 .expense-amount-home {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
@@ -2087,7 +2057,7 @@ body {
 }
 
 .expense-amount-local {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 12px;
   color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
@@ -2150,7 +2120,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -2182,7 +2152,7 @@ body {
 }
 
 .taxi-badge {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -2224,7 +2194,7 @@ body {
 }
 
 .taxi-latin-address {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 14px;
   color: #48484A;
   line-height: 1.4;
@@ -2395,7 +2365,7 @@ body {
 }
 
 .form-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -2445,7 +2415,7 @@ body {
   box-shadow: 0 4px 0 #141414;
   padding: 10px 18px;
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 12.5px;
   font-weight: 700;
   color: var(--text-primary);
@@ -2951,7 +2921,7 @@ input:checked + .toggle-slider:before {
   border: 1.5px solid var(--border-color);
   padding: 7px 14px;
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -3220,24 +3190,26 @@ input:checked + .toggle-slider:before {
 /* Widget Card Full-Width Pulita */
 /* Header Tecnico Widget Dashboard stile Teenage Engineering */
 .dash-widget-card {
-  padding: 20px 18px 18px 18px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 18px 16px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   background: var(--bg-card);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.08);
-  color: #1B1E1D !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
+  color: #1C1F1E !important;
   position: relative;
   z-index: 2;
   overflow: visible !important;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 [data-theme="dark"] .dash-widget-card {
-  background: #FCFBF7 !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-radius: 5px !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.20) !important;
-  color: #1B1E1D !important;
+  background: #FCFBF8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.30) !important;
+  color: #1C1F1E !important;
 }
 
 .dash-widget-header {
@@ -3320,7 +3292,7 @@ input:checked + .toggle-slider:before {
 }
 
 .budget-col-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 10px;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -3330,7 +3302,7 @@ input:checked + .toggle-slider:before {
 }
 
 .budget-col-val {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 15px;
   font-weight: 700;
   color: var(--text-primary);
@@ -3972,7 +3944,7 @@ button.accent,
 }
 
 .dash-weather-slim-temp {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
@@ -3980,7 +3952,7 @@ button.accent,
 }
 
 .dash-weather-slim-hilo {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--text-tertiary);
   font-weight: 600;
@@ -3990,7 +3962,7 @@ button.accent,
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--text-secondary);
   font-weight: 600;
@@ -4024,7 +3996,7 @@ button.accent,
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
 }
 
 .dash-conv-selects-grid {
@@ -4043,7 +4015,7 @@ button.accent,
   border: 1.5px solid var(--border-color);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 700;
   padding: 8px 10px;
@@ -4088,7 +4060,7 @@ button.accent,
   background: var(--bg-input);
   border: 1.5px solid var(--border-color);
   border-radius: 10px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 18px;
   font-weight: 700;
   padding: 8px 12px;
@@ -4101,7 +4073,7 @@ button.accent,
 
 .dash-conv-result {
   text-align: right;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 20px;
   font-weight: 700;
   color: var(--accent-blue);
@@ -4120,7 +4092,7 @@ button.accent,
 .dash-conv-chip-btn {
   flex: 1;
   padding: 6px 10px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   color: var(--text-secondary);
@@ -4334,7 +4306,7 @@ button.accent,
 }
 
 .dash-compass-val-mobile {
-  font-family: var(--font-mono) !important;
+  font-family: var(--font-ui) !important;
   font-size: 1.45rem !important;
   font-weight: 700 !important;
   font-variant-numeric: tabular-nums !important;
@@ -4344,7 +4316,7 @@ button.accent,
 }
 
 .dash-compass-subval-mobile {
-  font-family: var(--font-mono) !important;
+  font-family: var(--font-ui) !important;
   font-size: 0.82rem !important;
   color: var(--text-tertiary) !important;
   font-variant-numeric: tabular-nums !important;
@@ -4391,7 +4363,7 @@ button.accent,
 
 .dash-budget-3col-mobile .budget-col-val {
   white-space: nowrap !important;
-  font-family: var(--font-mono) !important;
+  font-family: var(--font-ui) !important;
   font-size: 0.95rem !important;
   font-weight: 700 !important;
   font-variant-numeric: tabular-nums !important;
@@ -4492,7 +4464,7 @@ button.accent,
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -4509,7 +4481,7 @@ button.accent,
 }
 
 .trans-header-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-weight: 700;
   font-size: 13px;
   text-transform: uppercase;
@@ -4541,7 +4513,7 @@ button.accent,
 .trans-segmented-btn {
   flex: 1;
   padding: 8px 12px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4593,7 +4565,7 @@ button.accent,
   background: var(--bg-card);
   border: 1.5px solid var(--border-color);
   color: var(--text-primary);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 700;
   padding: 0 10px;
@@ -4627,21 +4599,23 @@ button.accent,
 
 /* SLOT 2: Card Input Testo */
 .trans-input-card {
-  border-radius: 5px;
+  border-radius: 14px;
   padding: 16px;
   background: var(--bg-card);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  color: #1B1E1D !important;
+  color: #1C1F1E !important;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 [data-theme="dark"] .trans-input-card {
-  background: #FCFBF7 !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30) !important;
-  color: #1B1E1D !important;
+  background: #FCFBF8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.30) !important;
+  color: #1C1F1E !important;
 }
 
 .trans-textarea-clean {
@@ -4679,7 +4653,7 @@ button.accent,
 
 .trans-btn-mic-pill {
   padding: 7px 12px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4748,23 +4722,23 @@ button.accent,
 
 /* SLOT 3: Card Risultato */
 .trans-result-card {
-  border-radius: 5px;
+  border-radius: 14px;
   padding: 18px;
   background: var(--bg-card);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   width: 100%;
-  color: #1B1E1D !important;
+  color: #1C1F1E !important;
 }
 
 [data-theme="dark"] .trans-result-card {
-  background: #FCFBF7 !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30) !important;
-  color: #1B1E1D !important;
+  background: #FCFBF8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.30) !important;
+  color: #1C1F1E !important;
 }
 
 .trans-result-header {
@@ -4776,7 +4750,7 @@ button.accent,
 }
 
 .trans-result-lang-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   color: #1B6B4D;
@@ -4788,7 +4762,7 @@ button.accent,
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4845,7 +4819,7 @@ button.accent,
   border: 1.5px solid var(--border-color);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   color: var(--text-primary);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -4959,7 +4933,7 @@ button.accent,
 .phrasebook-cat-pill {
   white-space: nowrap;
   padding: 6px 12px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -5038,7 +5012,7 @@ button.accent,
 }
 
 .phrasebook-phonetic-text {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--accent-blue);
   margin-top: 3px;
@@ -5073,7 +5047,7 @@ button.accent,
 
 .phrasebook-show-btn {
   padding: 6px 10px;
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -5103,7 +5077,7 @@ button.accent,
 }
 
 .phrase-big-phonetic {
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: clamp(1rem, 4vw, 1.35rem);
   color: var(--accent-blue);
   text-align: center;
