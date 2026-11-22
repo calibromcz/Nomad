@@ -976,6 +976,134 @@ body {
   box-shadow: 0 1px 0 #000000;
 }
 
+/* Pulsante "+" compatto per aggiunta documenti nella tab Wallet */
+.wallet-doc-add-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: #1B6B4D;
+  color: #FFFFFF;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-family: var(--font-ui);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+
+[data-theme="dark"] .wallet-doc-add-btn {
+  border: 1.5px solid #000000;
+}
+
+.wallet-doc-add-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #141414;
+}
+
+/* Fullscreen Overlay Aggiungi Documento (100% Opaco, Isolato & Confortevole) */
+.wallet-upload-fullscreen-page {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  z-index: 9500 !important;
+  background-color: var(--bg-app) !important;
+  color: var(--text-primary);
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  transform: translateY(10px);
+}
+
+.wallet-upload-fullscreen-page.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+}
+
+.wallet-upload-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 20px calc(var(--sab) + 32px);
+  max-width: 580px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Category Pills Selector per Aggiungi Documento */
+.wallet-cat-pills-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.wallet-cat-pill-opt {
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: transform var(--duration-fast) ease, background var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.wallet-cat-pill-opt:active {
+  transform: translateY(1px);
+}
+
+.wallet-cat-pill-opt.active {
+  background: #1B6B4D;
+  color: #FFFFFF;
+  border-color: #141414;
+}
+
+[data-theme="dark"] .wallet-cat-pill-opt.active {
+  border-color: #000000;
+}
+
+.wallet-cat-pill-opt.add-new {
+  border-style: dashed;
+  color: var(--accent);
+}
+
+/* Tag Type Pill per Scheda Universale Alloggio & Codici */
+.hotel-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(27, 107, 77, 0.12);
+  color: #1B6B4D;
+  border: 1px solid rgba(27, 107, 77, 0.25);
+}
+
+[data-theme="dark"] .hotel-tag-badge {
+  background: rgba(52, 211, 153, 0.15);
+  color: #10B981;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
 /* File Upload Picker (Foto / File) Stile Pulse */
 .wallet-upload-picker-grid {
   display: grid;

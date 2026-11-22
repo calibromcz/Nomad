@@ -26,9 +26,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=42) -->
-  <link rel="stylesheet" href="./styles.css?v=42">
-  <link rel="modulepreload" href="./db.js?v=42">
+  <!-- Stylesheet (Cache-Busting ?v=43) -->
+  <link rel="stylesheet" href="./styles.css?v=43">
+  <link rel="modulepreload" href="./db.js?v=43">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function () {
@@ -543,31 +543,41 @@
     </div>
   </div>
 
-  <!-- 4. Sheet Carica Documento Wallet (7 Categorie Distinte) -->
-  <div id="sheetWalletUpload" class="bottom-sheet" role="dialog">
-    <div class="sheet-handle-bar"></div>
-    <div class="sheet-header">
-      <div class="sheet-title">Aggiungi Documento / Pass</div>
-      <button class="sheet-close-btn" data-close-sheet="sheetWalletUpload">✕</button>
-    </div>
-    <div class="sheet-scroll-body">
+  <!-- 4. Schermata Full-Screen Aggiungi Documento / Pass (100% Opaco, Isolato & Confortevole) -->
+  <div id="pageWalletUpload" class="wallet-upload-fullscreen-page" role="dialog" aria-modal="true">
+    <header class="trans-sticky-header">
+      <div style="font-size:15px; font-weight:800; color:var(--text-primary);">Nuovo Documento</div>
+      <button type="button" id="btnCloseWalletUploadPage" class="trans-header-btn-close" aria-label="Chiudi Aggiungi Documento">
+        ✕ Chiudi
+      </button>
+    </header>
+
+    <div class="wallet-upload-scroll-body">
       <form id="formWalletUpload">
         <div class="form-group">
           <label class="form-label">Titolo Documento *</label>
-          <input type="text" id="fieldWalletTitle" class="form-input" placeholder="es. Volo Andata Shanghai, Hotel Yiwu"
-            required>
+          <input type="text" id="fieldWalletTitle" class="form-input" placeholder="es. Volo Andata Shanghai, Hotel Yiwu" required>
         </div>
 
         <div class="form-group">
           <label class="form-label">Categoria</label>
-          <select id="fieldWalletCategory" class="form-select">
-            <option value="flight">✈️ Volo</option>
-            <option value="hotel">🏨 Hotel</option>
-            <option value="train">🚆 Treni / Trasporti</option>
-            <option value="event">🎟️ Biglietti / Eventi</option>
-            <option value="documents">🛂 Visto / Assicurazione</option>
-            <option value="other">📄 Altro</option>
-          </select>
+          <input type="hidden" id="fieldWalletCategory" value="flight">
+          
+          <!-- Selettore Pillole Categoria con "+ Nuova" -->
+          <div class="wallet-cat-pills-selector" id="walletCatPillsContainer">
+            <!-- Popolato dinamicamente da app.js -->
+          </div>
+
+          <!-- Input Inline "+ Nuova Categoria" (nascosto di default) -->
+          <div id="walletNewCatInlineBox" style="display:none; margin-top:8px; gap:8px; align-items:center;">
+            <input type="text" id="inputNewCatName" class="form-input" placeholder="Nome nuova categoria (es. Museo, Noleggio)" style="flex:1;">
+            <button type="button" id="btnConfirmAddCat" class="btn-glass-pill accent" style="padding:6px 14px; font-size:12px; font-weight:700;">
+              Aggiungi
+            </button>
+            <button type="button" id="btnCancelAddCat" class="btn-glass-pill" style="padding:6px 10px; font-size:12px;">
+              ✕
+            </button>
+          </div>
         </div>
 
         <div class="form-group">
@@ -596,13 +606,11 @@
         </div>
 
         <div style="display:flex; flex-direction:column; gap:10px; margin:14px 0;">
-          <label
-            style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
             <input type="checkbox" id="fieldWalletPin" style="width:18px; height:18px; accent-color:var(--accent);">
             <span>📌 Pinna in Dashboard (Home)</span>
           </label>
-          <label
-            style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-primary); cursor:pointer;">
             <input type="checkbox" id="fieldWalletVault" style="width:18px; height:18px; accent-color:var(--accent);">
             <span>🔒 Metti in Cassaforte (protetta da PIN)</span>
           </label>
@@ -613,7 +621,7 @@
           <input type="text" id="fieldWalletNotes" class="form-input" placeholder="es. Posto 14A, Terminal 2, Gate K43">
         </div>
 
-        <button type="submit" class="btn-glass-pill accent btn-full-width">
+        <button type="submit" class="btn-glass-pill accent btn-full-width" style="margin-top:14px; padding:13px; font-size:14px; font-weight:800; justify-content:center;">
           Salva nel Wallet Offline
         </button>
       </form>
@@ -836,11 +844,11 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
-  <script type="module" src="./app.js?v=42"></script>
+  <script type="module" src="./app.js?v=43"></script>
   <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>
-    <div class="bottom-sheet-header">
+    <div class="bottom-sheet-header" style="display:flex; align-items:center; justify-content:space-between;">
       <div style="display:flex; align-items:center; gap:8px;">
         <div class="dash-widget-icon-badge" style="background:rgba(52, 211, 153, 0.15); color:var(--accent);">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
@@ -854,8 +862,8 @@
         </div>
         <h3 class="sheet-title" style="margin:0;">Alloggio & Codici</h3>
       </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <button id="btnSheetAddAccommodation" class="sheet-add-btn-circle" title="Aggiungi Alloggio o Scheda" aria-label="Aggiungi Alloggio o Scheda">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button id="btnSheetAddAccommodation" class="sheet-add-btn-circle" title="Aggiungi Scheda" aria-label="Aggiungi Scheda">
           +
         </button>
         <button class="sheet-close-btn" data-close-sheet aria-label="Chiudi">✕</button>

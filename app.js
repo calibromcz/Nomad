@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=42';
+} from './db.js?v=43';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -1267,6 +1267,17 @@ function getTripAccommodations(trip) {
   return [];
 }
 
+function getAccTypeBadge(type) {
+  switch (type) {
+    case 'taxi': return { icon: '🚕', label: 'Taxi / Navetta' };
+    case 'transport': return { icon: '🚆', label: 'Trasporti / Bus' };
+    case 'ticket': return { icon: '🎟️', label: 'Biglietti' };
+    case 'other': return { icon: '📌', label: 'Altro' };
+    case 'hotel':
+    default: return { icon: '🏨', label: 'Alloggio' };
+  }
+}
+
 function openTaxiCodesSheet() {
   const trip = state.activeTrip;
   if (!trip) return;
@@ -1279,33 +1290,45 @@ function openTaxiCodesSheet() {
   const renderSheetBody = () => {
     let html = '';
 
-    // Form per aggiungere una nuova scheda
+    // Form versatile per aggiungere una nuova scheda
     if (showAddForm) {
       html += `
         <div class="hotel-form-box">
           <div class="hotel-form-title">+ Nuova Scheda Alloggio & Codici</div>
           <form id="formAddAccommodation" style="display:flex; flex-direction:column; gap:10px;">
-            <div>
-              <label class="form-label">Nome Alloggio / Titolo *</label>
-              <input type="text" id="newAccName" class="form-input" placeholder="es. Grand Hotel Shanghai, Airbnb Kyoto" required>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <div>
+                <label class="form-label">Tipo Scheda</label>
+                <select id="newAccType" class="form-select">
+                  <option value="hotel">🏨 Alloggio</option>
+                  <option value="taxi">🚕 Taxi</option>
+                  <option value="transport">🚆 Trasporti / Bus</option>
+                  <option value="ticket">🎟️ Biglietti</option>
+                  <option value="other">📌 Altro</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Titolo / Nome *</label>
+                <input type="text" id="newAccName" class="form-input" placeholder="es. Grand Hotel, Treno K89" required>
+              </div>
             </div>
             <div>
-              <label class="form-label">Indirizzo Completo *</label>
-              <textarea id="newAccAddress" class="form-input" rows="2" placeholder="Indirizzo per taxi e navigazione" required style="resize:none;"></textarea>
+              <label class="form-label">Indirizzo / Destinazione / Fermata (opzionale)</label>
+              <textarea id="newAccAddress" class="form-input" rows="2" placeholder="Indirizzo per taxi, navigazione o fermata" style="resize:none;"></textarea>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
               <div>
-                <label class="form-label">PNR Volo / Biglietto</label>
-                <input type="text" id="newAccPnr" class="form-input" placeholder="es. AF116-K89">
+                <label class="form-label">PNR / Codice Biglietto</label>
+                <input type="text" id="newAccPnr" class="form-input" placeholder="es. AF116-K89, #TK849">
               </div>
               <div>
-                <label class="form-label">Wi-Fi (Nome / Pass)</label>
-                <input type="text" id="newAccWifi" class="form-input" placeholder="es. Hotel_Guest / pass123">
+                <label class="form-label">Lockbox / PIN / Wi-Fi</label>
+                <input type="text" id="newAccLockbox" class="form-input" placeholder="es. Codice 1234A, Pass Wi-Fi">
               </div>
             </div>
             <div>
-              <label class="form-label">Lockbox / Codice Porta</label>
-              <input type="text" id="newAccLockbox" class="form-input" placeholder="es. #7492 oppure 1234A">
+              <label class="form-label">Note / Orari (opzionale)</label>
+              <input type="text" id="newAccNotes" class="form-input" placeholder="es. Check-in dalle 15:00, Binario 4">
             </div>
             <div style="display:flex; gap:8px; margin-top:4px;">
               <button type="button" id="btnCancelAddAcc" class="btn-glass-pill" style="flex:1; justify-content:center; padding:8px 12px; font-weight:700;">
@@ -1322,12 +1345,15 @@ function openTaxiCodesSheet() {
 
     if (accommodations.length > 0) {
       accommodations.forEach((acc, idx) => {
+        const typeInfo = getAccTypeBadge(acc.type || 'hotel');
         html += `
           <div class="hotel-card-multi" data-acc-id="${acc.id}">
             <div class="hotel-card-multi-header">
-              <div class="hotel-card-multi-title">
-                <span>🏨</span>
-                <span>${escapeHTML(acc.name || `Alloggio ${idx + 1}`)}</span>
+              <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+                <span class="hotel-tag-badge">${typeInfo.icon} ${typeInfo.label}</span>
+                <div class="hotel-card-multi-title" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                  ${escapeHTML(acc.name || `Scheda ${idx + 1}`)}
+                </div>
               </div>
               <button class="hotel-del-btn" data-action="delete-acc" data-acc-id="${acc.id}" title="Elimina Scheda" aria-label="Elimina Scheda">
                 🗑
@@ -1341,15 +1367,13 @@ function openTaxiCodesSheet() {
               <button class="hotel-show-taxi-btn" data-action="show-full-address" data-acc-id="${acc.id}">
                 ⛶ Mostra a Schermo Intero
               </button>
-            ` : `
-              <div style="font-size:12px; color:var(--text-tertiary); margin-bottom:8px;">Nessun indirizzo specificato</div>
-            `}
+            ` : ''}
 
             <div class="code-quick-list" style="margin-top:6px;">
               ${acc.pnr ? `
-                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.pnr)}" data-copy-desc="PNR Volo">
+                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.pnr)}" data-copy-desc="PNR / Biglietto">
                   <div class="code-quick-info">
-                    <span class="code-quick-label">PNR Volo</span>
+                    <span class="code-quick-label">PNR / Biglietto</span>
                     <span class="code-quick-val tabular-nums">${escapeHTML(acc.pnr)}</span>
                   </div>
                   <span class="code-quick-copy-badge">📋 Copia</span>
@@ -1357,7 +1381,7 @@ function openTaxiCodesSheet() {
               ` : ''}
 
               ${acc.wifi ? `
-                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.wifi)}" data-copy-desc="Password Wi-Fi">
+                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.wifi)}" data-copy-desc="Wi-Fi">
                   <div class="code-quick-info">
                     <span class="code-quick-label">Wi-Fi</span>
                     <span class="code-quick-val">${escapeHTML(acc.wifi)}</span>
@@ -1367,10 +1391,20 @@ function openTaxiCodesSheet() {
               ` : ''}
 
               ${acc.lockbox ? `
-                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.lockbox)}" data-copy-desc="Codice Porta">
+                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.lockbox)}" data-copy-desc="Lockbox / Codice">
                   <div class="code-quick-info">
-                    <span class="code-quick-label">Lockbox / Porta</span>
+                    <span class="code-quick-label">Lockbox / PIN / Codice</span>
                     <span class="code-quick-val tabular-nums">${escapeHTML(acc.lockbox)}</span>
+                  </div>
+                  <span class="code-quick-copy-badge">📋 Copia</span>
+                </div>
+              ` : ''}
+
+              ${acc.notes ? `
+                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.notes)}" data-copy-desc="Note">
+                  <div class="code-quick-info">
+                    <span class="code-quick-label">Note / Info</span>
+                    <span class="code-quick-val">${escapeHTML(acc.notes)}</span>
                   </div>
                   <span class="code-quick-copy-badge">📋 Copia</span>
                 </div>
@@ -1382,7 +1416,7 @@ function openTaxiCodesSheet() {
     } else if (!showAddForm) {
       html += `
         <div class="glass-card" style="text-align:center; padding:28px 16px; border-radius:14px;">
-          <p style="color:var(--text-secondary); font-size:13.5px; margin-bottom:12px;">Nessuna scheda alloggio o codice salvato.</p>
+          <p style="color:var(--text-secondary); font-size:13.5px; margin-bottom:12px;">Nessuna scheda alloggio, trasporto o codice salvato.</p>
           <button class="btn-glass-pill accent" id="btnEmptyAddAcc">+ Aggiungi Nuova Scheda</button>
         </div>
       `;
@@ -1399,31 +1433,33 @@ function openTaxiCodesSheet() {
 
       document.getElementById('formAddAccommodation')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const type = document.getElementById('newAccType')?.value || 'hotel';
         const name = document.getElementById('newAccName')?.value.trim();
         const address = document.getElementById('newAccAddress')?.value.trim();
         const pnr = document.getElementById('newAccPnr')?.value.trim();
-        const wifi = document.getElementById('newAccWifi')?.value.trim();
         const lockbox = document.getElementById('newAccLockbox')?.value.trim();
+        const notes = document.getElementById('newAccNotes')?.value.trim();
 
-        if (!name || !address) {
-          showToast('Inserisci nome e indirizzo');
+        if (!name) {
+          showToast('Inserisci un titolo per la scheda');
           return;
         }
 
         const newAcc = {
           id: 'acc_' + Date.now(),
+          type,
           name,
-          address,
+          address: address || '',
           pnr: pnr || '',
-          wifi: wifi || '',
-          lockbox: lockbox || ''
+          lockbox: lockbox || '',
+          notes: notes || ''
         };
 
         trip.accommodations = trip.accommodations || [];
         trip.accommodations.unshift(newAcc);
 
-        // Allinea anche l'alloggio primario se è il primo
-        if (!trip.accommodation || !trip.accommodation.name) {
+        // Allinea anche l'alloggio primario se è il primo con indirizzo
+        if ((!trip.accommodation || !trip.accommodation.name) && address) {
           trip.accommodation = {
             name: newAcc.name,
             address: newAcc.address
@@ -1432,7 +1468,7 @@ function openTaxiCodesSheet() {
 
         await putToStore('trips_store', trip);
         showAddForm = false;
-        showToast('Nuova scheda alloggio salvata!');
+        showToast('Nuova scheda salvata!');
         renderTabWallet();
         renderSheetBody();
       });
@@ -3267,6 +3303,34 @@ async function hashPinCode(pin) {
   return 'fallback_' + h;
 }
 
+function getCustomCategories() {
+  try {
+    const raw = localStorage.getItem('nomad_custom_categories');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCustomCategories(cats) {
+  try {
+    localStorage.setItem('nomad_custom_categories', JSON.stringify(cats));
+  } catch (e) {}
+}
+
+function getAllWalletCategories() {
+  const base = [
+    { id: 'flight', label: 'Volo', icon: '✈️' },
+    { id: 'hotel', label: 'Hotel', icon: '🏨' },
+    { id: 'train', label: 'Treni', icon: '🚆' },
+    { id: 'event', label: 'Eventi', icon: '🎟️' },
+    { id: 'documents', label: 'Visti/Assicurazione', icon: '🛂' },
+    { id: 'other', label: 'Altro', icon: '📄' }
+  ];
+  const custom = getCustomCategories();
+  return [...base, ...custom];
+}
+
 function getCategoryBadgeData(cat) {
   switch (cat) {
     case 'flight': return { label: '✈️ Volo', cls: 'badge-cat-flight' };
@@ -3277,7 +3341,11 @@ function getCategoryBadgeData(cat) {
     case 'ferry': return { label: '🚆 Trasporti', cls: 'badge-cat-transport' };
     case 'event': return { label: '🎟️ Evento', cls: 'badge-cat-event' };
     case 'documents': return { label: '🛂 Visto / Assicurazione', cls: 'badge-cat-doc' };
-    default: return { label: '📄 Altro', cls: 'badge-cat-doc' };
+    default: {
+      const custom = getCustomCategories().find(c => c.id === cat);
+      if (custom) return { label: `${custom.icon || '🏷️'} ${custom.label}`, cls: 'badge-cat-doc' };
+      return { label: '📄 Altro', cls: 'badge-cat-doc' };
+    }
   }
 }
 
@@ -3307,13 +3375,10 @@ function renderTabWallet() {
     hotelSubText = `${escapeHTML(accommodations[0].name || 'Alloggio')} · ${accommodations.length} schede`;
   }
 
-  // 1. BLOCCO 1: HEADER PULITO ("Wallet" + "+" button)
+  // 1. BLOCCO 1: HEADER PULITO ("Wallet" senza il pulsante "+" in alto a destra)
   let html = `
     <div class="wallet-header-row">
       <h2 style="font-size:1.4rem; font-weight:800; color:var(--text-primary); margin:0; letter-spacing:-0.02em;">Wallet</h2>
-      <button class="wallet-add-btn-circle" id="btnOpenUploadFile" title="Aggiungi Documento" aria-label="Aggiungi Documento">
-        +
-      </button>
     </div>
 
     <!-- 2. BLOCCO 2: SEGMENTED CONTROL (DOCUMENTI | CASSAFORTE) -->
@@ -3343,13 +3408,10 @@ function renderTabWallet() {
 
   // CONTENUTO TAB DOCUMENTI NORMALI
   if (!isVaultTab) {
+    const allCategories = getAllWalletCategories();
     const filterCategories = [
       { id: 'Tutti', label: 'Tutti', icon: '🗂️' },
-      { id: 'flight', label: 'Volo', icon: '✈️' },
-      { id: 'hotel', label: 'Hotel', icon: '🏨' },
-      { id: 'train', label: 'Treni', icon: '🚆' },
-      { id: 'event', label: 'Eventi', icon: '🎟️' },
-      { id: 'documents', label: 'Altro', icon: '📄' }
+      ...allCategories
     ];
 
     html += `<div class="wallet-filter-strip">`;
@@ -3413,19 +3475,21 @@ function renderTabWallet() {
       });
       html += `</div>`;
 
-      // Pulsante di aggiunta rapida visibile in fondo alla lista (in Tutti e categorie)
+      // Semplice pulsante "+" compatto e pulito centrato sotto la lista dei documenti
       html += `
-        <div style="margin-top:14px; text-align:center;">
-          <button class="btn-glass-pill accent" id="btnListUploadFile" style="width:100%; justify-content:center; padding:11px 16px; font-weight:700; font-size:13px;">
-            + Aggiungi Documento
+        <div style="margin-top:16px; text-align:center;">
+          <button class="wallet-doc-add-btn" id="btnListUploadFile" title="Aggiungi Documento" aria-label="Aggiungi Documento">
+            +
           </button>
         </div>
       `;
     } else {
       html += `
         <div class="glass-card" style="text-align:center; padding:32px 16px; border-radius:14px;">
-          <p style="color:var(--text-secondary); font-size:13.5px; margin-bottom:12px;">Nessun pass o documento in questa sezione.</p>
-          <button class="btn-glass-pill accent" id="btnEmptyUploadFile">+ Aggiungi Documento</button>
+          <p style="color:var(--text-secondary); font-size:13.5px; margin-bottom:14px;">Nessun pass o documento in questa sezione.</p>
+          <button class="wallet-doc-add-btn" id="btnEmptyUploadFile" title="Aggiungi Documento" aria-label="Aggiungi Documento">
+            +
+          </button>
         </div>
       `;
     }
@@ -5826,9 +5890,15 @@ function setupEventListeners() {
     });
 
     clearWalletUploadFile();
+    closeWalletUploadModal();
     closeAllSheets();
     await refreshApplicationData();
     showToast(inVault ? 'Documento salvato in Cassaforte 🔒' : 'Documento archiviato nel Wallet!');
+  });
+
+  // Chiusura pagina a schermo intero Nuovo Documento
+  document.getElementById('btnCloseWalletUploadPage')?.addEventListener('click', () => {
+    closeWalletUploadModal();
   });
 
   document.getElementById('formExchangeRate')?.addEventListener('submit', async (e) => {
@@ -5941,6 +6011,64 @@ function handleSelectedWalletFile(file) {
   });
 }
 
+function closeWalletUploadModal() {
+  const page = document.getElementById('pageWalletUpload');
+  if (page) page.classList.remove('active');
+  const inlineBox = document.getElementById('walletNewCatInlineBox');
+  if (inlineBox) {
+    inlineBox.style.display = 'none';
+    const input = document.getElementById('inputNewCatName');
+    if (input) input.value = '';
+  }
+}
+
+function renderWalletCategoryPills(selectedId = 'flight') {
+  const container = document.getElementById('walletCatPillsContainer');
+  const hiddenInput = document.getElementById('fieldWalletCategory');
+  if (!container || !hiddenInput) return;
+
+  const categories = getAllWalletCategories();
+  hiddenInput.value = selectedId;
+
+  let html = '';
+  categories.forEach(cat => {
+    const isAct = cat.id === selectedId;
+    html += `
+      <button type="button" class="wallet-cat-pill-opt ${isAct ? 'active' : ''}" data-cat-id="${cat.id}">
+        <span>${cat.icon || '🏷️'}</span>
+        <span>${escapeHTML(cat.label)}</span>
+      </button>
+    `;
+  });
+
+  html += `
+    <button type="button" class="wallet-cat-pill-opt add-new" id="btnAddNewWalletCatPill">
+      <span>＋</span>
+      <span>Nuova</span>
+    </button>
+  `;
+
+  container.innerHTML = html;
+
+  // Click sulle pillole categoria
+  container.querySelectorAll('.wallet-cat-pill-opt[data-cat-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const catId = btn.getAttribute('data-cat-id');
+      renderWalletCategoryPills(catId);
+    });
+  });
+
+  // Click su "+ Nuova"
+  document.getElementById('btnAddNewWalletCatPill')?.addEventListener('click', () => {
+    const inlineBox = document.getElementById('walletNewCatInlineBox');
+    const input = document.getElementById('inputNewCatName');
+    if (inlineBox) {
+      inlineBox.style.display = 'flex';
+      setTimeout(() => { input?.focus(); }, 50);
+    }
+  });
+}
+
 function openWalletUploadModal(presetVault = false) {
   clearWalletUploadFile();
   const form = document.getElementById('formWalletUpload');
@@ -5949,7 +6077,49 @@ function openWalletUploadModal(presetVault = false) {
   const vaultCheckbox = document.getElementById('fieldWalletVault');
   if (vaultCheckbox) vaultCheckbox.checked = Boolean(presetVault);
 
-  openSheet('sheetWalletUpload');
+  // Render pillole categoria nel form
+  renderWalletCategoryPills('flight');
+
+  // Setup inline input per Nuova Categoria (una tantum per sicurezza)
+  const inlineBox = document.getElementById('walletNewCatInlineBox');
+  if (inlineBox) inlineBox.style.display = 'none';
+
+  const btnConfirm = document.getElementById('btnConfirmAddCat');
+  const btnCancel = document.getElementById('btnCancelAddCat');
+  const inputNewCat = document.getElementById('inputNewCatName');
+
+  if (btnCancel) {
+    btnCancel.onclick = () => {
+      if (inlineBox) inlineBox.style.display = 'none';
+      if (inputNewCat) inputNewCat.value = '';
+    };
+  }
+
+  if (btnConfirm) {
+    btnConfirm.onclick = () => {
+      const name = inputNewCat?.value.trim();
+      if (!name) {
+        showToast('Inserisci un nome per la categoria');
+        return;
+      }
+      const newCatId = 'cat_' + Date.now();
+      const newCategory = { id: newCatId, label: name, icon: '🏷️' };
+      const currentCustom = getCustomCategories();
+      currentCustom.push(newCategory);
+      saveCustomCategories(currentCustom);
+
+      if (inlineBox) inlineBox.style.display = 'none';
+      if (inputNewCat) inputNewCat.value = '';
+      
+      renderWalletCategoryPills(newCatId);
+      renderTabWallet();
+      showToast(`Categoria "${name}" creata!`);
+    };
+  }
+
+  // Apri a schermo intero
+  const page = document.getElementById('pageWalletUpload');
+  if (page) page.classList.add('active');
 }
 
 function openEditTripSheet(tripToEdit = null) {
