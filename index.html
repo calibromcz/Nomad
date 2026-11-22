@@ -22,9 +22,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=41) -->
-  <link rel="stylesheet" href="./styles.css?v=41">
-  <link rel="modulepreload" href="./db.js?v=41">
+  <!-- Stylesheet (Cache-Busting ?v=40) -->
+  <link rel="stylesheet" href="./styles.css?v=40">
+  <link rel="modulepreload" href="./db.js?v=40">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -72,42 +72,8 @@
   <!-- App Main Viewport -->
   <div id="app">
     
-    <!-- TOP BAR (Fissa Liquid Glass: Logo N + 5 Utility Icon SF Symbols) -->
+    <!-- TOP BAR (Fissa Liquid Glass: 5 Utility Icon SF Symbols) -->
     <header class="top-bar top-bar-icons-only">
-      <!-- Logo N Industrial (Icona geometrica compatta) -->
-      <span class="nomad-logo-n" aria-label="Nomad">
-        <svg viewBox="0 0 100 100" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle;">
-          <!-- Sfondo/Scocca dell'icona -->
-          <rect width="100" height="100" rx="18" fill="#F7F7F5" stroke="#D1D1CB" stroke-width="2.5"/>
-          
-          <!-- Micro Dettaglio Tecnico hardware in alto a sx -->
-          <text x="12" y="20" font-family="monospace, ui-monospace, SFMono-Regular" font-size="8" font-weight="800" fill="#141414">NMD01</text>
-          
-          <!-- Gruppo Lettera N -->
-          <g transform="translate(10, 12)">
-            <!-- Asta Sinistra (Antracite) -->
-            <path d="M 12,12 L 28,12 L 28,64 L 12,64 Z" fill="#141414" />
-            
-            <!-- Asta Destra (Antracite) -->
-            <path d="M 52,12 L 68,12 L 68,64 L 52,64 Z" fill="#141414" />
-            
-            <!-- Diagonale Verde Viaggio -->
-            <path d="M 24,18 L 56,50 L 56,60 L 24,28 Z" fill="#00B853" />
-            
-            <!-- Dettagli bussola/viaggio sulla diagonale verde (Antracite) -->
-            <!-- Ago della bussola al centro -->
-            <polygon points="38,37 41,34 44,37 41,43" fill="#141414" />
-            <!-- Linee di tracciato o freccia -->
-            <line x1="28" y1="24" x2="33" y2="29" stroke="#141414" stroke-width="2" stroke-linecap="round" />
-            <line x1="47" y1="45" x2="52" y2="50" stroke="#141414" stroke-width="2" stroke-linecap="round" />
-            
-            <!-- Piccoli punti o micro dettagli tecnici -->
-            <circle cx="31" cy="22" r="1.5" fill="#141414" />
-            <circle cx="49" cy="52" r="1.5" fill="#141414" />
-          </g>
-        </svg>
-      </span>
-
       <!-- 1. Selettore Viaggi (SF Symbol Suitcase) -->
       <button id="btnTopTrips" class="top-icon-btn" aria-label="I miei viaggi" title="I miei viaggi">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -831,7 +797,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=5) -->
-  <script type="module" src="./app.js?v=41"></script>
+  <script type="module" src="./app.js?v=40"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>

@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=41';
+} from './db.js?v=40';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -1596,19 +1596,7 @@ function renderTabDashboard() {
   }
 
   let html = `
-    <!-- 1) FASCIA UNICA VIAGGIO + COUNTDOWN LIVE -->
-    <div class="glass-card dash-single-trip-bar" style="margin-bottom:0;">
-      <button id="dashBtnSelectTrip" class="dash-trip-left-btn" aria-label="Cambia o Seleziona Viaggio">
-        <span style="font-size:15px;">📍</span>
-        <span class="dash-trip-dest-name">${escapeHTML(trip.name || trip.destination)}</span>
-        <span style="font-size:11px; color:var(--text-tertiary); margin-left:2px;">▾</span>
-      </button>
-      <div class="dash-countdown-pill-compact tabular-nums" id="dashLiveCountdownText">
-        Caricamento...
-      </div>
-    </div>
-
-    <!-- 2) FASCIA METEO COMPATTA (SOPRA I DOCUMENTI PINNATI) -->
+    <!-- 1) FASCIA METEO COMPATTA (IN CIMA ALLA DASHBOARD) -->
     <div class="dash-weather-slim-bar" id="dashWidgetWeather" title="Tocca per vedere il Meteo della Settimana (7 Giorni)">
       <div class="dash-weather-slim-left">
         <span class="dash-weather-slim-icon" id="dashWeatherIcon">🌤️</span>
@@ -1628,7 +1616,7 @@ function renderTabDashboard() {
       </div>
     </div>
 
-    <!-- 3) DOCUMENTI PINNATI: PASS APPLE WALLET VISIBILI -->
+    <!-- 2) DOCUMENTI PINNATI: PASS APPLE WALLET VISIBILI -->
     <div class="dash-pass-carousel-section">
       ${pinnedDocs.length > 0 ? `
         <div class="dash-pass-carousel">
