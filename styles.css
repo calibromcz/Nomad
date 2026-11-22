@@ -4097,6 +4097,7 @@ button.accent,
   border-radius: var(--radius-md);
   background: var(--bg-card);
   border: 1.5px solid var(--border-color);
+  border-top: 3px solid #1B6B4D;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   cursor: pointer;
   scroll-snap-align: start;
@@ -4106,6 +4107,23 @@ button.accent,
   transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
   position: relative;
   overflow: hidden;
+}
+
+[data-theme="dark"] .dash-pass-card {
+  border-top: 3px solid #10B981;
+}
+
+.dash-pass-priority-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #1B6B4D;
+  opacity: 0.85;
+  text-transform: uppercase;
+}
+
+[data-theme="dark"] .dash-pass-priority-tag {
+  color: #10B981;
 }
 .dash-pass-card:active {
   transform: translateY(2px);
@@ -4234,6 +4252,42 @@ button.accent,
   font-size: 11px;
   color: var(--text-secondary);
   font-weight: 600;
+}
+
+/* Separatore "Strappo Biglietto" tra Documenti Pinnati e Convertitore Valute */
+.dashboard-ticket-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 18px 0 16px 0;
+  width: 100%;
+}
+
+.dashboard-ticket-divider .divider-line {
+  flex: 1;
+  height: 1px;
+  background-image: repeating-linear-gradient(to right, rgba(27, 107, 77, 0.45) 0, rgba(27, 107, 77, 0.45) 5px, transparent 5px, transparent 9px);
+}
+
+[data-theme="dark"] .dashboard-ticket-divider .divider-line {
+  background-image: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.22) 0, rgba(255, 255, 255, 0.22) 5px, transparent 5px, transparent 9px);
+}
+
+.dashboard-ticket-divider .divider-label {
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1B6B4D;
+  opacity: 0.88;
+  white-space: nowrap;
+  user-select: none;
+}
+
+[data-theme="dark"] .dashboard-ticket-divider .divider-label {
+  color: rgba(255, 255, 255, 0.70);
 }
 
 /* 3. CONVERTITORE: FULL WIDTH, 3 RIGHE PULITE SENZA SOVRAPPOSIZIONI */

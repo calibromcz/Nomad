@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=44';
+} from './db.js?v=45';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -1556,7 +1556,10 @@ function renderTabDashboard() {
                       <span>${catIcon}</span>
                       <span>${catLabel}</span>
                     </span>
-                    <span class="dash-pass-gate-tag">Modalità Gate ↗</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span class="dash-pass-priority-tag">IN EVIDENZA</span>
+                      <span class="dash-pass-gate-tag">Modalità Gate ↗</span>
+                    </div>
                   </div>
                   <div class="dash-pass-title ${isDoc ? 'blurred' : ''}">
                     ${escapeHTML(doc.title)}
@@ -1585,6 +1588,13 @@ function renderTabDashboard() {
           <button class="btn-glass-pill accent" style="padding:6px 12px; font-size:12px;">Scegli biglietti dal Wallet</button>
         </div>
       `}
+    </div>
+
+    <!-- SEPARATORE "STRAPPO BIGLIETTO" TRA DOCUMENTI PINNATI E CONVERTITORE VALUTE -->
+    <div class="dashboard-ticket-divider" aria-hidden="true">
+      <span class="divider-line"></span>
+      <span class="divider-label">VALUTA & BUDGET</span>
+      <span class="divider-line"></span>
     </div>
 
     <!-- 4) CONVERTITORE VALUTE: FULL-WIDTH SENZA SOVRAPPOSIZIONI -->
