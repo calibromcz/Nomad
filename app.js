@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=49';
+} from './db.js?v=50';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -194,21 +194,27 @@ function initTheme() {
 
 function updateThemeIcon() {
   const iconSun = document.getElementById('themeIconSun');
-  if (!iconSun) return;
-  if (state.theme === 'dark') {
-    iconSun.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
-  } else {
-    iconSun.innerHTML = `
-      <circle cx="12" cy="12" r="5"></circle>
-      <line x1="12" y1="1" x2="12" y2="3"></line>
-      <line x1="12" y1="21" x2="12" y2="23"></line>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-      <line x1="1" y1="12" x2="3" y2="12"></line>
-      <line x1="21" y1="12" x2="23" y2="12"></line>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-    `;
+  if (iconSun) {
+    if (state.theme === 'dark') {
+      iconSun.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+    } else {
+      iconSun.innerHTML = `
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      `;
+    }
+  }
+
+  const profThemeSubLabel = document.getElementById('profThemeSubLabel');
+  if (profThemeSubLabel) {
+    profThemeSubLabel.textContent = state.theme === 'dark' ? 'Dark Mode (Nero & Smeraldo)' : 'Light Mode (Verde Salvia)';
   }
 }
 
@@ -517,7 +523,14 @@ async function refreshApplicationData() {
 
   const topBarName = document.getElementById('topBarTripName');
   if (topBarName) {
-    topBarName.textContent = state.activeTrip ? state.activeTrip.name : 'Nessun Viaggio';
+    if (state.activeTrip) {
+      const fullDest = state.activeTrip.destination || state.activeTrip.city || state.activeTrip.name || 'Viaggio';
+      topBarName.textContent = fullDest.split(',')[0].trim();
+      topBarName.title = state.activeTrip.name || fullDest;
+    } else {
+      topBarName.textContent = 'Nessun Viaggio';
+      topBarName.title = '';
+    }
   }
 
   const allFiles = await getAllFromStore('files_store');
@@ -611,30 +624,96 @@ function populateDayPlanNotificationSheet() {
   const events = getTodayTripEvents();
   if (events.length === 0) {
     container.innerHTML = `
-      <div style="text-align:center; padding:24px; color:var(--text-secondary); font-size:13.5px;">
-        Nessuna tappa in programma per questa giornata.
+      <div style="text-align:center; padding:28px 16px; color:var(--text-secondary); font-size:13.5px;">
+        <div style="font-size:32px; margin-bottom:8px;">🗓️</div>
+        <div style="font-weight:700; color:var(--text-primary); margin-bottom:4px;">Nessuna tappa in programma per oggi</div>
+        <div style="font-size:12px; color:var(--text-tertiary); margin-bottom:16px;">Aggiungi una nuova tappa o consulta il piano completo per organizzare la giornata.</div>
+        <button id="btnDayPlanOpenPlan" class="btn-glass-pill accent" style="padding:8px 18px; font-size:13px; font-weight:700;">
+          Vai al Piano Viaggio →
+        </button>
       </div>
     `;
+    document.getElementById('btnDayPlanOpenPlan')?.addEventListener('click', () => {
+      closeAllSheets();
+      state.tripSubView = 'plan';
+      switchTab('trip');
+    });
     return;
   }
 
   let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
-  events.forEach(ev => {
+  events.forEach((ev, idx) => {
+    const isDone = !!ev.completed;
+    const hasCoords = Number.isFinite(Number(ev.lat)) && (Number.isFinite(Number(ev.lng)) || Number.isFinite(Number(ev.lon)));
+    const evTime = ev.time || '--:--';
+
     html += `
-      <div class="glass-card" style="padding:12px 14px; margin-bottom:0;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <span class="tabular-nums" style="font-size:13px; font-weight:800; color:var(--accent);">${escapeHTML(ev.time)}</span>
-          <span class="category-tag">${escapeHTML(ev.category || 'Tappa')}</span>
+      <div class="glass-card" style="padding:12px 14px; margin-bottom:0; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; ${isDone ? 'opacity:0.6;' : ''}">
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="tabular-nums" style="font-size:13px; font-weight:800; color:var(--accent);">${escapeHTML(evTime)}</span>
+            <span class="category-tag">${escapeHTML(ev.category || 'Tappa')}</span>
+          </div>
+          <div style="font-size:14.5px; font-weight:700; color:var(--text-primary); margin-bottom:2px; ${isDone ? 'text-decoration:line-through;' : ''}">
+            ${escapeHTML(ev.title)}
+          </div>
+          ${ev.notes ? `<div style="font-size:12px; color:var(--text-secondary);">${escapeHTML(ev.notes)}</div>` : ''}
         </div>
-        <div style="font-size:14.5px; font-weight:700; color:var(--text-primary); margin-bottom:2px;">
-          ${escapeHTML(ev.title)}
+        <div class="day-plan-actions-group">
+          ${hasCoords ? `
+            <button class="day-plan-map-btn" data-plan-map-lat="${ev.lat}" data-plan-map-lon="${ev.lng || ev.lon}" data-plan-map-title="${escapeHTML(ev.title)}" title="Mostra su mappa" aria-label="Mostra su mappa">
+              📍
+            </button>
+          ` : ''}
+          <button class="day-plan-check-btn ${isDone ? 'completed' : ''}" data-plan-event-id="${escapeHTML(ev.id || String(idx))}" title="${isDone ? 'Segna da completare' : 'Segna come completata'}" aria-label="Completata">
+            ✓
+          </button>
         </div>
-        ${ev.notes ? `<div style="font-size:12px; color:var(--text-secondary);">${escapeHTML(ev.notes)}</div>` : ''}
       </div>
     `;
   });
   html += '</div>';
   container.innerHTML = html;
+
+  // Listener per spuntare / completare la tappa
+  container.querySelectorAll('.day-plan-check-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const evId = btn.getAttribute('data-plan-event-id');
+      const targetEv = events.find((ev, i) => (ev.id && ev.id === evId) || String(i) === evId);
+      if (targetEv) {
+        targetEv.completed = !targetEv.completed;
+        await putToStore('trips_store', state.activeTrip);
+        updateTopBarUtilityBadges();
+        populateDayPlanNotificationSheet();
+        if (state.activeTab === 'trip' && state.tripSubView === 'plan') {
+          renderPlanSubView();
+        }
+        showToast(targetEv.completed ? 'Tappa completata! ✓' : 'Tappa riaperta');
+      }
+    });
+  });
+
+  // Listener per aprire la mappa sul punto esatto
+  container.querySelectorAll('.day-plan-map-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const lat = parseFloat(btn.getAttribute('data-plan-map-lat'));
+      const lon = parseFloat(btn.getAttribute('data-plan-map-lon'));
+      const title = btn.getAttribute('data-plan-map-title');
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        closeAllSheets();
+        openSheet('sheetMapOffline');
+        setTimeout(() => {
+          initLeafletMapInstance();
+          if (state.leafletMap) {
+            state.leafletMap.setView([lat, lon], 15);
+            L.marker([lat, lon]).addTo(state.leafletMap).bindPopup(`<b>${escapeHTML(title)}</b>`).openPopup();
+          }
+        }, 250);
+      }
+    });
+  });
 }
 
 /* ==========================================================================
@@ -4715,12 +4794,17 @@ async function renderTabProfile() {
         </div>
         <input type="text" id="profHomeTimeZone" class="form-input" style="width: 140px; text-align:center; padding: 6px;" value="${escapeHTML(state.homeTimeZone)}">
       </div>
-      <div class="settings-row" id="profThemeRow">
+      <div class="settings-row" id="profThemeRow" style="cursor:pointer;">
         <div class="settings-label-sub">
           <span class="settings-main-label">Tema Interfaccia</span>
-          <span class="settings-sub-label">${state.theme === 'dark' ? 'Dark Mode (Nero & Smeraldo)' : 'Light Mode (Verde Salvia)'}</span>
+          <span class="settings-sub-label" id="profThemeSubLabel">${state.theme === 'dark' ? 'Dark Mode (Nero & Smeraldo)' : 'Light Mode (Verde Salvia)'}</span>
         </div>
-        <span class="badge-tag">Cambia</span>
+        <button id="btnThemeToggle" class="btn-glass-pill" style="padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+          <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;">
+            ${state.theme === 'dark' ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>' : '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>'}
+          </svg>
+          <span>Cambia</span>
+        </button>
       </div>
     </div>
 

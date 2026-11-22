@@ -186,8 +186,8 @@ body {
   right: 0;
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: calc(var(--sat) + 8px) 14px 10px 14px;
+  justify-content: space-between;
+  padding: calc(var(--sat) + 6px) 14px 8px 14px;
   background: #1B6B4D;
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
@@ -198,6 +198,68 @@ body {
 [data-theme="dark"] .top-bar-icons-only {
   background: #1B6B4D;
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.top-trip-selector-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  padding: 6px 8px 6px 2px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: #FFFFFF;
+  text-decoration: none;
+  font-family: var(--font-ui);
+  max-width: 100%;
+  transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
+}
+
+.top-trip-selector-btn:active {
+  opacity: 0.8;
+  transform: scale(0.97);
+}
+
+.top-trip-selector-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: #FFFFFF;
+  stroke-width: 2.2px;
+  flex-shrink: 0;
+}
+
+.top-bar-trip-city {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.top-bar-chevron {
+  width: 14px !important;
+  height: 14px !important;
+  stroke: rgba(255, 255, 255, 0.8) !important;
+  stroke-width: 2.4px !important;
+  flex-shrink: 0;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .top-icon-btn {
@@ -263,8 +325,6 @@ body {
   align-items: center;
   justify-content: center;
   font-variant-numeric: tabular-nums;
-  border: none;
-}
   border: 1px solid var(--border-strong);
 }
 
@@ -4407,8 +4467,8 @@ button.accent,
   text-align: right;
   font-family: var(--font-ui);
   font-size: 20px;
-  font-weight: 700;
-  color: var(--accent-blue);
+  font-weight: 800;
+  color: #1B6B4D;
   line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
@@ -5689,3 +5749,112 @@ button.accent,
   width: 12px;
   height: 12px;
 }
+
+/* Day Plan Notification Sheet Actions */
+.day-plan-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.day-plan-check-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-card-subtle);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 0;
+}
+
+.day-plan-check-btn:active {
+  transform: scale(0.92);
+}
+
+.day-plan-check-btn.completed {
+  background: #1B6B4D;
+  border-color: #1B6B4D;
+  color: #FFFFFF;
+}
+
+.day-plan-map-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card-subtle);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  font-size: 13px;
+  padding: 0;
+}
+
+.day-plan-map-btn:active {
+  transform: scale(0.92);
+}
+
+/* ==========================================================================
+   CONTRASTO DARK MODE: VIAGGIO -> SOTTO-TAB VALIGIA
+   ========================================================================== */
+[data-theme="dark"] .checklist-accordion-group {
+  background: transparent;
+}
+
+[data-theme="dark"] .accordion-header {
+  background: #1C2126 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .accordion-header span {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .accordion-header span span {
+  color: #9CA3AF !important;
+}
+
+[data-theme="dark"] .accordion-header svg {
+  stroke: #FFFFFF !important;
+}
+
+[data-theme="dark"] .input-sub-quick-add {
+  background: #1C2126 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+
+[data-theme="dark"] .input-sub-quick-add::placeholder {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+[data-theme="dark"] .btn-sub-quick-add {
+  background: #262D34 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+}
+
+[data-theme="dark"] #tripSubViewContainer .btn-glass-pill {
+  background: #1C2126;
+  color: #F3F4F6;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+[data-theme="dark"] #tripSubViewContainer .btn-glass-pill.accent {
+  background: #1B6B4D;
+  color: #FFFFFF;
+  border-color: #1B6B4D;
+}
+
