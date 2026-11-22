@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=50';
+} from './db.js?v=51';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -1669,69 +1669,120 @@ function renderTabDashboard() {
       `}
     </div>
 
-    <!-- SEPARATORE "STRAPPO BIGLIETTO" TRA DOCUMENTI PINNATI E CONVERTITORE VALUTE -->
+    <!-- SEPARATORE "STRAPPO BIGLIETTO" TRA DOCUMENTI PINNATI E CONVERTITORE VALUTE / APPUNTI -->
     <div class="dashboard-ticket-divider" aria-hidden="true">
       <span class="divider-line"></span>
-      <span class="divider-label">VALUTA & BUDGET</span>
+      <span class="divider-label">${(trip.destCurrency || trip.currency || 'EUR').toUpperCase() !== 'EUR' ? 'VALUTA & BUDGET' : 'APPUNTI & BUDGET'}</span>
       <span class="divider-line"></span>
     </div>
 
-    <!-- 4) CONVERTITORE VALUTE: FULL-WIDTH SENZA SOVRAPPOSIZIONI -->
-    <div class="glass-card dash-converter-card">
-      <!-- Riga 1: Header dedicato (Titolo a sinistra, Tasso + Tasto ↻ a destra) -->
-      <div class="dash-conv-header-row">
-        <div class="dash-conv-header-left">
-          <div class="bento-mini-icon-badge icon-badge-converter" style="width:26px; height:26px; font-size:13px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
-              <path d="M12 18V6"></path>
-            </svg>
+    ${(trip.destCurrency || trip.currency || 'EUR').toUpperCase() !== 'EUR' ? `
+      <!-- 4A) CONVERTITORE VALUTE: FULL-WIDTH SENZA SOVRAPPOSIZIONI (VIAGGI EXTRA-EURO) -->
+      <div class="glass-card dash-converter-card" id="dashboard-converter-card">
+        <!-- Riga 1: Header dedicato (Titolo a sinistra, Tasso + Tasto ↻ a destra) -->
+        <div class="dash-conv-header-row">
+          <div class="dash-conv-header-left">
+            <div class="bento-mini-icon-badge icon-badge-converter" style="width:26px; height:26px; font-size:13px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+                <path d="M12 18V6"></path>
+              </svg>
+            </div>
+            <span style="font-size:14px; font-weight:700; color:var(--text-primary);">Convertitore Valute</span>
           </div>
-          <span style="font-size:14px; font-weight:700; color:var(--text-primary);">Convertitore Valute</span>
+          <div class="dash-conv-header-right">
+            <span style="font-size:11px; color:var(--text-tertiary);" id="dashCurrMetaText">${formatRateMeta(trip)}</span>
+            <button class="exchange-refresh-btn" id="dashBtnRefreshRate" aria-label="Aggiorna tasso di cambio" style="width:24px; height:24px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="dash-conv-header-right">
-          <span style="font-size:11px; color:var(--text-tertiary);" id="dashCurrMetaText">${formatRateMeta(trip)}</span>
-          <button class="exchange-refresh-btn" id="dashBtnRefreshRate" aria-label="Aggiorna tasso di cambio" style="width:24px; height:24px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-            </svg>
-          </button>
-        </div>
-      </div>
 
-      <!-- Riga 2: Selettori Valuta (Grid 3 colonne distanziata) -->
-      <div class="dash-conv-selects-grid">
-        <select id="dashSelectFromCurr" class="dash-conv-select">
-          ${SUPPORTED_CURRENCIES.map(c => `
-            <option value="${c.code}" ${c.code === (trip.destCurrency || "CNY") ? "selected" : ""}>${c.code} (${c.symbol})</option>
-          `).join("")}
-        </select>
-        <button id="dashBtnSwapCurr" class="dash-conv-swap-btn" aria-label="Inverti valute">⇄</button>
-        <select id="dashSelectToCurr" class="dash-conv-select">
-          ${SUPPORTED_CURRENCIES.map(c => `
-            <option value="${c.code}" ${c.code === homeCurr ? "selected" : ""}>${c.code} (${c.symbol})</option>
-          `).join("")}
-        </select>
-      </div>
-
-      <!-- Riga 3: Importo & Risultato + 3 Mini-Chip Rapidi -->
-      <div class="dash-conv-calc-row">
-        <div>
-          <input type="number" step="any" id="dashFromCurrInput" class="dash-conv-input tabular-nums" placeholder="100">
+        <!-- Riga 2: Selettori Valuta (Grid 3 colonne distanziata) -->
+        <div class="dash-conv-selects-grid">
+          <select id="dashSelectFromCurr" class="dash-conv-select">
+            ${SUPPORTED_CURRENCIES.map(c => `
+              <option value="${c.code}" ${c.code === (trip.destCurrency || "CNY") ? "selected" : ""}>${c.code} (${c.symbol})</option>
+            `).join("")}
+          </select>
+          <button id="dashBtnSwapCurr" class="dash-conv-swap-btn" aria-label="Inverti valute">⇄</button>
+          <select id="dashSelectToCurr" class="dash-conv-select">
+            ${SUPPORTED_CURRENCIES.map(c => `
+              <option value="${c.code}" ${c.code === homeCurr ? "selected" : ""}>${c.code} (${c.symbol})</option>
+            `).join("")}
+          </select>
         </div>
-        <div class="dash-conv-result tabular-nums" id="dashToCurrOutput">
-          0.00
+
+        <!-- Riga 3: Importo & Risultato + 3 Mini-Chip Rapidi -->
+        <div class="dash-conv-calc-row">
+          <div>
+            <input type="number" step="any" id="dashFromCurrInput" class="dash-conv-input tabular-nums" placeholder="100">
+          </div>
+          <div class="dash-conv-result tabular-nums" id="dashToCurrOutput">
+            0.00
+          </div>
+        </div>
+
+        <div class="dash-conv-chips-strip">
+          <button class="dash-conv-chip-btn" data-quick-amt="10">10</button>
+          <button class="dash-conv-chip-btn" data-quick-amt="50">50</button>
+          <button class="dash-conv-chip-btn" data-quick-amt="100">100</button>
         </div>
       </div>
+    ` : `
+      <!-- 4B) POST-IT "APPUNTI AL VOLO" CON COLORI & IMMAGINI (VIAGGI ZONA EURO) -->
+      <div class="glass-card dash-postit-card" id="dashboard-postit-card" style="background:${trip.quickNotesColor || '#FEFCE8'} !important;">
+        <!-- Header Compatto: Titolo a sx, Palette colori + Camera + Svuota a dx -->
+        <div class="postit-header-row">
+          <div class="postit-header-left">
+            <div class="postit-icon-badge">
+              📌
+            </div>
+            <span class="postit-title">Appunti al volo</span>
+            <span class="postit-saved-indicator" id="postitSavedIndicator">Salvato ✓</span>
+          </div>
 
-      <div class="dash-conv-chips-strip">
-        <button class="dash-conv-chip-btn" data-quick-amt="10">10</button>
-        <button class="dash-conv-chip-btn" data-quick-amt="50">50</button>
-        <button class="dash-conv-chip-btn" data-quick-amt="100">100</button>
+          <div class="postit-header-right">
+            <!-- Selettore 5 colori pastello carta -->
+            <div class="postit-colors-wrap">
+              <button class="postit-color-dot ${(trip.quickNotesColor || '#FEFCE8') === '#FEFCE8' ? 'active' : ''}" data-postit-color="#FEFCE8" style="background:#FEFCE8;" title="Giallo caldo" aria-label="Colore giallo"></button>
+              <button class="postit-color-dot ${(trip.quickNotesColor || '#FEFCE8') === '#FDF2F8' ? 'active' : ''}" data-postit-color="#FDF2F8" style="background:#FDF2F8;" title="Rosa cipria" aria-label="Colore rosa"></button>
+              <button class="postit-color-dot ${(trip.quickNotesColor || '#FEFCE8') === '#EFF6FF' ? 'active' : ''}" data-postit-color="#EFF6FF" style="background:#EFF6FF;" title="Azzurro polvere" aria-label="Colore azzurro"></button>
+              <button class="postit-color-dot ${(trip.quickNotesColor || '#FEFCE8') === '#ECFDF5' ? 'active' : ''}" data-postit-color="#ECFDF5" style="background:#ECFDF5;" title="Verde salvia" aria-label="Colore verde"></button>
+              <button class="postit-color-dot ${(trip.quickNotesColor || '#FEFCE8') === '#FCFBF7' ? 'active' : ''}" data-postit-color="#FCFBF7" style="background:#FCFBF7;" title="Bianco carta" aria-label="Colore bianco"></button>
+            </div>
+
+            <!-- Tasto Allegato Immagine (Scatta / Scegli foto) -->
+            <button class="postit-tool-btn" id="postitBtnAddPhoto" title="Allega foto o appunto visivo" aria-label="Allega foto">
+              📷
+            </button>
+            <input type="file" id="postitFileInput" accept="image/*" style="display:none;">
+
+            <!-- Tasto Svuota Post-it -->
+            <button class="postit-tool-btn" id="postitBtnClear" title="Svuota appunti" aria-label="Svuota appunti">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Area di Testo Rapida -->
+        <textarea id="dashboard-postit-input" class="postit-textarea" rows="4" placeholder="Parcheggio piano -2, ristorante consigliato, codice cancello...">${escapeHTML(trip.quickNotes || '')}</textarea>
+
+        <!-- Galleria Allegati Miniature Orizzontale -->
+        <div id="dashboard-postit-images" class="postit-images-strip" style="${(trip.quickNotesImages && trip.quickNotesImages.length > 0) ? '' : 'display:none;'}">
+          ${(trip.quickNotesImages || []).map(img => `
+            <div class="postit-thumb-wrap" data-postit-img-id="${escapeHTML(img.id)}">
+              <img src="${img.dataUrl}" class="postit-thumb-img" alt="Allegato appunto" loading="lazy">
+              <button class="postit-thumb-del" data-postit-del-id="${escapeHTML(img.id)}" title="Rimuovi foto" aria-label="Rimuovi foto">✕</button>
+            </div>
+          `).join('')}
+        </div>
       </div>
-    </div>
+    `}
 
     <!-- 5) WIDGET BUDGET VIAGGIO + BUSSOLA GIORNALIERA (MOBILE-FIRST 360-430px) -->
     <div class="glass-card dash-widget-card" style="padding:16px;">
@@ -1960,9 +2011,14 @@ function renderTabDashboard() {
     openAddExpenseSheet();
   });
 
-  // Setup Convertitore Valute Elegante full-width con 3 chip rapidi
-  setupDashAdvancedConverter(trip);
-  recalcConverter();
+  // Setup Contestuale: Convertitore Valute (Extra-Euro) oppure Post-it Appunti (Zona Euro)
+  const isExtraEuro = (trip.destCurrency || trip.currency || 'EUR').toUpperCase() !== 'EUR';
+  if (isExtraEuro) {
+    setupDashAdvancedConverter(trip);
+    recalcConverter();
+  } else {
+    setupDashPostit(trip);
+  }
 }
 
 // ==========================================================================
@@ -2112,6 +2168,211 @@ function setupDashAdvancedConverter(trip) {
 
   // Calcolo iniziale immediato
   recalcConverter();
+}
+
+// ==========================================================================
+// POST-IT "APPUNTI AL VOLO" CON COLORI & IMMAGINI (DASHBOARD ZONA EURO)
+// ==========================================================================
+let postitSaveTimeout = null;
+
+function setupDashPostit(trip) {
+  const card = document.getElementById('dashboard-postit-card');
+  const textarea = document.getElementById('dashboard-postit-input');
+  const savedIndicator = document.getElementById('postitSavedIndicator');
+  const btnAddPhoto = document.getElementById('postitBtnAddPhoto');
+  const fileInput = document.getElementById('postitFileInput');
+  const btnClear = document.getElementById('postitBtnClear');
+  const imagesContainer = document.getElementById('dashboard-postit-images');
+
+  if (!card || !textarea) return;
+
+  // Mostra indicatore "Salvato ✓" temporaneamente
+  const triggerSavedIndicator = () => {
+    if (!savedIndicator) return;
+    savedIndicator.classList.add('visible');
+    setTimeout(() => {
+      savedIndicator.classList.remove('visible');
+    }, 1500);
+  };
+
+  // 1. Salvataggio testo con debounce (400ms)
+  textarea.addEventListener('input', () => {
+    if (postitSaveTimeout) clearTimeout(postitSaveTimeout);
+    postitSaveTimeout = setTimeout(async () => {
+      if (!state.activeTrip) return;
+      state.activeTrip.quickNotes = textarea.value;
+      await putToStore('trips_store', state.activeTrip);
+      triggerSavedIndicator();
+    }, 400);
+  });
+
+  // 2. Selettore Colore Post-it
+  card.querySelectorAll('.postit-color-dot').forEach(dot => {
+    dot.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const color = dot.getAttribute('data-postit-color');
+      if (!color || !state.activeTrip) return;
+
+      // Aggiorna classe active visiva
+      card.querySelectorAll('.postit-color-dot').forEach(d => d.classList.remove('active'));
+      dot.classList.add('active');
+
+      // Aggiorna sfondo card
+      card.style.setProperty('background', color, 'important');
+
+      // Persisti in IndexedDB
+      state.activeTrip.quickNotesColor = color;
+      await putToStore('trips_store', state.activeTrip);
+      triggerSavedIndicator();
+    });
+  });
+
+  // 3. Aggiunta Foto / Immagine (Scatto con fotocamera o Galleria)
+  btnAddPhoto?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput?.click();
+  });
+
+  fileInput?.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !state.activeTrip) return;
+
+    try {
+      showToast('Compressione immagine...');
+      // Comprimi immagine client-side in WebP (max 1200px, 0.75 qualità)
+      const compressedBlob = await compressImageToWebP(file, 1200, 0.75);
+
+      // Converti in dataURL base64 per preview immediata offline
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const dataUrl = ev.target.result;
+        if (!state.activeTrip.quickNotesImages) {
+          state.activeTrip.quickNotesImages = [];
+        }
+
+        const newImageRecord = {
+          id: 'pimg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          dataUrl: dataUrl
+        };
+
+        state.activeTrip.quickNotesImages.push(newImageRecord);
+        await putToStore('trips_store', state.activeTrip);
+
+        fileInput.value = '';
+        renderPostitImages(state.activeTrip);
+        triggerSavedIndicator();
+        showToast('Foto allegata agli appunti');
+      };
+      reader.readAsDataURL(compressedBlob);
+    } catch (err) {
+      console.error('Errore caricamento immagine post-it:', err);
+      showToast('Errore nel caricamento della foto');
+    }
+  });
+
+  // 4. Svuota Post-it (con conferma se contiene testo o foto)
+  btnClear?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!state.activeTrip) return;
+
+    const hasContent = (textarea.value.trim().length > 0) || (state.activeTrip.quickNotesImages && state.activeTrip.quickNotesImages.length > 0);
+    if (hasContent) {
+      const confirmClear = confirm('Vuoi cancellare tutto il testo e le immagini degli appunti?');
+      if (!confirmClear) return;
+    }
+
+    textarea.value = '';
+    state.activeTrip.quickNotes = '';
+    state.activeTrip.quickNotesImages = [];
+    await putToStore('trips_store', state.activeTrip);
+    renderPostitImages(state.activeTrip);
+    triggerSavedIndicator();
+    showToast('Appunti svuotati');
+  });
+
+  // 5. Setup listener miniature esistenti
+  bindPostitImageInteractions(state.activeTrip);
+}
+
+function renderPostitImages(trip) {
+  const container = document.getElementById('dashboard-postit-images');
+  if (!container) return;
+
+  const images = trip.quickNotesImages || [];
+  if (images.length === 0) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  container.style.display = 'flex';
+  container.innerHTML = images.map(img => `
+    <div class="postit-thumb-wrap" data-postit-img-id="${escapeHTML(img.id)}">
+      <img src="${img.dataUrl}" class="postit-thumb-img" alt="Allegato appunto" loading="lazy">
+      <button class="postit-thumb-del" data-postit-del-id="${escapeHTML(img.id)}" title="Rimuovi foto" aria-label="Rimuovi foto">✕</button>
+    </div>
+  `).join('');
+
+  bindPostitImageInteractions(trip);
+}
+
+function bindPostitImageInteractions(trip) {
+  const container = document.getElementById('dashboard-postit-images');
+  if (!container) return;
+
+  // Tap su miniatura -> apri Lightbox a schermo intero
+  container.querySelectorAll('.postit-thumb-wrap').forEach(wrap => {
+    wrap.addEventListener('click', (e) => {
+      if (e.target.closest('.postit-thumb-del')) return;
+      const imgEl = wrap.querySelector('.postit-thumb-img');
+      if (imgEl && imgEl.src) {
+        openPostitLightbox(imgEl.src);
+      }
+    });
+  });
+
+  // Tap su '✕' miniatura -> elimina singola foto
+  container.querySelectorAll('.postit-thumb-del').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const imgId = btn.getAttribute('data-postit-del-id');
+      if (!imgId || !state.activeTrip) return;
+
+      state.activeTrip.quickNotesImages = (state.activeTrip.quickNotesImages || []).filter(img => img.id !== imgId);
+      await putToStore('trips_store', state.activeTrip);
+      renderPostitImages(state.activeTrip);
+
+      const savedIndicator = document.getElementById('postitSavedIndicator');
+      if (savedIndicator) {
+        savedIndicator.classList.add('visible');
+        setTimeout(() => savedIndicator.classList.remove('visible'), 1500);
+      }
+      showToast('Foto rimossa');
+    });
+  });
+}
+
+function openPostitLightbox(src) {
+  const overlay = document.getElementById('postitLightboxOverlay');
+  const img = document.getElementById('postitLightboxImg');
+  if (!overlay || !img) return;
+
+  img.src = src;
+  overlay.classList.add('active');
+
+  const closeHandler = () => {
+    overlay.classList.remove('active');
+    img.src = '';
+    document.getElementById('btnClosePostitLightbox')?.removeEventListener('click', closeHandler);
+    overlay.removeEventListener('click', overlayClickHandler);
+  };
+
+  const overlayClickHandler = (e) => {
+    if (e.target === overlay) closeHandler();
+  };
+
+  document.getElementById('btnClosePostitLightbox')?.addEventListener('click', closeHandler);
+  overlay.addEventListener('click', overlayClickHandler);
 }
 
 function initDashLeafletMapInstance() {

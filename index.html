@@ -22,9 +22,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=50) -->
-  <link rel="stylesheet" href="./styles.css?v=50">
-  <link rel="modulepreload" href="./db.js?v=50">
+  <!-- Stylesheet (Cache-Busting ?v=51) -->
+  <link rel="stylesheet" href="./styles.css?v=51">
+  <link rel="modulepreload" href="./db.js?v=51">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -299,6 +299,16 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- ==========================================================================
+       OVERLAY 3: LIGHTBOX IMMAGINI (Post-it / Foglietti Dashboard)
+       ========================================================================== -->
+  <div id="postitLightboxOverlay" class="postit-lightbox-overlay" role="dialog" aria-modal="true">
+    <button id="btnClosePostitLightbox" class="postit-lightbox-close-btn" aria-label="Chiudi visualizzatore">
+      ✕ Chiudi
+    </button>
+    <img id="postitLightboxImg" class="postit-lightbox-img" src="" alt="Anteprima immagine appunti">
   </div>
 
   <!-- ==========================================================================
@@ -949,8 +959,8 @@
   <!-- Leaflet JS da CDN (cachato nel Service Worker per funzionamento offline) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=50) -->
-  <script type="module" src="./app.js?v=50"></script>
+  <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=51) -->
+  <script type="module" src="./app.js?v=51"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>

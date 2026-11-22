@@ -5806,8 +5806,280 @@ button.accent,
 }
 
 /* ==========================================================================
-   CONTRASTO DARK MODE: VIAGGIO -> SOTTO-TAB VALIGIA
+   POST-IT "APPUNTI AL VOLO" CON COLORI & IMMAGINI (DASHBOARD ZONA EURO)
    ========================================================================== */
+.dash-postit-card {
+  padding: 16px 16px 14px 16px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06) !important;
+  position: relative !important;
+  transition: background-color var(--duration-normal) ease, border-color var(--duration-normal) ease;
+  color: #1C1F1E !important;
+  margin-bottom: 16px !important;
+}
+
+[data-theme="dark"] .dash-postit-card {
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.30) !important;
+  color: #1C1F1E !important;
+}
+
+.postit-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.postit-header-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.postit-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(27, 107, 77, 0.12);
+  color: #1B6B4D;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.postit-title {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  color: #1C1F1E !important;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.postit-saved-indicator {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1B6B4D;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  user-select: none;
+  pointer-events: none;
+}
+
+.postit-saved-indicator.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.postit-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.postit-colors-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.postit-color-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  padding: 0;
+  box-sizing: border-box;
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  flex-shrink: 0;
+}
+
+.postit-color-dot:active {
+  transform: scale(0.9);
+}
+
+.postit-color-dot.active {
+  border: 2px solid #1B6B4D !important;
+  box-shadow: 0 0 0 1.5px rgba(27, 107, 77, 0.35);
+  transform: scale(1.15);
+}
+
+.postit-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1C1F1E;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  transition: background var(--duration-fast) ease, transform var(--duration-fast) ease;
+}
+
+.postit-tool-btn:active {
+  transform: scale(0.92);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.postit-textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #1C1F1E !important;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  resize: vertical;
+  min-height: 80px;
+  padding: 4px 2px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.postit-textarea::placeholder {
+  color: rgba(28, 31, 30, 0.50) !important;
+  font-weight: 400;
+}
+
+/* Galleria Miniature Orizzontale */
+.postit-images-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 6px 2px 4px 2px;
+  margin-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.12);
+  -webkit-overflow-scrolling: touch;
+}
+
+.postit-images-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.postit-thumb-wrap {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.05);
+  transition: transform var(--duration-fast) ease;
+}
+
+.postit-thumb-wrap:active {
+  transform: scale(0.96);
+}
+
+.postit-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.postit-thumb-del {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: background var(--duration-fast) ease;
+  z-index: 2;
+}
+
+.postit-thumb-del:active {
+  background: #D93829;
+}
+
+/* ==========================================================================
+   LIGHTBOX IMMAGINI POST-IT / GATE
+   ========================================================================== */
+.postit-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.postit-lightbox-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.postit-lightbox-close-btn {
+  position: absolute;
+  top: calc(var(--sat) + 14px);
+  right: 18px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #FFFFFF;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+  z-index: 10001;
+}
+
+.postit-lightbox-close-btn:active {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.postit-lightbox-img {
+  max-width: 94vw;
+  max-height: 82dvh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+  user-select: none;
+}
+
 [data-theme="dark"] .checklist-accordion-group {
   background: transparent;
 }
