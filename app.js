@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=45';
+} from './db.js?v=46';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -3158,62 +3158,82 @@ function renderTabWallet() {
       return f.category === state.activeWalletFilter;
     });
 
-    // Ordina in cima i documenti con pinnedWallet: true
-    filteredFiles.sort((a, b) => {
-      const aPinned = Boolean(a.pinnedWallet);
-      const bPinned = Boolean(b.pinnedWallet);
-      if (aPinned && !bPinned) return -1;
-      if (!aPinned && bPinned) return 1;
-      return (b.lastModified || 0) - (a.lastModified || 0);
-    });
+    const pinnedGroup = filteredFiles.filter(f => Boolean(f.pinnedWallet));
+    const normalGroup = filteredFiles.filter(f => !f.pinnedWallet);
+
+    pinnedGroup.sort((a, b) => (b.lastModified || 0) - (a.lastModified || 0));
+    normalGroup.sort((a, b) => (b.lastModified || 0) - (a.lastModified || 0));
+
+    const renderPassCardHtml = (file) => {
+      const isPdf = file.type === 'application/pdf';
+      const badge = getCategoryBadgeData(file.category);
+      const subNote = file.notes ? escapeHTML(file.notes) : formatFileSize(file.size);
+      const isDashPinned = Boolean(file.pinnedDashboard !== undefined ? file.pinnedDashboard : file.isPinned);
+      const isWalletPinned = Boolean(file.pinnedWallet);
+
+      return `
+        <div class="wallet-pass-row ${isWalletPinned ? 'doc-card-pinned is-wallet-pinned' : ''}" data-file-id="${file.id}">
+          <div class="wallet-pass-thumb-box" data-action="gate" data-file-id="${file.id}">
+            ${isPdf ? `
+              <div class="wallet-pass-pdf-icon">PDF</div>
+            ` : `
+              <img class="wallet-pass-thumb-img" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
+            `}
+          </div>
+
+          <div class="wallet-pass-info" data-action="gate" data-file-id="${file.id}">
+            <div class="wallet-pass-title-row" style="display:flex; align-items:center; gap:5px;">
+              ${isWalletPinned ? `<span class="wallet-pin-indicator" title="Fissato in cima al Wallet">📌</span>` : ''}
+              <span class="wallet-pass-title">${escapeHTML(file.title)}</span>
+            </div>
+            <div class="wallet-pass-meta">
+              <span class="taxi-badge ${badge.cls}" style="font-size:9.5px; padding:1px 5px;">${badge.label}</span>
+              <span class="wallet-pass-subnote">${subNote}</span>
+            </div>
+          </div>
+
+          <div class="wallet-pass-actions">
+            <button class="wallet-action-icon-btn ${isWalletPinned ? 'active' : ''}" data-action="pin-wallet" data-file-id="${file.id}" title="${isWalletPinned ? 'Rimuovi pin dal Wallet' : 'Pinna in cima al Wallet'}" aria-label="Pin Wallet">
+              📌
+            </button>
+            <button class="wallet-action-icon-btn ${isDashPinned ? 'active' : ''}" data-action="pin-dashboard" data-file-id="${file.id}" title="${isDashPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin Dashboard">
+              🏠
+            </button>
+            <button class="wallet-action-icon-btn" data-action="toggle-vault" data-file-id="${file.id}" title="Sposta in Cassaforte" aria-label="Cassaforte">
+              🔒
+            </button>
+            <button class="wallet-action-icon-btn btn-del" data-action="delete" data-file-id="${file.id}" title="Elimina" aria-label="Elimina">
+              🗑
+            </button>
+          </div>
+        </div>
+      `;
+    };
 
     if (filteredFiles.length > 0) {
       html += `<div class="wallet-pass-list">`;
-      filteredFiles.forEach(file => {
-        const isPdf = file.type === 'application/pdf';
-        const badge = getCategoryBadgeData(file.category);
-        const subNote = file.notes ? escapeHTML(file.notes) : formatFileSize(file.size);
-        const isDashPinned = Boolean(file.pinnedDashboard !== undefined ? file.pinnedDashboard : file.isPinned);
-        const isWalletPinned = Boolean(file.pinnedWallet);
+      
+      // 1. Gruppo Pinnati
+      pinnedGroup.forEach(file => {
+        html += renderPassCardHtml(file);
+      });
 
+      // 2. Separatore Strappo Biglietto solo se entrambi i gruppi hanno almeno 1 documento
+      if (pinnedGroup.length > 0 && normalGroup.length > 0) {
         html += `
-          <div class="wallet-pass-row ${isWalletPinned ? 'is-wallet-pinned' : ''}" data-file-id="${file.id}">
-            <div class="wallet-pass-thumb-box" data-action="gate" data-file-id="${file.id}">
-              ${isPdf ? `
-                <div class="wallet-pass-pdf-icon">PDF</div>
-              ` : `
-                <img class="wallet-pass-thumb-img" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
-              `}
-            </div>
-
-            <div class="wallet-pass-info" data-action="gate" data-file-id="${file.id}">
-              <div class="wallet-pass-title-row" style="display:flex; align-items:center; gap:5px;">
-                ${isWalletPinned ? `<span class="wallet-pin-indicator" title="Fissato in cima al Wallet">📌</span>` : ''}
-                <span class="wallet-pass-title">${escapeHTML(file.title)}</span>
-              </div>
-              <div class="wallet-pass-meta">
-                <span class="taxi-badge ${badge.cls}" style="font-size:9.5px; padding:1px 5px;">${badge.label}</span>
-                <span class="wallet-pass-subnote">${subNote}</span>
-              </div>
-            </div>
-
-            <div class="wallet-pass-actions">
-              <button class="wallet-action-icon-btn ${isWalletPinned ? 'active' : ''}" data-action="pin-wallet" data-file-id="${file.id}" title="${isWalletPinned ? 'Rimuovi pin dal Wallet' : 'Pinna in cima al Wallet'}" aria-label="Pin Wallet">
-                📌
-              </button>
-              <button class="wallet-action-icon-btn ${isDashPinned ? 'active' : ''}" data-action="pin-dashboard" data-file-id="${file.id}" title="${isDashPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin Dashboard">
-                🏠
-              </button>
-              <button class="wallet-action-icon-btn" data-action="toggle-vault" data-file-id="${file.id}" title="Sposta in Cassaforte" aria-label="Cassaforte">
-                🔒
-              </button>
-              <button class="wallet-action-icon-btn btn-del" data-action="delete" data-file-id="${file.id}" title="Elimina" aria-label="Elimina">
-                🗑
-              </button>
-            </div>
+          <div class="dashboard-ticket-divider wallet-ticket-divider" aria-hidden="true">
+            <span class="divider-line"></span>
+            <span class="divider-label">ALTRI DOCUMENTI</span>
+            <span class="divider-line"></span>
           </div>
         `;
+      }
+
+      // 3. Gruppo Altri Documenti
+      normalGroup.forEach(file => {
+        html += renderPassCardHtml(file);
       });
+
       html += `</div>`;
 
       // Semplice pulsante "+" compatto e pulito centrato sotto la lista dei documenti
@@ -3294,16 +3314,21 @@ function renderTabWallet() {
       `;
 
       if (vaultFiles.length > 0) {
-        html += `<div class="wallet-pass-list">`;
-        vaultFiles.forEach(file => {
+        const pinnedVault = vaultFiles.filter(f => Boolean(f.pinnedWallet));
+        const normalVault = vaultFiles.filter(f => !f.pinnedWallet);
+
+        pinnedVault.sort((a, b) => (b.lastModified || 0) - (a.lastModified || 0));
+        normalVault.sort((a, b) => (b.lastModified || 0) - (a.lastModified || 0));
+
+        const renderVaultCardHtml = (file) => {
           const isPdf = file.type === 'application/pdf';
           const badge = getCategoryBadgeData(file.category);
           const subNote = file.notes ? escapeHTML(file.notes) : formatFileSize(file.size);
           const isDashPinned = Boolean(file.pinnedDashboard !== undefined ? file.pinnedDashboard : file.isPinned);
           const isWalletPinned = Boolean(file.pinnedWallet);
 
-          html += `
-            <div class="wallet-pass-row ${isWalletPinned ? 'is-wallet-pinned' : ''}" data-file-id="${file.id}">
+          return `
+            <div class="wallet-pass-row ${isWalletPinned ? 'doc-card-pinned is-wallet-pinned' : ''}" data-file-id="${file.id}">
               <div class="wallet-pass-thumb-box" data-action="gate" data-file-id="${file.id}">
                 ${isPdf ? `
                   <div class="wallet-pass-pdf-icon">PDF</div>
@@ -3339,7 +3364,27 @@ function renderTabWallet() {
               </div>
             </div>
           `;
+        };
+
+        html += `<div class="wallet-pass-list">`;
+        pinnedVault.forEach(file => {
+          html += renderVaultCardHtml(file);
         });
+
+        if (pinnedVault.length > 0 && normalVault.length > 0) {
+          html += `
+            <div class="dashboard-ticket-divider wallet-ticket-divider" aria-hidden="true">
+              <span class="divider-line"></span>
+              <span class="divider-label">ALTRI DOCUMENTI</span>
+              <span class="divider-line"></span>
+            </div>
+          `;
+        }
+
+        normalVault.forEach(file => {
+          html += renderVaultCardHtml(file);
+        });
+
         html += `</div>`;
       } else {
         html += `

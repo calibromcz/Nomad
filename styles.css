@@ -1383,7 +1383,7 @@ body {
   background: rgba(239, 68, 68, 0.15);
 }
 
-/* Indicatore Documento Pinnato nel Wallet */
+/* Indicatore e Accento Documento Pinnato nel Wallet */
 .wallet-pin-indicator {
   font-size: 13px;
   line-height: 1;
@@ -1391,12 +1391,21 @@ body {
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
 }
 
+.wallet-pass-row.doc-card-pinned,
 .wallet-pass-row.is-wallet-pinned {
+  border-top: 3px solid #1B6B4D;
   border-left: 3.5px solid #1B6B4D;
 }
 
+[data-theme="dark"] .wallet-pass-row.doc-card-pinned,
 [data-theme="dark"] .wallet-pass-row.is-wallet-pinned {
+  border-top: 3px solid #10B981;
   border-left: 3.5px solid #10B981;
+}
+
+/* Divisore Strappo Biglietto nella lista Wallet */
+.dashboard-ticket-divider.wallet-ticket-divider {
+  margin: 10px 4px;
 }
 
 /* Badge categorie documento Industrial Pop */
