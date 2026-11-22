@@ -942,38 +942,16 @@ body {
   margin-bottom: 12px;
 }
 
-.wallet-add-btn-circle {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-ui);
+.wallet-main-title {
   font-size: 1.4rem;
-  font-weight: 700;
-  line-height: 1;
-  background: #1B6B4D;
-  color: #FFFFFF;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
-  flex-shrink: 0;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
-[data-theme="dark"] .wallet-add-btn-circle {
-  border: 1.5px solid #000000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.wallet-add-btn-circle:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #141414;
-}
-
-[data-theme="dark"] .wallet-add-btn-circle:active {
-  box-shadow: 0 1px 0 #000000;
+[data-theme="dark"] .wallet-main-title {
+  color: #FFFFFF !important;
 }
 
 /* Pulsante "+" compatto per aggiunta documenti nella tab Wallet */
@@ -1038,6 +1016,40 @@ body {
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Dark mode fix per Schermata Full-Screen Nuovo Documento */
+[data-theme="dark"] .wallet-upload-fullscreen-page {
+  background-color: #13171A !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .wallet-upload-fullscreen-page .form-label {
+  color: #FFFFFF !important;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .wallet-upload-fullscreen-page .wallet-checkbox-label {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .wallet-upload-fullscreen-page .wallet-checkbox-label span {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .wallet-upload-fullscreen-page .form-input,
+[data-theme="dark"] .wallet-upload-fullscreen-page .form-select {
+  color: #FFFFFF !important;
+  background: #1C2126 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] .wallet-upload-fullscreen-page .form-input::placeholder {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+[data-theme="dark"] .wallet-upload-fullscreen-page span[style*="var(--text-tertiary)"] {
+  color: rgba(255, 255, 255, 0.72) !important;
 }
 
 /* Category Pills Selector per Aggiungi Documento */
@@ -1222,90 +1234,6 @@ body {
   color: #FFFFFF;
 }
 
-/* Barra Compatta Alloggio & Codici */
-.wallet-hotel-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  margin-bottom: 14px;
-  min-height: 52px;
-  box-sizing: border-box;
-  background: var(--bg-card);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-  cursor: pointer;
-  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
-}
-
-[data-theme="dark"] .wallet-hotel-bar {
-  background: #FCFBF8 !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28) !important;
-  color: #1C1F1E !important;
-}
-
-.wallet-hotel-bar:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-}
-
-.wallet-hotel-bar:active {
-  transform: translateY(1px);
-}
-
-.wallet-hotel-bar-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.wallet-hotel-bar-icon {
-  font-size: 20px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.wallet-hotel-bar-texts {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.wallet-hotel-bar-title {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.25;
-}
-
-[data-theme="dark"] .wallet-hotel-bar-title {
-  color: #1C1F1E !important;
-}
-
-.wallet-hotel-bar-sub {
-  font-size: 11.5px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 1px;
-}
-
-[data-theme="dark"] .wallet-hotel-bar-sub {
-  color: #555957 !important;
-}
-
-.wallet-hotel-bar-arrow {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  margin-left: 8px;
-  flex-shrink: 0;
-}
-
 /* Lista Documenti Compatta Pass-Style */
 .wallet-pass-list {
   display: flex;
@@ -1455,92 +1383,20 @@ body {
   background: rgba(239, 68, 68, 0.15);
 }
 
-.wallet-taxi-card {
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--border-color);
-  background: var(--bg-card);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+/* Indicatore Documento Pinnato nel Wallet */
+.wallet-pin-indicator {
+  font-size: 13px;
+  line-height: 1;
+  display: inline-block;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
 }
 
-.wallet-taxi-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+.wallet-pass-row.is-wallet-pinned {
+  border-left: 3.5px solid #1B6B4D;
 }
 
-.wallet-taxi-title {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-family: var(--font-ui);
-}
-
-.wallet-taxi-address {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  line-height: 1.4;
-  margin-bottom: 12px;
-}
-
-.wallet-taxi-actions {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.wallet-taxi-codes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 8px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--border-color);
-}
-
-.wallet-code-chip {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--bg-input);
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  cursor: pointer;
-  font-family: var(--font-ui);
-}
-.wallet-code-chip:active {
-  transform: translateY(1px);
-  border-color: var(--border-strong);
-}
-  transform: scale(0.98);
-}
-
-.wallet-code-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.wallet-code-label {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-}
-.wallet-code-val {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+[data-theme="dark"] .wallet-pass-row.is-wallet-pinned {
+  border-left: 3.5px solid #10B981;
 }
 
 /* Badge categorie documento Industrial Pop */
@@ -1600,118 +1456,6 @@ body {
 
 .sheet-add-btn-circle:active {
   transform: translateY(2px);
-}
-
-/* Card e Form Schede Multiple Alloggio & Codici */
-.hotel-card-multi {
-  padding: 14px 16px;
-  margin-bottom: 12px;
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="dark"] .hotel-card-multi {
-  background: #FCFBF8 !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28) !important;
-  color: #1C1F1E !important;
-}
-
-.hotel-card-multi-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.hotel-card-multi-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-[data-theme="dark"] .hotel-card-multi-title {
-  color: #1C1F1E !important;
-}
-
-.hotel-del-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  color: #EF4444;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  cursor: pointer;
-  transition: transform var(--duration-fast) ease;
-}
-
-.hotel-del-btn:active {
-  transform: translateY(1px);
-}
-
-.hotel-card-multi-addr {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  line-height: 1.4;
-  margin-bottom: 10px;
-}
-
-[data-theme="dark"] .hotel-card-multi-addr {
-  color: #555957 !important;
-}
-
-.hotel-show-taxi-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  background: #1B6B4D;
-  color: #FFFFFF;
-  border: none;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-bottom: 10px;
-  transition: transform var(--duration-fast) ease;
-}
-
-.hotel-show-taxi-btn:active {
-  transform: translateY(1px);
-}
-
-.hotel-form-box {
-  padding: 14px;
-  margin-bottom: 14px;
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  border: 1.5px solid var(--accent);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="dark"] .hotel-form-box {
-  background: #FCFBF8 !important;
-  color: #1C1F1E !important;
-}
-
-.hotel-form-title {
-  font-size: 13.5px;
-  font-weight: 800;
-  color: var(--text-primary);
-  margin-bottom: 10px;
-}
-
-[data-theme="dark"] .hotel-form-title {
-  color: #1C1F1E !important;
 }
 
 .wallet-filter-strip {

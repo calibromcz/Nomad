@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=43';
+} from './db.js?v=44';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -1266,280 +1266,6 @@ function getTripAccommodations(trip) {
   }
   return [];
 }
-
-function getAccTypeBadge(type) {
-  switch (type) {
-    case 'taxi': return { icon: '🚕', label: 'Taxi / Navetta' };
-    case 'transport': return { icon: '🚆', label: 'Trasporti / Bus' };
-    case 'ticket': return { icon: '🎟️', label: 'Biglietti' };
-    case 'other': return { icon: '📌', label: 'Altro' };
-    case 'hotel':
-    default: return { icon: '🏨', label: 'Alloggio' };
-  }
-}
-
-function openTaxiCodesSheet() {
-  const trip = state.activeTrip;
-  if (!trip) return;
-  const content = document.getElementById('sheetTaxiCodesContent');
-  if (!content) return;
-
-  const accommodations = getTripAccommodations(trip);
-  let showAddForm = false;
-
-  const renderSheetBody = () => {
-    let html = '';
-
-    // Form versatile per aggiungere una nuova scheda
-    if (showAddForm) {
-      html += `
-        <div class="hotel-form-box">
-          <div class="hotel-form-title">+ Nuova Scheda Alloggio & Codici</div>
-          <form id="formAddAccommodation" style="display:flex; flex-direction:column; gap:10px;">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-              <div>
-                <label class="form-label">Tipo Scheda</label>
-                <select id="newAccType" class="form-select">
-                  <option value="hotel">🏨 Alloggio</option>
-                  <option value="taxi">🚕 Taxi</option>
-                  <option value="transport">🚆 Trasporti / Bus</option>
-                  <option value="ticket">🎟️ Biglietti</option>
-                  <option value="other">📌 Altro</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label">Titolo / Nome *</label>
-                <input type="text" id="newAccName" class="form-input" placeholder="es. Grand Hotel, Treno K89" required>
-              </div>
-            </div>
-            <div>
-              <label class="form-label">Indirizzo / Destinazione / Fermata (opzionale)</label>
-              <textarea id="newAccAddress" class="form-input" rows="2" placeholder="Indirizzo per taxi, navigazione o fermata" style="resize:none;"></textarea>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-              <div>
-                <label class="form-label">PNR / Codice Biglietto</label>
-                <input type="text" id="newAccPnr" class="form-input" placeholder="es. AF116-K89, #TK849">
-              </div>
-              <div>
-                <label class="form-label">Lockbox / PIN / Wi-Fi</label>
-                <input type="text" id="newAccLockbox" class="form-input" placeholder="es. Codice 1234A, Pass Wi-Fi">
-              </div>
-            </div>
-            <div>
-              <label class="form-label">Note / Orari (opzionale)</label>
-              <input type="text" id="newAccNotes" class="form-input" placeholder="es. Check-in dalle 15:00, Binario 4">
-            </div>
-            <div style="display:flex; gap:8px; margin-top:4px;">
-              <button type="button" id="btnCancelAddAcc" class="btn-glass-pill" style="flex:1; justify-content:center; padding:8px 12px; font-weight:700;">
-                Annulla
-              </button>
-              <button type="submit" class="btn-glass-pill accent" style="flex:1; justify-content:center; padding:8px 12px; font-weight:700;">
-                Salva Scheda
-              </button>
-            </div>
-          </form>
-        </div>
-      `;
-    }
-
-    if (accommodations.length > 0) {
-      accommodations.forEach((acc, idx) => {
-        const typeInfo = getAccTypeBadge(acc.type || 'hotel');
-        html += `
-          <div class="hotel-card-multi" data-acc-id="${acc.id}">
-            <div class="hotel-card-multi-header">
-              <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
-                <span class="hotel-tag-badge">${typeInfo.icon} ${typeInfo.label}</span>
-                <div class="hotel-card-multi-title" style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                  ${escapeHTML(acc.name || `Scheda ${idx + 1}`)}
-                </div>
-              </div>
-              <button class="hotel-del-btn" data-action="delete-acc" data-acc-id="${acc.id}" title="Elimina Scheda" aria-label="Elimina Scheda">
-                🗑
-              </button>
-            </div>
-
-            ${acc.address ? `
-              <div class="hotel-card-multi-addr">
-                ${escapeHTML(acc.address)}
-              </div>
-              <button class="hotel-show-taxi-btn" data-action="show-full-address" data-acc-id="${acc.id}">
-                ⛶ Mostra a Schermo Intero
-              </button>
-            ` : ''}
-
-            <div class="code-quick-list" style="margin-top:6px;">
-              ${acc.pnr ? `
-                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.pnr)}" data-copy-desc="PNR / Biglietto">
-                  <div class="code-quick-info">
-                    <span class="code-quick-label">PNR / Biglietto</span>
-                    <span class="code-quick-val tabular-nums">${escapeHTML(acc.pnr)}</span>
-                  </div>
-                  <span class="code-quick-copy-badge">📋 Copia</span>
-                </div>
-              ` : ''}
-
-              ${acc.wifi ? `
-                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.wifi)}" data-copy-desc="Wi-Fi">
-                  <div class="code-quick-info">
-                    <span class="code-quick-label">Wi-Fi</span>
-                    <span class="code-quick-val">${escapeHTML(acc.wifi)}</span>
-                  </div>
-                  <span class="code-quick-copy-badge">📋 Copia</span>
-                </div>
-              ` : ''}
-
-              ${acc.lockbox ? `
-                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.lockbox)}" data-copy-desc="Lockbox / Codice">
-                  <div class="code-quick-info">
-                    <span class="code-quick-label">Lockbox / PIN / Codice</span>
-                    <span class="code-quick-val tabular-nums">${escapeHTML(acc.lockbox)}</span>
-                  </div>
-                  <span class="code-quick-copy-badge">📋 Copia</span>
-                </div>
-              ` : ''}
-
-              ${acc.notes ? `
-                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.notes)}" data-copy-desc="Note">
-                  <div class="code-quick-info">
-                    <span class="code-quick-label">Note / Info</span>
-                    <span class="code-quick-val">${escapeHTML(acc.notes)}</span>
-                  </div>
-                  <span class="code-quick-copy-badge">📋 Copia</span>
-                </div>
-              ` : ''}
-            </div>
-          </div>
-        `;
-      });
-    } else if (!showAddForm) {
-      html += `
-        <div class="glass-card" style="text-align:center; padding:28px 16px; border-radius:14px;">
-          <p style="color:var(--text-secondary); font-size:13.5px; margin-bottom:12px;">Nessuna scheda alloggio, trasporto o codice salvato.</p>
-          <button class="btn-glass-pill accent" id="btnEmptyAddAcc">+ Aggiungi Nuova Scheda</button>
-        </div>
-      `;
-    }
-
-    content.innerHTML = html;
-
-    // Bind event form aggiunta
-    if (showAddForm) {
-      document.getElementById('btnCancelAddAcc')?.addEventListener('click', () => {
-        showAddForm = false;
-        renderSheetBody();
-      });
-
-      document.getElementById('formAddAccommodation')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const type = document.getElementById('newAccType')?.value || 'hotel';
-        const name = document.getElementById('newAccName')?.value.trim();
-        const address = document.getElementById('newAccAddress')?.value.trim();
-        const pnr = document.getElementById('newAccPnr')?.value.trim();
-        const lockbox = document.getElementById('newAccLockbox')?.value.trim();
-        const notes = document.getElementById('newAccNotes')?.value.trim();
-
-        if (!name) {
-          showToast('Inserisci un titolo per la scheda');
-          return;
-        }
-
-        const newAcc = {
-          id: 'acc_' + Date.now(),
-          type,
-          name,
-          address: address || '',
-          pnr: pnr || '',
-          lockbox: lockbox || '',
-          notes: notes || ''
-        };
-
-        trip.accommodations = trip.accommodations || [];
-        trip.accommodations.unshift(newAcc);
-
-        // Allinea anche l'alloggio primario se è il primo con indirizzo
-        if ((!trip.accommodation || !trip.accommodation.name) && address) {
-          trip.accommodation = {
-            name: newAcc.name,
-            address: newAcc.address
-          };
-        }
-
-        await putToStore('trips_store', trip);
-        showAddForm = false;
-        showToast('Nuova scheda salvata!');
-        renderTabWallet();
-        renderSheetBody();
-      });
-    } else {
-      document.getElementById('btnEmptyAddAcc')?.addEventListener('click', () => {
-        showAddForm = true;
-        renderSheetBody();
-      });
-    }
-
-    // Bind eliminazione singola scheda
-    content.querySelectorAll('[data-action="delete-acc"]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const accId = btn.getAttribute('data-acc-id');
-        const targetAcc = accommodations.find(a => a.id === accId);
-        if (confirm(`Eliminare la scheda "${targetAcc?.name || 'Alloggio'}"?`)) {
-          trip.accommodations = trip.accommodations.filter(a => a.id !== accId);
-          await putToStore('trips_store', trip);
-          showToast('Scheda eliminata');
-          renderTabWallet();
-          renderSheetBody();
-        }
-      });
-    });
-
-    // Bind Mostra a schermo intero (Taxi Card Overlay con Wake Lock)
-    content.querySelectorAll('[data-action="show-full-address"]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const accId = btn.getAttribute('data-acc-id');
-        const targetAcc = accommodations.find(a => a.id === accId);
-        if (targetAcc) {
-          closeAllSheets();
-          openTaxiCard(targetAcc);
-        }
-      });
-    });
-
-    // Bind tap-to-copy
-    content.querySelectorAll('.code-quick-item[data-copy-val]').forEach(item => {
-      item.addEventListener('click', () => {
-        const val = item.getAttribute('data-copy-val');
-        const desc = item.getAttribute('data-copy-desc') || 'Codice';
-        if (val) {
-          copyToClipboard(val, `${desc} copiato!`);
-          const badge = item.querySelector('.code-quick-copy-badge');
-          if (badge) {
-            const orig = badge.textContent;
-            badge.textContent = 'Copiato ✓';
-            setTimeout(() => { badge.textContent = orig; }, 1500);
-          }
-        }
-      });
-    });
-  };
-
-  renderSheetBody();
-
-  // Bottone "+" nell'header dello sheet
-  const headerAddBtn = document.getElementById('btnSheetAddAccommodation');
-  if (headerAddBtn) {
-    headerAddBtn.onclick = () => {
-      showAddForm = true;
-      renderSheetBody();
-    };
-  }
-
-  openSheet('sheetTaxiCodes');
-}
-
 
 /* ==========================================================================
    HELPER BUDGET MODAL & EVENT DELEGATION
@@ -3378,7 +3104,7 @@ function renderTabWallet() {
   // 1. BLOCCO 1: HEADER PULITO ("Wallet" senza il pulsante "+" in alto a destra)
   let html = `
     <div class="wallet-header-row">
-      <h2 style="font-size:1.4rem; font-weight:800; color:var(--text-primary); margin:0; letter-spacing:-0.02em;">Wallet</h2>
+      <h2 class="wallet-main-title">Wallet</h2>
     </div>
 
     <!-- 2. BLOCCO 2: SEGMENTED CONTROL (DOCUMENTI | CASSAFORTE) -->
@@ -3391,18 +3117,6 @@ function renderTabWallet() {
           🔒 Cassaforte (${files.filter(f => f.inVault).length})
         </button>
       </div>
-    </div>
-
-    <!-- 3. BLOCCO 3: BARRA COMPATTA "ALLOGGIO & CODICI" -->
-    <div class="wallet-hotel-bar" id="btnWalletOpenHotelSheet" role="button" tabindex="0" aria-label="Alloggio e Codici Rapidi">
-      <div class="wallet-hotel-bar-left">
-        <span class="wallet-hotel-bar-icon">🏨</span>
-        <div class="wallet-hotel-bar-texts">
-          <div class="wallet-hotel-bar-title">Alloggio & Codici</div>
-          <div class="wallet-hotel-bar-sub">${hotelSubText}</div>
-        </div>
-      </div>
-      <div class="wallet-hotel-bar-arrow">›</div>
     </div>
   `;
 
@@ -3434,15 +3148,26 @@ function renderTabWallet() {
       return f.category === state.activeWalletFilter;
     });
 
+    // Ordina in cima i documenti con pinnedWallet: true
+    filteredFiles.sort((a, b) => {
+      const aPinned = Boolean(a.pinnedWallet);
+      const bPinned = Boolean(b.pinnedWallet);
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      return (b.lastModified || 0) - (a.lastModified || 0);
+    });
+
     if (filteredFiles.length > 0) {
       html += `<div class="wallet-pass-list">`;
       filteredFiles.forEach(file => {
         const isPdf = file.type === 'application/pdf';
         const badge = getCategoryBadgeData(file.category);
         const subNote = file.notes ? escapeHTML(file.notes) : formatFileSize(file.size);
+        const isDashPinned = Boolean(file.pinnedDashboard !== undefined ? file.pinnedDashboard : file.isPinned);
+        const isWalletPinned = Boolean(file.pinnedWallet);
 
         html += `
-          <div class="wallet-pass-row" data-file-id="${file.id}">
+          <div class="wallet-pass-row ${isWalletPinned ? 'is-wallet-pinned' : ''}" data-file-id="${file.id}">
             <div class="wallet-pass-thumb-box" data-action="gate" data-file-id="${file.id}">
               ${isPdf ? `
                 <div class="wallet-pass-pdf-icon">PDF</div>
@@ -3452,7 +3177,10 @@ function renderTabWallet() {
             </div>
 
             <div class="wallet-pass-info" data-action="gate" data-file-id="${file.id}">
-              <div class="wallet-pass-title">${escapeHTML(file.title)}</div>
+              <div class="wallet-pass-title-row" style="display:flex; align-items:center; gap:5px;">
+                ${isWalletPinned ? `<span class="wallet-pin-indicator" title="Fissato in cima al Wallet">📌</span>` : ''}
+                <span class="wallet-pass-title">${escapeHTML(file.title)}</span>
+              </div>
               <div class="wallet-pass-meta">
                 <span class="taxi-badge ${badge.cls}" style="font-size:9.5px; padding:1px 5px;">${badge.label}</span>
                 <span class="wallet-pass-subnote">${subNote}</span>
@@ -3460,8 +3188,11 @@ function renderTabWallet() {
             </div>
 
             <div class="wallet-pass-actions">
-              <button class="wallet-action-icon-btn ${file.isPinned ? 'active' : ''}" data-action="pin" data-file-id="${file.id}" title="${file.isPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin">
+              <button class="wallet-action-icon-btn ${isWalletPinned ? 'active' : ''}" data-action="pin-wallet" data-file-id="${file.id}" title="${isWalletPinned ? 'Rimuovi pin dal Wallet' : 'Pinna in cima al Wallet'}" aria-label="Pin Wallet">
                 📌
+              </button>
+              <button class="wallet-action-icon-btn ${isDashPinned ? 'active' : ''}" data-action="pin-dashboard" data-file-id="${file.id}" title="${isDashPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin Dashboard">
+                🏠
               </button>
               <button class="wallet-action-icon-btn" data-action="toggle-vault" data-file-id="${file.id}" title="Sposta in Cassaforte" aria-label="Cassaforte">
                 🔒
@@ -3496,6 +3227,13 @@ function renderTabWallet() {
   } else {
     // CONTENUTO TAB CASSAFORTE 🔒
     const vaultFiles = files.filter(f => f.inVault);
+    vaultFiles.sort((a, b) => {
+      const aPinned = Boolean(a.pinnedWallet);
+      const bPinned = Boolean(b.pinnedWallet);
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      return (b.lastModified || 0) - (a.lastModified || 0);
+    });
 
     if (!state.vaultUnlocked) {
       // Schermata di sblocco PIN
@@ -3551,9 +3289,11 @@ function renderTabWallet() {
           const isPdf = file.type === 'application/pdf';
           const badge = getCategoryBadgeData(file.category);
           const subNote = file.notes ? escapeHTML(file.notes) : formatFileSize(file.size);
+          const isDashPinned = Boolean(file.pinnedDashboard !== undefined ? file.pinnedDashboard : file.isPinned);
+          const isWalletPinned = Boolean(file.pinnedWallet);
 
           html += `
-            <div class="wallet-pass-row" data-file-id="${file.id}">
+            <div class="wallet-pass-row ${isWalletPinned ? 'is-wallet-pinned' : ''}" data-file-id="${file.id}">
               <div class="wallet-pass-thumb-box" data-action="gate" data-file-id="${file.id}">
                 ${isPdf ? `
                   <div class="wallet-pass-pdf-icon">PDF</div>
@@ -3563,7 +3303,10 @@ function renderTabWallet() {
               </div>
 
               <div class="wallet-pass-info" data-action="gate" data-file-id="${file.id}">
-                <div class="wallet-pass-title">${escapeHTML(file.title)}</div>
+                <div class="wallet-pass-title-row" style="display:flex; align-items:center; gap:5px;">
+                  ${isWalletPinned ? `<span class="wallet-pin-indicator" title="Fissato in cima al Wallet">📌</span>` : ''}
+                  <span class="wallet-pass-title">${escapeHTML(file.title)}</span>
+                </div>
                 <div class="wallet-pass-meta">
                   <span class="taxi-badge ${badge.cls}" style="font-size:9.5px; padding:1px 5px;">${badge.label}</span>
                   <span class="wallet-pass-subnote">${subNote}</span>
@@ -3571,8 +3314,11 @@ function renderTabWallet() {
               </div>
 
               <div class="wallet-pass-actions">
-                <button class="wallet-action-icon-btn ${file.isPinned ? 'active' : ''}" data-action="pin" data-file-id="${file.id}" title="${file.isPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin">
+                <button class="wallet-action-icon-btn ${isWalletPinned ? 'active' : ''}" data-action="pin-wallet" data-file-id="${file.id}" title="${isWalletPinned ? 'Rimuovi pin dal Wallet' : 'Pinna in cima al Wallet'}" aria-label="Pin Wallet">
                   📌
+                </button>
+                <button class="wallet-action-icon-btn ${isDashPinned ? 'active' : ''}" data-action="pin-dashboard" data-file-id="${file.id}" title="${isDashPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin Dashboard">
+                  🏠
                 </button>
                 <button class="wallet-action-icon-btn active" data-action="toggle-vault" data-file-id="${file.id}" title="Rimuovi da Cassaforte" aria-label="Togli da Cassaforte">
                   🔓
@@ -3622,17 +3368,6 @@ function renderTabWallet() {
     renderTabWallet();
   });
 
-  // Apri Bottom Sheet Alloggio & Codici
-  document.getElementById('btnWalletOpenHotelSheet')?.addEventListener('click', () => {
-    openTaxiCodesSheet();
-  });
-  document.getElementById('btnWalletOpenHotelSheet')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openTaxiCodesSheet();
-    }
-  });
-
   // Filtri pillola Documenti
   container.querySelectorAll('.wallet-filter-item').forEach(pill => {
     pill.addEventListener('click', () => {
@@ -3647,7 +3382,7 @@ function renderTabWallet() {
   document.getElementById('btnEmptyUploadFile')?.addEventListener('click', () => openWalletUploadModal(false));
   document.getElementById('btnEmptyUploadVaultFile')?.addEventListener('click', () => openWalletUploadModal(true));
 
-  // Azioni sulle righe pass (Pin, Toggle Vault, Delete)
+  // Azioni sulle righe pass (Pin Wallet, Pin Dashboard, Toggle Vault, Delete)
   container.querySelectorAll('.wallet-action-icon-btn[data-action]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
@@ -3656,11 +3391,18 @@ function renderTabWallet() {
       const file = files.find(f => f.id === fileId);
       if (!file) return;
 
-      if (action === 'pin') {
-        file.isPinned = !file.isPinned;
+      if (action === 'pin-wallet') {
+        file.pinnedWallet = !file.pinnedWallet;
         await putToStore('files_store', file);
         await refreshApplicationData();
-        showToast(file.isPinned ? 'Pinnato in Dashboard' : 'Rimosso dalla Dashboard');
+        showToast(file.pinnedWallet ? 'Pinnato in cima al Wallet 📌' : 'Rimosso dal pin Wallet');
+      } else if (action === 'pin-dashboard' || action === 'pin') {
+        const curPinned = Boolean(file.pinnedDashboard !== undefined ? file.pinnedDashboard : file.isPinned);
+        file.pinnedDashboard = !curPinned;
+        file.isPinned = !curPinned;
+        await putToStore('files_store', file);
+        await refreshApplicationData();
+        showToast(file.pinnedDashboard ? 'Pinnato in Dashboard 🏠' : 'Rimosso dalla Dashboard');
       } else if (action === 'toggle-vault') {
         file.inVault = !file.inVault;
         await putToStore('files_store', file);
@@ -5787,14 +5529,6 @@ function setupEventListeners() {
     openSheet('sheetTrips');
   });
 
-  // Mantenimento retrocompatibile Taxi & Codici Rapidi
-  document.getElementById('btnTopTaxiCodes')?.addEventListener('click', () => {
-    openTaxiCodesSheet();
-  });
-  document.getElementById('btnTopCalc')?.addEventListener('click', () => {
-    openTaxiCodesSheet();
-  });
-
   document.getElementById('btnTopMap')?.addEventListener('click', () => {
     state.tripSubView = 'map';
     switchTab('trip');
@@ -5862,7 +5596,8 @@ function setupEventListeners() {
     const title = document.getElementById('fieldWalletTitle').value.trim();
     const category = document.getElementById('fieldWalletCategory').value;
     const notes = document.getElementById('fieldWalletNotes').value.trim();
-    const isPinned = Boolean(document.getElementById('fieldWalletPin')?.checked);
+    const pinnedDashboard = Boolean(document.getElementById('fieldWalletPinDashboard')?.checked);
+    const pinnedWallet = Boolean(document.getElementById('fieldWalletPinWallet')?.checked);
     const inVault = Boolean(document.getElementById('fieldWalletVault')?.checked);
 
     const file = selectedWalletFile;
@@ -5885,7 +5620,9 @@ function setupEventListeners() {
       title,
       category,
       notes,
-      isPinned,
+      isPinned: pinnedDashboard,
+      pinnedDashboard,
+      pinnedWallet,
       inVault
     });
 
@@ -6073,6 +5810,12 @@ function openWalletUploadModal(presetVault = false) {
   clearWalletUploadFile();
   const form = document.getElementById('formWalletUpload');
   if (form) form.reset();
+
+  const pinDashCheckbox = document.getElementById('fieldWalletPinDashboard');
+  if (pinDashCheckbox) pinDashCheckbox.checked = false;
+
+  const pinWalletCheckbox = document.getElementById('fieldWalletPinWallet');
+  if (pinWalletCheckbox) pinWalletCheckbox.checked = false;
 
   const vaultCheckbox = document.getElementById('fieldWalletVault');
   if (vaultCheckbox) vaultCheckbox.checked = Boolean(presetVault);

@@ -119,7 +119,9 @@ export async function processAndStoreFile(file, metadata = {}) {
     category: metadata.category || 'documents',
     title: metadata.title || file.name,
     notes: metadata.notes || '',
-    isPinned: Boolean(metadata.isPinned || false),
+    isPinned: Boolean(metadata.isPinned !== undefined ? metadata.isPinned : metadata.pinnedDashboard || false),
+    pinnedDashboard: Boolean(metadata.pinnedDashboard !== undefined ? metadata.pinnedDashboard : metadata.isPinned || false),
+    pinnedWallet: Boolean(metadata.pinnedWallet || false),
     inVault: Boolean(metadata.inVault || false),
     blob: finalBlob
   };
