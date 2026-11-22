@@ -300,6 +300,18 @@ export function getDemoTrip() {
       }
     },
     weatherUpdatedAt: Date.now() - 3600000,
+    accommodations: [
+      {
+        id: 'acc_demo_1',
+        name: 'The PuLi Hotel & Spa',
+        nameLocal: '璞丽酒店 (静安区常德路1号)',
+        address: '1 Changde Rd, Jing\'an District, Shanghai',
+        addressLocal: '上海市静安区常德路1号（近延安中路）',
+        pnr: 'AF116-K89X4P',
+        wifi: 'PuLi_Guest / SilkRoad2026',
+        lockbox: 'A-7492#'
+      }
+    ],
     accommodation: {
       name: 'The PuLi Hotel & Spa',
       nameLocal: '璞丽酒店 (静安区常德路1号)',

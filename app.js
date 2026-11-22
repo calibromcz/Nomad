@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=40';
+} from './db.js?v=41';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -1234,116 +1234,266 @@ function openWeatherForecastSheet() {
   openSheet('sheetWeatherForecast');
 }
 
+function getTripAccommodations(trip) {
+  if (!trip) return [];
+  if (Array.isArray(trip.accommodations) && trip.accommodations.length > 0) {
+    return trip.accommodations;
+  }
+  // Migrazione automatica da vecchio formato singolo
+  const hotel = trip.accommodation || {};
+  const codes = trip.codes || {};
+  if (hotel.name || hotel.address || codes.pnr || codes.wifi || codes.lockbox) {
+    const migrated = [{
+      id: 'acc_' + Date.now(),
+      name: hotel.name || 'Alloggio Principale',
+      nameLocal: hotel.nameLocal || '',
+      address: hotel.address || '',
+      addressLocal: hotel.addressLocal || '',
+      pnr: codes.pnr || '',
+      wifi: codes.wifi || '',
+      lockbox: codes.lockbox || '',
+      phone: hotel.phone || ''
+    }];
+    trip.accommodations = migrated;
+    putToStore('trips_store', trip).catch(() => {});
+    return migrated;
+  }
+  return [];
+}
+
 function openTaxiCodesSheet() {
   const trip = state.activeTrip;
   if (!trip) return;
   const content = document.getElementById('sheetTaxiCodesContent');
   if (!content) return;
 
-  const hotel = trip.accommodation || {};
-  const codes = trip.codes || {
-    pnr: 'AF116-K89X4P',
-    lockbox: 'A-7492#',
-    wifi: 'PuLi_Guest / SilkRoad2026',
-    insurance: 'Allianz Global Care — Polizza #IT-948190',
-    emergencyPhone: '+39 02 2660 9999'
+  const accommodations = getTripAccommodations(trip);
+  let showAddForm = false;
+
+  const renderSheetBody = () => {
+    let html = '';
+
+    // Form per aggiungere una nuova scheda
+    if (showAddForm) {
+      html += `
+        <div class="hotel-form-box">
+          <div class="hotel-form-title">+ Nuova Scheda Alloggio & Codici</div>
+          <form id="formAddAccommodation" style="display:flex; flex-direction:column; gap:10px;">
+            <div>
+              <label class="form-label">Nome Alloggio / Titolo *</label>
+              <input type="text" id="newAccName" class="form-input" placeholder="es. Grand Hotel Shanghai, Airbnb Kyoto" required>
+            </div>
+            <div>
+              <label class="form-label">Indirizzo Completo *</label>
+              <textarea id="newAccAddress" class="form-input" rows="2" placeholder="Indirizzo per taxi e navigazione" required style="resize:none;"></textarea>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <div>
+                <label class="form-label">PNR Volo / Biglietto</label>
+                <input type="text" id="newAccPnr" class="form-input" placeholder="es. AF116-K89">
+              </div>
+              <div>
+                <label class="form-label">Wi-Fi (Nome / Pass)</label>
+                <input type="text" id="newAccWifi" class="form-input" placeholder="es. Hotel_Guest / pass123">
+              </div>
+            </div>
+            <div>
+              <label class="form-label">Lockbox / Codice Porta</label>
+              <input type="text" id="newAccLockbox" class="form-input" placeholder="es. #7492 oppure 1234A">
+            </div>
+            <div style="display:flex; gap:8px; margin-top:4px;">
+              <button type="button" id="btnCancelAddAcc" class="btn-glass-pill" style="flex:1; justify-content:center; padding:8px 12px; font-weight:700;">
+                Annulla
+              </button>
+              <button type="submit" class="btn-glass-pill accent" style="flex:1; justify-content:center; padding:8px 12px; font-weight:700;">
+                Salva Scheda
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+    }
+
+    if (accommodations.length > 0) {
+      accommodations.forEach((acc, idx) => {
+        html += `
+          <div class="hotel-card-multi" data-acc-id="${acc.id}">
+            <div class="hotel-card-multi-header">
+              <div class="hotel-card-multi-title">
+                <span>🏨</span>
+                <span>${escapeHTML(acc.name || `Alloggio ${idx + 1}`)}</span>
+              </div>
+              <button class="hotel-del-btn" data-action="delete-acc" data-acc-id="${acc.id}" title="Elimina Scheda" aria-label="Elimina Scheda">
+                🗑
+              </button>
+            </div>
+
+            ${acc.address ? `
+              <div class="hotel-card-multi-addr">
+                ${escapeHTML(acc.address)}
+              </div>
+              <button class="hotel-show-taxi-btn" data-action="show-full-address" data-acc-id="${acc.id}">
+                ⛶ Mostra a Schermo Intero
+              </button>
+            ` : `
+              <div style="font-size:12px; color:var(--text-tertiary); margin-bottom:8px;">Nessun indirizzo specificato</div>
+            `}
+
+            <div class="code-quick-list" style="margin-top:6px;">
+              ${acc.pnr ? `
+                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.pnr)}" data-copy-desc="PNR Volo">
+                  <div class="code-quick-info">
+                    <span class="code-quick-label">PNR Volo</span>
+                    <span class="code-quick-val tabular-nums">${escapeHTML(acc.pnr)}</span>
+                  </div>
+                  <span class="code-quick-copy-badge">📋 Copia</span>
+                </div>
+              ` : ''}
+
+              ${acc.wifi ? `
+                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.wifi)}" data-copy-desc="Password Wi-Fi">
+                  <div class="code-quick-info">
+                    <span class="code-quick-label">Wi-Fi</span>
+                    <span class="code-quick-val">${escapeHTML(acc.wifi)}</span>
+                  </div>
+                  <span class="code-quick-copy-badge">📋 Copia</span>
+                </div>
+              ` : ''}
+
+              ${acc.lockbox ? `
+                <div class="code-quick-item" data-copy-val="${escapeHTML(acc.lockbox)}" data-copy-desc="Codice Porta">
+                  <div class="code-quick-info">
+                    <span class="code-quick-label">Lockbox / Porta</span>
+                    <span class="code-quick-val tabular-nums">${escapeHTML(acc.lockbox)}</span>
+                  </div>
+                  <span class="code-quick-copy-badge">📋 Copia</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
+    } else if (!showAddForm) {
+      html += `
+        <div class="glass-card" style="text-align:center; padding:28px 16px; border-radius:14px;">
+          <p style="color:var(--text-secondary); font-size:13.5px; margin-bottom:12px;">Nessuna scheda alloggio o codice salvato.</p>
+          <button class="btn-glass-pill accent" id="btnEmptyAddAcc">+ Aggiungi Nuova Scheda</button>
+        </div>
+      `;
+    }
+
+    content.innerHTML = html;
+
+    // Bind event form aggiunta
+    if (showAddForm) {
+      document.getElementById('btnCancelAddAcc')?.addEventListener('click', () => {
+        showAddForm = false;
+        renderSheetBody();
+      });
+
+      document.getElementById('formAddAccommodation')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('newAccName')?.value.trim();
+        const address = document.getElementById('newAccAddress')?.value.trim();
+        const pnr = document.getElementById('newAccPnr')?.value.trim();
+        const wifi = document.getElementById('newAccWifi')?.value.trim();
+        const lockbox = document.getElementById('newAccLockbox')?.value.trim();
+
+        if (!name || !address) {
+          showToast('Inserisci nome e indirizzo');
+          return;
+        }
+
+        const newAcc = {
+          id: 'acc_' + Date.now(),
+          name,
+          address,
+          pnr: pnr || '',
+          wifi: wifi || '',
+          lockbox: lockbox || ''
+        };
+
+        trip.accommodations = trip.accommodations || [];
+        trip.accommodations.unshift(newAcc);
+
+        // Allinea anche l'alloggio primario se è il primo
+        if (!trip.accommodation || !trip.accommodation.name) {
+          trip.accommodation = {
+            name: newAcc.name,
+            address: newAcc.address
+          };
+        }
+
+        await putToStore('trips_store', trip);
+        showAddForm = false;
+        showToast('Nuova scheda alloggio salvata!');
+        renderTabWallet();
+        renderSheetBody();
+      });
+    } else {
+      document.getElementById('btnEmptyAddAcc')?.addEventListener('click', () => {
+        showAddForm = true;
+        renderSheetBody();
+      });
+    }
+
+    // Bind eliminazione singola scheda
+    content.querySelectorAll('[data-action="delete-acc"]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const accId = btn.getAttribute('data-acc-id');
+        const targetAcc = accommodations.find(a => a.id === accId);
+        if (confirm(`Eliminare la scheda "${targetAcc?.name || 'Alloggio'}"?`)) {
+          trip.accommodations = trip.accommodations.filter(a => a.id !== accId);
+          await putToStore('trips_store', trip);
+          showToast('Scheda eliminata');
+          renderTabWallet();
+          renderSheetBody();
+        }
+      });
+    });
+
+    // Bind Mostra a schermo intero (Taxi Card Overlay con Wake Lock)
+    content.querySelectorAll('[data-action="show-full-address"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const accId = btn.getAttribute('data-acc-id');
+        const targetAcc = accommodations.find(a => a.id === accId);
+        if (targetAcc) {
+          closeAllSheets();
+          openTaxiCard(targetAcc);
+        }
+      });
+    });
+
+    // Bind tap-to-copy
+    content.querySelectorAll('.code-quick-item[data-copy-val]').forEach(item => {
+      item.addEventListener('click', () => {
+        const val = item.getAttribute('data-copy-val');
+        const desc = item.getAttribute('data-copy-desc') || 'Codice';
+        if (val) {
+          copyToClipboard(val, `${desc} copiato!`);
+          const badge = item.querySelector('.code-quick-copy-badge');
+          if (badge) {
+            const orig = badge.textContent;
+            badge.textContent = 'Copiato ✓';
+            setTimeout(() => { badge.textContent = orig; }, 1500);
+          }
+        }
+      });
+    });
   };
 
-  content.innerHTML = `
-    <!-- Tasto Diretto Taxi Card a Schermo Intero -->
-    <button class="taxi-quick-card-btn" id="btnSheetOpenTaxiFull">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:20px;height:20px;">
-        <rect x="2" y="3" width="20" height="18" rx="3"></rect>
-        <path d="M7 8h10M7 12h10M7 16h6"></path>
-      </svg>
-      Mostra Taxi Card Schermo Intero
-    </button>
+  renderSheetBody();
 
-    <!-- Info Indirizzo Locale Sintetico -->
-    <div class="glass-card" style="padding:12px 14px; margin-bottom:14px;">
-      <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--accent); margin-bottom:4px;">Destinazione Taxi</div>
-      <div style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:2px;">${escapeHTML(hotel.nameLocal || hotel.name || 'Alloggio')}</div>
-      <div style="font-size:12.5px; color:var(--text-secondary);">${escapeHTML(hotel.addressLocal || hotel.address || '')}</div>
-    </div>
-
-    <div style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; padding-left:2px;">
-      Codici Rapidi (Tocca per Copiare)
-    </div>
-
-    <!-- Lista Codici Rapidi con Tap-to-Copy -->
-    <div class="code-quick-list">
-      <div class="code-quick-item" data-copy-val="${escapeHTML(codes.pnr || 'AF116-K89X4P')}" data-copy-desc="Codice PNR Volo">
-        <div class="code-quick-info">
-          <span class="code-quick-label">PNR Volo / Biglietto</span>
-          <span class="code-quick-val tabular-nums">${escapeHTML(codes.pnr || 'AF116-K89X4P')}</span>
-        </div>
-        <span class="code-quick-copy-badge">Copia</span>
-      </div>
-
-      <div class="code-quick-item" data-copy-val="${escapeHTML(codes.lockbox || 'A-7492#')}" data-copy-desc="Codice Lockbox / Chiave">
-        <div class="code-quick-info">
-          <span class="code-quick-label">Lockbox / Porta</span>
-          <span class="code-quick-val tabular-nums">${escapeHTML(codes.lockbox || 'A-7492#')}</span>
-        </div>
-        <span class="code-quick-copy-badge">Copia</span>
-      </div>
-
-      <div class="code-quick-item" data-copy-val="${escapeHTML(codes.wifi || 'PuLi_Guest / SilkRoad2026')}" data-copy-desc="Password Wi-Fi">
-        <div class="code-quick-info">
-          <span class="code-quick-label">Wi-Fi Hotel / Alloggio</span>
-          <span class="code-quick-val">${escapeHTML(codes.wifi || 'PuLi_Guest / SilkRoad2026')}</span>
-        </div>
-        <span class="code-quick-copy-badge">Copia</span>
-      </div>
-
-      <div class="code-quick-item" data-copy-val="${escapeHTML(codes.insurance || 'Allianz Global Care — #IT-948190')}" data-copy-desc="Polizza Assicurazione">
-        <div class="code-quick-info">
-          <span class="code-quick-label">Assicurazione Viaggio</span>
-          <span class="code-quick-val">${escapeHTML(codes.insurance || 'Allianz Global Care — #IT-948190')}</span>
-        </div>
-        <span class="code-quick-copy-badge">Copia</span>
-      </div>
-
-      ${codes.emergencyPhone ? `
-        <a href="tel:${codes.emergencyPhone.replace(/\s+/g, '')}" class="code-quick-item" style="text-decoration:none;">
-          <div class="code-quick-info">
-            <span class="code-quick-label" style="color:#F87171;">Pronto Intervento / Emergenza</span>
-            <span class="code-quick-val tabular-nums" style="color:#F87171;">${escapeHTML(codes.emergencyPhone)}</span>
-          </div>
-          <span class="code-quick-copy-badge" style="color:#F87171; background:rgba(248, 113, 113, 0.15);">Chiama</span>
-        </a>
-      ` : ''}
-    </div>
-  `;
-
-  // Bind click per aprire Taxi Card
-  document.getElementById('btnSheetOpenTaxiFull')?.addEventListener('click', () => {
-    closeAllSheets();
-    openTaxiCard();
-  });
-
-  // Bind click per modificare codici viaggio
-  document.getElementById('btnSheetEditTripCodes')?.addEventListener('click', () => {
-    closeAllSheets();
-    openEditTripSheet(state.activeTrip);
-  });
-
-  // Bind tap-to-copy
-  content.querySelectorAll('.code-quick-item[data-copy-val]').forEach(item => {
-    item.addEventListener('click', () => {
-      const val = item.getAttribute('data-copy-val');
-      const desc = item.getAttribute('data-copy-desc') || 'Codice';
-      if (val) {
-        copyToClipboard(val, `${desc} copiato!`);
-        const badge = item.querySelector('.code-quick-copy-badge');
-        if (badge) {
-          const orig = badge.textContent;
-          badge.textContent = 'Copiato ✓';
-          setTimeout(() => { badge.textContent = orig; }, 1500);
-        }
-      }
-    });
-  });
+  // Bottone "+" nell'header dello sheet
+  const headerAddBtn = document.getElementById('btnSheetAddAccommodation');
+  if (headerAddBtn) {
+    headerAddBtn.onclick = () => {
+      showAddForm = true;
+      renderSheetBody();
+    };
+  }
 
   openSheet('sheetTaxiCodes');
 }
@@ -3142,6 +3292,15 @@ function renderTabWallet() {
   const vaultPinHash = localStorage.getItem('nomad_vault_pin_hash');
   const isVaultTab = state.walletSubView === 'vault';
 
+  // Gestione lista alloggi multipli e sottotitolo barra compatta
+  const accommodations = getTripAccommodations(trip);
+  let hotelSubText = 'Nessuna scheda · Tocca per aggiungere';
+  if (accommodations.length === 1) {
+    hotelSubText = escapeHTML(accommodations[0].name || accommodations[0].address || '1 scheda alloggio');
+  } else if (accommodations.length > 1) {
+    hotelSubText = `${escapeHTML(accommodations[0].name || 'Alloggio')} · ${accommodations.length} schede`;
+  }
+
   // 1. BLOCCO 1: HEADER PULITO ("Wallet" + "+" button)
   let html = `
     <div class="wallet-header-row">
@@ -3169,7 +3328,7 @@ function renderTabWallet() {
         <span class="wallet-hotel-bar-icon">🏨</span>
         <div class="wallet-hotel-bar-texts">
           <div class="wallet-hotel-bar-title">Alloggio & Codici</div>
-          <div class="wallet-hotel-bar-sub">${escapeHTML(hotel.nameLocal || hotel.name || 'Aggiungi indirizzo, PNR, Wi-Fi')}</div>
+          <div class="wallet-hotel-bar-sub">${hotelSubText}</div>
         </div>
       </div>
       <div class="wallet-hotel-bar-arrow">›</div>
@@ -3247,6 +3406,15 @@ function renderTabWallet() {
         `;
       });
       html += `</div>`;
+
+      // Pulsante di aggiunta rapida visibile in fondo alla lista (in Tutti e categorie)
+      html += `
+        <div style="margin-top:14px; text-align:center;">
+          <button class="btn-glass-pill accent" id="btnListUploadFile" style="width:100%; justify-content:center; padding:11px 16px; font-weight:700; font-size:13px;">
+            + Aggiungi Documento
+          </button>
+        </div>
+      `;
     } else {
       html += `
         <div class="glass-card" style="text-align:center; padding:32px 16px; border-radius:14px;">
@@ -3405,6 +3573,7 @@ function renderTabWallet() {
 
   // Tasti Aggiungi Documento
   document.getElementById('btnOpenUploadFile')?.addEventListener('click', () => openWalletUploadModal(false));
+  document.getElementById('btnListUploadFile')?.addEventListener('click', () => openWalletUploadModal(false));
   document.getElementById('btnEmptyUploadFile')?.addEventListener('click', () => openWalletUploadModal(false));
   document.getElementById('btnEmptyUploadVaultFile')?.addEventListener('click', () => openWalletUploadModal(true));
 
@@ -3523,13 +3692,13 @@ function renderTabWallet() {
 /* ==========================================================================
    OVERLAY: TAXI CARD & GATE MODE
    ========================================================================== */
-async function openTaxiCard() {
+async function openTaxiCard(specificAcc = null) {
   const overlay = document.getElementById('taxiCardOverlay');
   if (!overlay || !state.activeTrip) return;
 
-  const hotel = state.activeTrip.accommodation || {};
+  const hotel = specificAcc || state.activeTrip.accommodation || {};
   document.getElementById('taxiHotelName').textContent = hotel.name || 'Alloggio';
-  document.getElementById('taxiHotelLocal').textContent = hotel.nameLocal || hotel.addressLocal || hotel.address || 'Indirizzo non impostato';
+  document.getElementById('taxiHotelLocal').textContent = hotel.addressLocal || hotel.nameLocal || hotel.address || 'Indirizzo non impostato';
   document.getElementById('taxiHotelLatin').textContent = hotel.address || '';
 
   const callBtn = document.getElementById('taxiCallBtn');
