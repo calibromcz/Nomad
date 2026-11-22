@@ -477,25 +477,43 @@ body {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: #FFFFFF !important;
-  opacity: 0.62;
-  font-family: var(--font-ui);
+  color: rgba(255, 255, 255, 0.52) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
   font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   cursor: pointer;
   padding: 6px 4px;
   border-radius: var(--radius-sm);
-  transition: opacity var(--duration-fast) ease;
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.15s ease, filter 0.15s ease;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.nav-tab-btn:hover,
+.nav-tab-btn:focus {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+.nav-tab-btn:active {
+  transform: scale(0.92) translateY(1px) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.nav-tab-btn:active svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
 }
 
 .nav-tab-btn svg {
   width: 20px;
   height: 20px;
-  stroke: #FFFFFF !important;
-  stroke-width: 2.4px !important;
-  transition: stroke var(--duration-fast) ease, opacity var(--duration-fast) ease;
+  stroke: rgba(255, 255, 255, 0.52) !important;
+  stroke-width: 1.9px !important;
+  transition: stroke var(--duration-fast) ease, opacity var(--duration-fast) ease, filter 0.15s ease, stroke-width 0.15s ease;
 }
 
 .nav-tab-btn.active {
@@ -504,14 +522,14 @@ body {
   box-shadow: none !important;
   color: #FFFFFF !important;
   opacity: 1 !important;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .nav-tab-btn.active svg {
   stroke: #FFFFFF !important;
-  stroke-width: 2.6px !important;
+  stroke-width: 2.2px !important;
   transform: none;
-  filter: none !important;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25)) !important;
   opacity: 1 !important;
 }
 
@@ -521,7 +539,7 @@ body {
 
 [data-theme="dark"] .nav-tab-btn.active svg {
   stroke: #FFFFFF !important;
-  filter: none;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25)) !important;
 }
 
 /* ==========================================================================
@@ -2503,11 +2521,11 @@ body {
 /* ==========================================================================
    MICRO-INTERAZIONI DINAMICHE & FEEDBACK TATTILE
    ========================================================================== */
-button, .btn-glass-pill, .top-icon-btn, .nav-tab-btn, .wallet-card, .glass-card.interactive, .pinned-doc-mini-card {
+button, .btn-glass-pill, .top-icon-btn, .wallet-card, .glass-card.interactive, .pinned-doc-mini-card {
   transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-button:active, .btn-glass-pill:active, .top-icon-btn:active, .nav-tab-btn:active, .pinned-doc-mini-card:active, .calc-btn:active, .btn-plus-icon:active, .btn-settle-balance:active {
+button:active, .btn-glass-pill:active, .top-icon-btn:active, .pinned-doc-mini-card:active, .calc-btn:active, .btn-plus-icon:active, .btn-settle-balance:active {
   transform: scale(0.95);
 }
 
@@ -3333,11 +3351,11 @@ input:checked + .toggle-slider:before {
 
 /* Bottom Nav Active State */
 [data-theme="dark"] .nav-tab-btn.active {
-  color: #6EE7B7 !important;
+  color: #FFFFFF !important;
 }
 
 [data-theme="dark"] .nav-tab-btn.active svg {
-  stroke: #6EE7B7 !important;
+  stroke: #FFFFFF !important;
 }
 
 
