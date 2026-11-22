@@ -22,9 +22,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=40) -->
-  <link rel="stylesheet" href="./styles.css?v=40">
-  <link rel="modulepreload" href="./db.js?v=40">
+  <!-- Stylesheet (Cache-Busting ?v=48) -->
+  <link rel="stylesheet" href="./styles.css?v=48">
+  <link rel="modulepreload" href="./db.js?v=48">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -510,6 +510,147 @@
     </div>
   </div>
 
+  <!-- MODALE DEDICATO: AGGIUNGI LUOGO AL PIANO ITINERARIO -->
+  <div id="sheetAddPlaceToPlan" class="bottom-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="addPlaceToPlanTitle">Aggiungi al Piano</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetAddPlaceToPlan" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <form id="formAddPlaceToPlan" style="padding: 10px 4px 28px;">
+        <input type="hidden" id="fieldPlacePlanPlaceId">
+        <input type="hidden" id="fieldPlacePlanLat">
+        <input type="hidden" id="fieldPlacePlanLon">
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Titolo Tappa *</label>
+          <input type="text" id="fieldPlacePlanTitle" class="form-input" placeholder="Titolo del luogo" required>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Giorno di Visita *</label>
+            <select id="fieldPlacePlanDaySelect" class="form-select" required>
+              <!-- Popolato dinamicamente da app.js -->
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Orario Previsto *</label>
+            <input type="time" id="fieldPlacePlanTime" class="form-input" value="10:00" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Categoria</label>
+          <select id="fieldPlacePlanCategory" class="form-select">
+            <option value="Visita">Visita</option>
+            <option value="Cibo">Cibo</option>
+            <option value="Volo/Treno">Volo/Treno</option>
+            <option value="Alloggio">Alloggio</option>
+            <option value="Altro">Altro</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label">Note Rapide (opzionale)</label>
+          <textarea id="fieldPlacePlanNotes" class="form-textarea" placeholder="Biglietti, orari di apertura, consigli..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-glass-pill accent btn-full-width" style="font-weight:700; padding:13px; font-size:14px;">
+          + Salva nel Piano
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE: AGGIUNGI LUOGO PERSONALIZZATO (MANUALE) -->
+  <div id="sheetAddCustomPlace" class="bottom-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Nuovo Luogo</div>
+      <button class="sheet-close-btn" data-close-sheet="sheetAddCustomPlace" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="sheet-scroll-body">
+      <form id="formAddCustomPlace" style="padding: 10px 4px 28px;">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Nome Luogo *</label>
+          <input type="text" id="fieldCustomPlaceName" class="form-input" placeholder="es. Yu Garden, Mercato del tè" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Categoria</label>
+          <select id="fieldCustomPlaceCategory" class="form-select">
+            <option value="Da vedere">Da vedere</option>
+            <option value="Cibo">Cibo</option>
+            <option value="Altro">Altro</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label">Note / Info</label>
+          <textarea id="fieldCustomPlaceNotes" class="form-textarea" placeholder="Consigliato da amici, specialità della casa..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-glass-pill accent btn-full-width" style="font-weight:700; padding:13px; font-size:14px;">
+          Salva Luogo
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE DEDICATO: MAPPA OFFLINE -->
+  <div id="sheetMapOffline" class="bottom-sheet" role="dialog" aria-modal="true" style="max-height:92vh;">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:16px;">🗺️</span>
+        <div class="sheet-title">Mappa Offline</div>
+      </div>
+      <button class="sheet-close-btn" data-close-sheet="sheetMapOffline" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="sheet-scroll-body" style="padding:10px 14px 28px;">
+      <div class="map-view-wrapper">
+        <div class="map-control-overlay-row">
+          <button id="btnDownloadTiles" class="btn-glass-pill" style="font-size:12px; gap:4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Scarica area offline
+          </button>
+          <button id="btnCenterGPS" class="btn-glass-pill accent" style="font-size:12px; gap:4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            Centra su di me
+          </button>
+        </div>
+
+        <div id="tileDownloadProgressBox" style="display:none; margin-top:2px;">
+          <div class="progress-track" style="height:4px;">
+            <div class="progress-fill" id="tileProgressFill" style="width:0%;"></div>
+          </div>
+          <div style="font-size:11px; color:var(--text-tertiary); margin-top:3px; text-align:right;" id="tileProgressLabel">0 / 0</div>
+        </div>
+
+        <div id="radarCompassBar" class="glass-card radar-compass-card" style="display:none; margin-bottom:0;">
+          <div class="radar-arrow-circle" id="radarArrowCircle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+          </div>
+          <div class="radar-info-box">
+            <div class="radar-target-title" id="radarTargetTitle">Destinazione</div>
+            <div class="radar-distance-val tabular-nums" id="radarDistanceVal">-- m</div>
+          </div>
+          <button id="btnStopRadar" class="btn-mini-action" style="color:var(--status-danger);">Chiudi</button>
+        </div>
+
+        <div class="map-container-box">
+          <div id="leafletMap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 4. Sheet Carica Documento Wallet (7 Categorie Distinte) -->
   <div id="sheetWalletUpload" class="bottom-sheet" role="dialog">
     <div class="sheet-handle-bar"></div>
@@ -796,8 +937,8 @@
   <!-- Leaflet JS da CDN (cachato nel Service Worker per funzionamento offline) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=47) -->
-  <script type="module" src="./app.js?v=47"></script>
+  <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=48) -->
+  <script type="module" src="./app.js?v=48"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>

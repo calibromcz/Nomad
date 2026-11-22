@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=47';
+} from './db.js?v=48';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -2184,6 +2184,57 @@ function renderTabTrip() {
 /* ==========================================================================
    WIKIPEDIA GEOSEARCH OFFLINE CACHE & SOTTO-VISTA LUOGHI
    ========================================================================== */
+async function resolveTripCoordinatesSafe(trip) {
+  if (!trip) return { lat: 31.2235, lng: 121.4475 };
+
+  // 1. Coordinate esplicite su trip
+  if (Number.isFinite(trip.lat) && Number.isFinite(trip.lng || trip.lon)) {
+    return { lat: Number(trip.lat), lng: Number(trip.lng || trip.lon) };
+  }
+
+  // 2. Alloggio
+  if (trip.accommodation && Number.isFinite(trip.accommodation.lat) && Number.isFinite(trip.accommodation.lng)) {
+    return { lat: Number(trip.accommodation.lat), lng: Number(trip.accommodation.lng) };
+  }
+
+  // 3. Tappe con coordinate
+  const days = trip.itineraryDays || trip.days || [];
+  for (const day of days) {
+    for (const ev of (day.events || [])) {
+      if (Number.isFinite(ev.lat) && Number.isFinite(ev.lng || ev.lon)) {
+        return { lat: Number(ev.lat), lng: Number(ev.lng || ev.lon) };
+      }
+    }
+  }
+
+  // 4. Geocoding Open-Meteo tramite nome città / destinazione se online
+  const queryCity = (trip.destination || trip.city || trip.name || '').split(',')[0].trim();
+  if (queryCity && navigator.onLine) {
+    try {
+      const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(queryCity)}&count=1&language=it&format=json`;
+      const res = await fetch(geoUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.results) && data.results.length > 0) {
+          const rLat = parseFloat(data.results[0].latitude);
+          const rLng = parseFloat(data.results[0].longitude);
+          if (Number.isFinite(rLat) && Number.isFinite(rLng)) {
+            trip.lat = rLat;
+            trip.lng = rLng;
+            putToStore('trips_store', trip).catch(() => {});
+            return { lat: rLat, lng: rLng };
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Open-Meteo Geocoding error:', e);
+    }
+  }
+
+  // Default coordinate Shanghai
+  return { lat: 31.2235, lng: 121.4475 };
+}
+
 async function fetchWikipediaPlaces(lat, lon, force = false) {
   if (!state.activeTrip) return [];
   const trip = state.activeTrip;
@@ -2198,14 +2249,20 @@ async function fetchWikipediaPlaces(lat, lon, force = false) {
   }
 
   try {
+    // Verifica validità numerica coordinate
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      const safeCoords = await resolveTripCoordinatesSafe(trip);
+      lat = safeCoords.lat;
+      lon = safeCoords.lng;
+    }
+
     let places = await queryWikiGeo('it', lat, lon);
     if (!places || places.length < 5) {
       const enPlaces = await queryWikiGeo('en', lat, lon);
       if (enPlaces && enPlaces.length > 0) {
-        // Unisci ed elimina duplicati per titolo
-        const existingTitles = new Set((places || []).map(p => p.title.toLowerCase()));
+        const existingTitles = new Set((places || []).map(p => (p.title || '').toLowerCase()));
         enPlaces.forEach(p => {
-          if (!existingTitles.has(p.title.toLowerCase())) {
+          if (!existingTitles.has((p.title || '').toLowerCase())) {
             places.push(p);
           }
         });
@@ -2217,6 +2274,8 @@ async function fetchWikipediaPlaces(lat, lon, force = false) {
       await putToStore('trips_store', trip);
       showToast(`Trovati ${places.length} luoghi nei dintorni ✓`);
       return places;
+    } else {
+      showToast("Nessun luogo trovato nelle vicinanze");
     }
   } catch (err) {
     console.warn('Wiki GeoSearch error:', err);
@@ -2227,31 +2286,33 @@ async function fetchWikipediaPlaces(lat, lon, force = false) {
 }
 
 async function queryWikiGeo(lang, lat, lon) {
-  const url = `https://${lang}.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}|${lon}&ggsradius=10000&ggslimit=20&prop=extracts|pageimages|coordinates&exintro=1&explaintext=1&exsentences=2&piprop=thumbnail&pithumbsize=200&format=json&origin=*`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const data = await res.json();
-  if (!data || !data.query || !data.query.pages) return [];
+  try {
+    const url = `https://${lang}.wikipedia.org/w/api.php?action=query&generator=geosearch&ggscoord=${lat}|${lon}&ggsradius=10000&ggslimit=20&prop=extracts|pageimages|coordinates&exintro=1&explaintext=1&exsentences=2&piprop=thumbnail&pithumbsize=200&format=json&origin=*`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = await res.json();
+    const pages = Object.values(data?.query?.pages || {});
+    if (pages.length === 0) return [];
 
-  const items = Object.values(data.query.pages);
-  return items.map(p => {
-    let pLat = null;
-    let pLng = null;
-    if (p.coordinates && p.coordinates.length > 0) {
-      pLat = p.coordinates[0].lat;
-      pLng = p.coordinates[0].lon;
-    }
-    return {
-      id: 'wiki_' + p.pageid,
-      title: p.title,
-      extract: p.extract || 'Nessuna descrizione disponibile.',
-      thumbnail: p.thumbnail?.source || null,
-      lat: pLat,
-      lng: pLng,
-      source: 'wikipedia',
-      lang: lang
-    };
-  });
+    return pages.map(p => {
+      const pLat = p.coordinates?.[0]?.lat || null;
+      const pLon = p.coordinates?.[0]?.lon || null;
+      return {
+        id: 'wiki_' + (p.pageid || Math.random().toString(36).slice(2)),
+        title: p.title || '',
+        extract: p.extract || '',
+        lat: pLat,
+        lon: pLon,
+        thumb: p.thumbnail?.source || '',
+        thumbnail: p.thumbnail?.source || '',
+        source: 'wikipedia',
+        lang: lang
+      };
+    });
+  } catch (e) {
+    console.warn(`queryWikiGeo (${lang}) error:`, e);
+    return [];
+  }
 }
 
 async function renderPlacesSubView() {
@@ -2259,8 +2320,8 @@ async function renderPlacesSubView() {
   if (!container || !state.activeTrip) return;
 
   const trip = state.activeTrip;
-  const cityName = (trip.destination || 'Città').split(',')[0].trim();
-  const coords = getTripCoordinates(trip);
+  const cityName = (trip.destination || trip.city || trip.name || 'Città').split(',')[0].trim();
+  const coords = await resolveTripCoordinatesSafe(trip);
 
   let suggested = trip.suggestedPlaces || [];
   const custom = trip.customPlaces || [];
@@ -2279,7 +2340,7 @@ async function renderPlacesSubView() {
               <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path>
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
             </svg>
-            <span>Suggerisci</span>
+            <span id="txtBtnRefreshWiki">Suggerisci</span>
           </button>
           <button class="btn-add-place-pill" id="btnAddCustomPlace" aria-label="Aggiungi luogo personalizzato" title="Aggiungi Luogo">+</button>
         </div>
@@ -2302,15 +2363,19 @@ async function renderPlacesSubView() {
   } else {
     allPlaces.forEach(place => {
       const isCustom = place.source === 'custom';
-      const mapsUrl = place.lat && place.lng 
-        ? `https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}` 
+      const pLat = place.lat;
+      const pLon = place.lon || place.lng;
+      const mapsUrl = pLat && pLon 
+        ? `https://www.google.com/maps/search/?api=1&query=${pLat},${pLon}` 
         : getNativeMapsUrl(place.title);
 
+      const thumbUrl = place.thumb || place.thumbnail || '';
+
       html += `
-        <div class="place-card" data-place-id="${place.id}">
+        <div class="place-card" data-place-id="${escapeHTML(place.id)}">
           <div class="place-card-main">
-            ${place.thumbnail ? `
-              <img class="place-card-thumb" src="${escapeHTML(place.thumbnail)}" alt="${escapeHTML(place.title)}" loading="lazy">
+            ${thumbUrl ? `
+              <img class="place-card-thumb" src="${escapeHTML(thumbUrl)}" alt="${escapeHTML(place.title)}" loading="lazy">
             ` : `
               <div class="place-card-thumb-fallback">${isCustom ? '📌' : '🏛️'}</div>
             `}
@@ -2324,12 +2389,7 @@ async function renderPlacesSubView() {
           </div>
 
           <div class="place-card-footer">
-            <button class="place-btn-add-plan btn-place-add-to-plan" 
-              data-title="${escapeHTML(place.title)}" 
-              data-notes="${escapeHTML(place.notes || place.extract || '')}" 
-              data-lat="${place.lat || ''}" 
-              data-lng="${place.lng || ''}" 
-              data-category="${escapeHTML(place.category || 'Visita')}">
+            <button class="place-btn-add-plan btn-place-add-to-plan" data-place-id="${escapeHTML(place.id)}">
               <span>+ Piano</span>
             </button>
             <div class="place-secondary-actions">
@@ -2337,7 +2397,7 @@ async function renderPlacesSubView() {
                 📍
               </a>
               ${isCustom ? `
-                <button class="place-icon-action btn-delete-custom-place" data-place-id="${place.id}" title="Elimina" style="color:var(--text-quaternary);">
+                <button class="place-icon-action btn-delete-custom-place" data-place-id="${escapeHTML(place.id)}" title="Elimina" style="color:var(--text-quaternary);">
                   🗑
                 </button>
               ` : ''}
@@ -2358,19 +2418,34 @@ async function renderPlacesSubView() {
     });
   }
 
-  // Event Listeners
-  document.getElementById('btnRefreshWikiPlaces')?.addEventListener('click', async () => {
+  // Refresh sicuro con try-catch e ripristino garantito in finally
+  const handleWikiRefresh = async () => {
     const btn = document.getElementById('btnRefreshWikiPlaces');
-    if (btn) btn.style.opacity = '0.5';
-    await fetchWikipediaPlaces(coords.lat, coords.lng, true);
-    if (btn) btn.style.opacity = '1';
-    renderPlacesSubView();
-  });
+    const txt = document.getElementById('txtBtnRefreshWiki');
+    if (btn) {
+      btn.style.opacity = '0.6';
+      btn.disabled = true;
+    }
+    if (txt) txt.textContent = 'Caricamento...';
 
-  document.getElementById('btnEmptyFetchWiki')?.addEventListener('click', async () => {
-    await fetchWikipediaPlaces(coords.lat, coords.lng, true);
-    renderPlacesSubView();
-  });
+    try {
+      const freshCoords = await resolveTripCoordinatesSafe(state.activeTrip);
+      await fetchWikipediaPlaces(freshCoords.lat, freshCoords.lng, true);
+    } catch (err) {
+      console.error('Error refreshing wiki places:', err);
+      showToast('Errore durante il caricamento');
+    } finally {
+      if (btn) {
+        btn.style.opacity = '1';
+        btn.disabled = false;
+      }
+      if (txt) txt.textContent = 'Suggerisci';
+      renderPlacesSubView();
+    }
+  };
+
+  document.getElementById('btnRefreshWikiPlaces')?.addEventListener('click', handleWikiRefresh);
+  document.getElementById('btnEmptyFetchWiki')?.addEventListener('click', handleWikiRefresh);
 
   document.getElementById('btnAddCustomPlace')?.addEventListener('click', () => {
     const form = document.getElementById('formAddCustomPlace');
@@ -2378,51 +2453,91 @@ async function renderPlacesSubView() {
     openSheet('sheetAddCustomPlace');
   });
 
-  container.querySelectorAll('.btn-place-add-to-plan').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const title = btn.getAttribute('data-title');
-      const notes = btn.getAttribute('data-notes');
-      const lat = btn.getAttribute('data-lat');
-      const lng = btn.getAttribute('data-lng');
-      const cat = btn.getAttribute('data-category');
-      openAddPlaceToPlanSheet(title, notes, lat, lng, cat);
-    });
-  });
+  // Event delegation pulita sul contenitore della lista dei luoghi
+  const listContainer = document.getElementById('placesListCards');
+  if (listContainer) {
+    listContainer.addEventListener('click', async (e) => {
+      const addBtn = e.target.closest('.btn-place-add-to-plan');
+      if (addBtn) {
+        e.stopPropagation();
+        const placeId = addBtn.getAttribute('data-place-id');
+        const currentTrip = state.activeTrip;
+        if (!currentTrip) return;
+        const all = [...(currentTrip.customPlaces || []), ...(currentTrip.suggestedPlaces || [])];
+        const targetPlace = all.find(p => p.id === placeId);
+        if (targetPlace) {
+          openAddPlaceToPlanSheet(targetPlace);
+        }
+        return;
+      }
 
-  container.querySelectorAll('.btn-delete-custom-place').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.getAttribute('data-place-id');
-      trip.customPlaces = (trip.customPlaces || []).filter(p => p.id !== id);
-      await putToStore('trips_store', trip);
-      renderPlacesSubView();
-      showToast('Luogo rimosso');
+      const delBtn = e.target.closest('.btn-delete-custom-place');
+      if (delBtn) {
+        e.stopPropagation();
+        const placeId = delBtn.getAttribute('data-place-id');
+        const currentTrip = state.activeTrip;
+        if (currentTrip) {
+          currentTrip.customPlaces = (currentTrip.customPlaces || []).filter(p => p.id !== placeId);
+          await putToStore('trips_store', currentTrip);
+          renderPlacesSubView();
+          showToast('Luogo rimosso');
+        }
+      }
     });
-  });
+  }
 }
 
-function openAddPlaceToPlanSheet(title, notes, lat, lng, category) {
+function openAddPlaceToPlanSheet(place) {
   const trip = state.activeTrip;
   if (!trip) return;
-  const days = trip.itineraryDays || [];
+
+  // Inizializza array giorni per evitare TypeError
+  if (!Array.isArray(trip.itineraryDays) || trip.itineraryDays.length === 0) {
+    if (Array.isArray(trip.days) && trip.days.length > 0) {
+      trip.itineraryDays = trip.days;
+    } else {
+      const todayStr = trip.startDate || new Date().toISOString().split('T')[0];
+      trip.itineraryDays = [
+        { id: 'day_' + Date.now(), date: todayStr, title: 'Giorno 1', events: [] }
+      ];
+    }
+    putToStore('trips_store', trip).catch(() => {});
+  }
+
+  const days = trip.itineraryDays;
 
   const daySelect = document.getElementById('fieldPlacePlanDaySelect');
   if (daySelect) {
-    if (days.length === 0) {
-      daySelect.innerHTML = `<option value="day_new">Giorno 1 (Crea nuovo)</option>`;
-    } else {
-      daySelect.innerHTML = days.map((d, idx) => `
-        <option value="${d.id}" ${idx === state.currentDayIndex ? 'selected' : ''}>${escapeHTML(d.title || `Giorno ${idx + 1}`)}</option>
-      `).join('');
-    }
+    daySelect.innerHTML = days.map((d, idx) => `
+      <option value="${d.id}" ${idx === state.currentDayIndex ? 'selected' : ''}>${escapeHTML(d.title || `Giorno ${idx + 1}`)}</option>
+    `).join('');
   }
 
-  document.getElementById('fieldPlacePlanTitle').value = title || '';
-  document.getElementById('fieldPlacePlanLocation').value = title || '';
-  document.getElementById('fieldPlacePlanNotes').value = notes || '';
-  document.getElementById('fieldPlacePlanLat').value = lat || '';
-  document.getElementById('fieldPlacePlanLng').value = lng || '';
-  document.getElementById('fieldPlacePlanCategory').value = category || 'Visita';
-  document.getElementById('fieldPlacePlanTime').value = '10:00';
+  const title = place.title || '';
+  const notes = place.notes || place.extract || '';
+  const lat = place.lat || '';
+  const lon = place.lon || place.lng || '';
+
+  const fieldPlaceId = document.getElementById('fieldPlacePlanPlaceId');
+  if (fieldPlaceId) fieldPlaceId.value = place.id || '';
+
+  const fieldTitle = document.getElementById('fieldPlacePlanTitle');
+  if (fieldTitle) fieldTitle.value = title;
+
+  const fieldNotes = document.getElementById('fieldPlacePlanNotes');
+  if (fieldNotes) fieldNotes.value = notes;
+
+  const fieldLat = document.getElementById('fieldPlacePlanLat');
+  if (fieldLat) fieldLat.value = lat;
+
+  const fieldLon = document.getElementById('fieldPlacePlanLon');
+  if (fieldLon) fieldLon.value = lon;
+
+  const fieldTime = document.getElementById('fieldPlacePlanTime');
+  if (fieldTime) fieldTime.value = '10:00';
+
+  const fieldCategory = document.getElementById('fieldPlacePlanCategory');
+  if (fieldCategory) fieldCategory.value = place.category || 'Visita';
 
   const modalTitle = document.getElementById('addPlaceToPlanTitle');
   if (modalTitle) modalTitle.textContent = `Aggiungi: ${title}`;
@@ -5878,20 +5993,27 @@ function setupEventListeners() {
     const dayId = document.getElementById('fieldPlacePlanDaySelect').value;
     const time = document.getElementById('fieldPlacePlanTime').value || '10:00';
     const title = document.getElementById('fieldPlacePlanTitle').value.trim();
-    const location = document.getElementById('fieldPlacePlanLocation').value.trim();
     const notes = document.getElementById('fieldPlacePlanNotes').value.trim();
-    const lat = document.getElementById('fieldPlacePlanLat').value ? parseFloat(document.getElementById('fieldPlacePlanLat').value) : null;
-    const lng = document.getElementById('fieldPlacePlanLng').value ? parseFloat(document.getElementById('fieldPlacePlanLng').value) : null;
-    const category = document.getElementById('fieldPlacePlanCategory').value || 'Visita';
+    const latVal = document.getElementById('fieldPlacePlanLat').value;
+    const lonVal = document.getElementById('fieldPlacePlanLon').value;
+    const lat = latVal ? parseFloat(latVal) : null;
+    const lon = lonVal ? parseFloat(lonVal) : null;
+    const category = document.getElementById('fieldPlacePlanCategory')?.value || 'Visita';
+
+    if (!Array.isArray(state.activeTrip.itineraryDays) || state.activeTrip.itineraryDays.length === 0) {
+      if (Array.isArray(state.activeTrip.days) && state.activeTrip.days.length > 0) {
+        state.activeTrip.itineraryDays = state.activeTrip.days;
+      } else {
+        const todayStr = state.activeTrip.startDate || new Date().toISOString().split('T')[0];
+        state.activeTrip.itineraryDays = [
+          { id: 'day_' + Date.now(), date: todayStr, title: 'Giorno 1', events: [] }
+        ];
+      }
+    }
 
     let day = state.activeTrip.itineraryDays.find(d => d.id === dayId);
     if (!day) {
-      if (state.activeTrip.itineraryDays.length === 0) {
-        await handleAddNewDay();
-        day = state.activeTrip.itineraryDays[0];
-      } else {
-        day = state.activeTrip.itineraryDays[state.currentDayIndex] || state.activeTrip.itineraryDays[0];
-      }
+      day = state.activeTrip.itineraryDays[state.currentDayIndex] || state.activeTrip.itineraryDays[0];
     }
 
     const newEvent = {
@@ -5899,10 +6021,11 @@ function setupEventListeners() {
       time,
       category,
       title,
-      location,
+      location: title,
       notes,
-      lat,
-      lng,
+      lat: Number.isFinite(lat) ? lat : null,
+      lng: Number.isFinite(lon) ? lon : null,
+      lon: Number.isFinite(lon) ? lon : null,
       completed: false
     };
 
