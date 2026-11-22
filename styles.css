@@ -1,33 +1,36 @@
 /* ==========================================================================
-   NOMAD DESIGN SYSTEM — MODERNO RETRÒ & BIGLIETTO DI VIAGGIO
-   Schede Bianche Opache / Carta Calda (#FFFFFF / #FCFBF8)
-   Testi Inchiostro (#1C1F1E), Bordo Bosco Retrò (#1B6B4D), Divisori Tratteggiati
+   NOMAD DESIGN SYSTEM — BACHECA DA VIAGGIO MINIMAL
+   Sughero Caldo / Lavagna Tecnica, Fogli Squadrati Allineati, Puntine 3D & Fili
    100% Offline, Airplane-Mode First
    ========================================================================== */
 
 :root {
-  /* Color Palette — Light Mode (Morbido, Caldo e Atmosferico) */
-  --bg-app: #E8EFEA;
-  --bg-card: #FFFFFF;
-  --bg-input: #F4F6F4;
-  --text-primary: #1C1F1E;
-  --text-secondary: #5E6461;
-  --text-tertiary: #848D88;
-  --text-quaternary: #BAC2BD;
-  --border-color: rgba(27, 107, 77, 0.28);
+  /* Color Palette — Light Mode (Sughero Minimal) */
+  --bg-app: #D9C5A9;
+  --bg-card: #FCFBF7;
+  --bg-input: #F3F1EC;
+  --text-primary: #1B1E1D;
+  --text-secondary: #5F6462;
+  --text-tertiary: #878E8A;
+  --text-quaternary: #BDC4C0;
+  --border-color: rgba(0, 0, 0, 0.08);
   --border-strong: #1B6B4D;
 
   /* Aliasing per componenti */
   --bg-base: var(--bg-app);
   --bg-surface: var(--bg-card);
-  --bg-surface-elevated: #FCFBF8;
+  --bg-surface-elevated: #FFFFFF;
   --bg-glass-input: var(--bg-input);
-  --bg-card-subtle: #F7F9F7;
+  --bg-card-subtle: #F6F4EE;
   --border-glass: var(--border-color);
-  --border-subtle: rgba(27, 107, 77, 0.16);
+  --border-subtle: rgba(27, 30, 29, 0.12);
   --border-focus: #1B6B4D;
 
-  /* Accenti Retrò Bosco */
+  /* Puntina e Fili */
+  --pin-color: #D93829;
+  --string-color: rgba(217, 56, 41, 0.55);
+
+  /* Accenti */
   --accent: #1B6B4D;
   --accent-orange: #1B6B4D;
   --accent-yellow: #D97706;
@@ -44,21 +47,21 @@
   --status-danger: var(--accent-red);
   --status-info: var(--accent-blue);
 
-  /* Ombre Naturali e Morbide */
-  --hardware-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  --keycap-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --glass-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  --glass-shadow-elevated: 0 12px 28px rgba(0, 0, 0, 0.10);
+  /* Ombre Foglio Appoggiato */
+  --hardware-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.08);
+  --keycap-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
+  --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.08);
+  --glass-shadow-elevated: 0 6px 16px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.10);
 
-  /* Radii Moderno Retrò (20px, non a bolla) */
-  --radius-sm: 10px;
-  --radius-md: 20px;
-  --radius-lg: 20px;
-  --radius-xl: 24px;
+  /* Radii Foglio (Quasi Squadrati: 5px foglio, 8px input/bottoni) */
+  --radius-sm: 8px;
+  --radius-md: 5px;
+  --radius-lg: 5px;
+  --radius-xl: 8px;
   --radius-pill: 9999px;
 
-  /* Typography Retrò Pulita */
+  /* Typography */
   --font-ui: 'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-family: var(--font-ui);
@@ -77,15 +80,15 @@
 }
 
 [data-theme="dark"] {
-  /* Color Palette — Dark Mode (Schede Bianche su Sfondo Scuro Profondo) */
-  --bg-app: #10171A;
-  --bg-card: #FCFBF8;
-  --bg-input: #F4F6F4;
-  --text-primary: #1C1F1E;
-  --text-secondary: #5E6461;
-  --text-tertiary: #848D88;
-  --text-quaternary: #BAC2BD;
-  --border-color: rgba(255, 255, 255, 0.15);
+  /* Color Palette — Dark Mode (Lavagna Tecnica a Puntini) */
+  --bg-app: #13171A;
+  --bg-card: #FCFBF7;
+  --bg-input: #F3F1EC;
+  --text-primary: #1B1E1D;
+  --text-secondary: #5F6462;
+  --text-tertiary: #878E8A;
+  --text-quaternary: #BDC4C0;
+  --border-color: rgba(0, 0, 0, 0.08);
   --border-strong: #1B6B4D;
 
   /* Aliasing Dark Mode */
@@ -93,19 +96,23 @@
   --bg-surface: var(--bg-card);
   --bg-surface-elevated: #FFFFFF;
   --bg-glass-input: var(--bg-input);
-  --bg-card-subtle: #F0F4F2;
+  --bg-card-subtle: #F6F4EE;
   --border-glass: var(--border-color);
-  --border-subtle: rgba(27, 107, 77, 0.20);
+  --border-subtle: rgba(27, 30, 29, 0.12);
   --border-focus: #1B6B4D;
 
-  --hardware-shadow: 0 10px 28px rgba(0, 0, 0, 0.40);
-  --keycap-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-  --glass-shadow: 0 10px 28px rgba(0, 0, 0, 0.40);
-  --glass-shadow-elevated: 0 14px 34px rgba(0, 0, 0, 0.50);
+  /* Puntina e Fili Dark Mode */
+  --pin-color: #10B981;
+  --string-color: rgba(16, 185, 129, 0.50);
+
+  --hardware-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.20);
+  --keycap-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  --keycap-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
+  --glass-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.20);
+  --glass-shadow-elevated: 0 6px 18px rgba(0, 0, 0, 0.40);
 
   --bottom-bar-bg: #1B6B4D;
-  --sheet-bg: #FCFBF8;
+  --sheet-bg: #FCFBF7;
   --sheet-bg-elevated: #FFFFFF;
 }
 
@@ -122,7 +129,6 @@ html, body {
   height: 100%;
   overflow: hidden;
   background-color: var(--bg-app);
-  background-image: linear-gradient(180deg, #E8EFEA 0%, #F3F5F2 100%);
   color: var(--text-primary);
   font-family: var(--font-ui);
   letter-spacing: -0.015em;
@@ -132,8 +138,22 @@ html, body {
   -webkit-user-select: none;
 }
 
+/* Sfondo Sughero Procedurale Light Mode */
+body {
+  background-color: #D9C5A9;
+  background-image: 
+    radial-gradient(rgba(140, 105, 65, 0.14) 1px, transparent 1px),
+    radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+  background-size: 12px 12px, 20px 20px;
+  background-position: 0 0, 6px 6px;
+}
+
+/* Sfondo Lavagna Tecnica a Puntini Dark Mode */
 [data-theme="dark"] body {
-  background: radial-gradient(circle at top, #18262B 0%, #10171A 100%);
+  background-color: #13171A;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
 }
 
 /* Font Monospazio per tutti i dati numerici, codici ed etichette tecniche */
@@ -151,14 +171,6 @@ html, body {
   z-index: 0;
   pointer-events: none;
   background: transparent;
-  background-image: radial-gradient(rgba(27, 107, 77, 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-[data-theme="dark"] .mesh-gradient-bg {
-  background: transparent;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 
 #app {
@@ -172,7 +184,7 @@ html, body {
 }
 
 /* ==========================================================================
-   TOP BAR (Moderno Retrò Verde Bosco Header)
+   TOP BAR (Bacheca Header Verde Bosco)
    ========================================================================== */
 .top-bar-icons-only {
   position: fixed;
@@ -185,7 +197,7 @@ html, body {
   padding: calc(var(--sat) + 8px) 16px 10px 16px;
   background: #1B6B4D;
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   z-index: 50;
   transition: background var(--duration-normal) ease;
 }
@@ -220,7 +232,7 @@ html, body {
   width: 22px;
   height: 22px;
   stroke: #FFFFFF !important;
-  stroke-width: 2.2px;
+  stroke-width: 2.4px !important;
   transition: stroke var(--duration-fast) ease;
 }
 
@@ -397,26 +409,69 @@ html, body {
 }
 
 /* ==========================================================================
-   MAIN CONTENT AREA & TABS (Respira lo Sfondo)
+   MAIN CONTENT AREA & TABS (Bacheca Spaziatura & Fili di Sfondo)
    ========================================================================== */
 .main-viewport {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 20px 18px calc(var(--sab) + 88px) 18px;
+  padding: 24px 16px calc(var(--sab) + 90px) 16px;
   scroll-behavior: smooth;
+  position: relative;
 }
 
 .tab-pane {
   display: none;
   animation: fadeIn 0.24s var(--ease-smooth);
+  position: relative;
 }
 
 .tab-pane.active {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 22px;
+}
+
+/* Fili di collegamento discreti dietro le schede della Dashboard */
+#tab-dashboard {
+  position: relative;
+}
+
+#tab-dashboard::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 20px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0px,
+    var(--string-color) 10px,
+    var(--string-color) calc(100% - 10px),
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+#tab-dashboard::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: 
+    linear-gradient(135deg, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%),
+    linear-gradient(45deg, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%);
+  background-size: 100% 280px;
+  background-repeat: repeat-y;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
 }
 
 @keyframes fadeIn {
@@ -425,7 +480,7 @@ html, body {
 }
 
 /* ==========================================================================
-   BOTTOM NAVIGATION BAR (5 TAB — Moderno Retrò Verde Bosco)
+   BOTTOM NAVIGATION BAR (5 TAB — Identica Header Verde Bosco)
    ========================================================================== */
 .bottom-nav {
   position: absolute;
@@ -438,8 +493,8 @@ html, body {
   padding: 8px 10px calc(var(--sab) + 6px) 10px;
   background: #1B6B4D;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.10);
-  z-index: 20;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 50;
 }
 
 [data-theme="dark"] .bottom-nav {
@@ -505,62 +560,87 @@ html, body {
 }
 
 /* ==========================================================================
-   SCHEDE BIANCHE STILE "BIGLIETTO DI VIAGGIO" (MODERNO RETRÒ)
+   SCHEDE "FOGLIETTI" DRITTI + PUNTINE 3D (BACHECA)
    ========================================================================== */
 .glass-card {
   background: var(--bg-card) !important;
-  border: 1.5px solid rgba(27, 107, 77, 0.28) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
-  padding: 18px !important;
-  margin-bottom: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 5px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+  padding: 20px 18px 18px 18px !important;
+  margin-bottom: 20px !important;
   position: relative;
-  overflow: hidden;
-  color: #1C1F1E !important;
+  z-index: 2 !important;
+  overflow: visible !important;
+  color: #1B1E1D !important;
 }
 
 [data-theme="dark"] .glass-card {
-  background: #FCFBF8 !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.40) !important;
-  color: #1C1F1E !important;
+  background: #FCFBF7 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 5px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.20) !important;
+  color: #1B1E1D !important;
 }
 
-.glass-card::before {
-  display: none !important;
+/* Puntina conficcata in cima a ogni foglietto (Home / Dashboard) */
+#tab-dashboard .glass-card::before,
+.dash-widget-card::before,
+.dash-single-trip-bar::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, var(--pin-color) 45%, #921A10 100%);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.30), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  z-index: 10;
+  pointer-events: none;
+  display: block !important;
+}
+
+[data-theme="dark"] #tab-dashboard .glass-card::before,
+[data-theme="dark"] .dash-widget-card::before,
+[data-theme="dark"] .dash-single-trip-bar::before {
+  background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, #10B981 45%, #064E3B 100%);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 .glass-card-elevated {
   background: var(--bg-surface-elevated) !important;
-  border: 1.5px solid rgba(27, 107, 77, 0.32) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10) !important;
-  color: #1C1F1E !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 5px !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16), 0 2px 4px rgba(0, 0, 0, 0.10) !important;
+  color: #1B1E1D !important;
+  position: relative;
+  z-index: 2 !important;
 }
 
 [data-theme="dark"] .glass-card-elevated {
   background: #FFFFFF !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.20) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.50) !important;
-  color: #1C1F1E !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 5px !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.40) !important;
+  color: #1B1E1D !important;
 }
 
-/* Forzatura testo nitido inchiostro su schede bianche */
+/* Forzatura testo nitido inchiostro su fogli bianchi */
 .glass-card, [data-theme="dark"] .glass-card,
 .dash-widget-card, [data-theme="dark"] .dash-widget-card,
 .wallet-card, [data-theme="dark"] .wallet-card,
 .trans-input-card, [data-theme="dark"] .trans-input-card,
 .trans-result-card, [data-theme="dark"] .trans-result-card {
-  color: #1C1F1E !important;
+  color: #1B1E1D !important;
 }
 
 .glass-card h1, .glass-card h2, .glass-card h3, .glass-card h4,
 [data-theme="dark"] .glass-card h1, [data-theme="dark"] .glass-card h2, [data-theme="dark"] .glass-card h3, [data-theme="dark"] .glass-card h4,
 .dash-widget-card h1, .dash-widget-card h2, .dash-widget-card h3,
 [data-theme="dark"] .dash-widget-card h1, [data-theme="dark"] .dash-widget-card h2, [data-theme="dark"] .dash-widget-card h3 {
-  color: #1C1F1E !important;
+  color: #1B1E1D !important;
 }
 
 .bento-grid {
@@ -667,7 +747,7 @@ html, body {
   stroke: var(--accent);
 }
 
-/* Clean Moderno Retrò Bosco Buttons */
+/* Clean Moderno Retrò Bosco Buttons (8px radius) */
 .btn-glass-pill {
   display: inline-flex;
   align-items: center;
@@ -677,12 +757,12 @@ html, body {
   background: #1B6B4D;
   color: #FFFFFF;
   border: 1px solid #1B6B4D;
-  border-radius: 12px;
+  border-radius: 8px;
   font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
   transition: transform var(--duration-fast) ease, opacity var(--duration-fast) ease;
 }
 
@@ -690,7 +770,7 @@ html, body {
   background: #1B6B4D;
   color: #FFFFFF;
   border: 1px solid #1B6B4D;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .btn-glass-pill:active {
@@ -708,8 +788,8 @@ html, body {
   color: #FFFFFF;
   font-weight: 700;
   border: 1px solid #1B6B4D;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
 }
 
 [data-theme="dark"] .btn-glass-pill.accent {
@@ -717,8 +797,8 @@ html, body {
   color: #FFFFFF;
   font-weight: 700;
   border: 1px solid #1B6B4D;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .btn-glass-pill.accent:active {
@@ -1201,36 +1281,37 @@ html, body {
 }
 
 .wallet-card {
-  border-radius: 20px;
+  border-radius: 5px;
   padding: 14px;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   margin-bottom: 0;
   background: var(--bg-card);
-  border: 1.5px solid rgba(27, 107, 77, 0.28);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
   transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
   position: relative;
-  color: #1C1F1E !important;
+  z-index: 2;
+  color: #1B1E1D !important;
 }
 
 [data-theme="dark"] .wallet-card {
-  background: #FCFBF8 !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.40) !important;
-  color: #1C1F1E !important;
+  background: #FCFBF7 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30) !important;
+  color: #1B1E1D !important;
 }
 
 .wallet-card:active {
   transform: translateY(2px);
-  box-shadow: 0 0 0 var(--border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .wallet-preview-box {
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: 16px;
+  border-radius: 4px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   display: flex;
@@ -2326,8 +2407,8 @@ html, body {
   width: 100%;
   padding: 12px 14px;
   background: var(--bg-input);
-  border: 1.5px solid var(--border-color);
-  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   font-size: 14.5px;
   font-weight: 500;
   font-family: var(--font-ui);
@@ -3139,21 +3220,24 @@ input:checked + .toggle-slider:before {
 /* Widget Card Full-Width Pulita */
 /* Header Tecnico Widget Dashboard stile Teenage Engineering */
 .dash-widget-card {
-  padding: 18px;
-  margin-bottom: 16px;
-  border-radius: 20px;
-  border: 1.5px solid rgba(27, 107, 77, 0.28);
+  padding: 20px 18px 18px 18px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
   background: var(--bg-card);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  color: #1C1F1E !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14), 0 1px 2px rgba(0, 0, 0, 0.08);
+  color: #1B1E1D !important;
+  position: relative;
+  z-index: 2;
+  overflow: visible !important;
 }
 
 [data-theme="dark"] .dash-widget-card {
-  background: #FCFBF8 !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.40) !important;
-  color: #1C1F1E !important;
+  background: #FCFBF7 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 5px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.20) !important;
+  color: #1B1E1D !important;
 }
 
 .dash-widget-header {
@@ -4543,21 +4627,21 @@ button.accent,
 
 /* SLOT 2: Card Input Testo */
 .trans-input-card {
-  border-radius: 20px;
+  border-radius: 5px;
   padding: 16px;
   background: var(--bg-card);
-  border: 1.5px solid rgba(27, 107, 77, 0.28);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  color: #1C1F1E !important;
+  color: #1B1E1D !important;
 }
 
 [data-theme="dark"] .trans-input-card {
-  background: #FCFBF8 !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.40) !important;
-  color: #1C1F1E !important;
+  background: #FCFBF7 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30) !important;
+  color: #1B1E1D !important;
 }
 
 .trans-textarea-clean {
@@ -4664,23 +4748,23 @@ button.accent,
 
 /* SLOT 3: Card Risultato */
 .trans-result-card {
-  border-radius: 20px;
+  border-radius: 5px;
   padding: 18px;
   background: var(--bg-card);
-  border: 1.5px solid rgba(27, 107, 77, 0.28);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   width: 100%;
-  color: #1C1F1E !important;
+  color: #1B1E1D !important;
 }
 
 [data-theme="dark"] .trans-result-card {
-  background: #FCFBF8 !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.40) !important;
-  color: #1C1F1E !important;
+  background: #FCFBF7 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30) !important;
+  color: #1B1E1D !important;
 }
 
 .trans-result-header {
