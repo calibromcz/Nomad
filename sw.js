@@ -1,12 +1,12 @@
-const CACHE_NAME = 'nomad-cache-v48';
+const CACHE_NAME = 'nomad-cache-v49';
 const MAP_TILES_CACHE_NAME = 'nomad-map-tiles-v1';
 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './styles.css?v=48',
-  './db.js?v=48',
-  './app.js?v=48',
+  './styles.css?v=49',
+  './db.js?v=49',
+  './app.js?v=49',
   './manifest.json',
   'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',

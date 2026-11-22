@@ -409,7 +409,7 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: calc(var(--header-height, 58px) + var(--sat) + 12px) 16px calc(56px + var(--sab) + 16px) 16px;
+  padding: calc(var(--header-height, 58px) + var(--sat) + 12px) 16px calc(52px + min(var(--sab), 14px) + 14px) 16px;
   scroll-behavior: smooth;
   position: relative;
 }
@@ -452,11 +452,12 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(56px + var(--sab));
+  min-height: 0;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 6px 8px calc(6px + var(--sab)) 8px;
+  padding: 5px 8px calc(4px + min(var(--sab), 14px)) 8px;
   box-sizing: border-box;
   background: #1B6B4D;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
@@ -475,17 +476,17 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   color: rgba(255, 255, 255, 0.52) !important;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 500;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  padding: 4px 2px;
+  padding: 2px 0;
   border-radius: var(--radius-sm);
   transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.15s ease, filter 0.15s ease;
   position: relative;
@@ -511,10 +512,10 @@ body {
 }
 
 .nav-tab-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   stroke: rgba(255, 255, 255, 0.52) !important;
-  stroke-width: 1.9px !important;
+  stroke-width: 2px !important;
   transition: stroke var(--duration-fast) ease, opacity var(--duration-fast) ease, filter 0.15s ease, stroke-width 0.15s ease;
 }
 
@@ -529,7 +530,7 @@ body {
 
 .nav-tab-btn.active svg {
   stroke: #FFFFFF !important;
-  stroke-width: 2.2px !important;
+  stroke-width: 2.3px !important;
   transform: none;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25)) !important;
   opacity: 1 !important;

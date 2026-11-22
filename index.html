@@ -22,9 +22,9 @@
   <!-- Leaflet CSS per Mappa Offline -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <!-- Stylesheet (Cache-Busting ?v=48) -->
-  <link rel="stylesheet" href="./styles.css?v=48">
-  <link rel="modulepreload" href="./db.js?v=48">
+  <!-- Stylesheet (Cache-Busting ?v=49) -->
+  <link rel="stylesheet" href="./styles.css?v=49">
+  <link rel="modulepreload" href="./db.js?v=49">
   <!-- Runtime Error Banner (Diagnostica live a schermo) -->
   <script>
     (function() {
@@ -469,21 +469,29 @@
         <input type="hidden" id="fieldEventLat">
         <input type="hidden" id="fieldEventLng">
 
-        <div class="form-row-2">
-          <div class="form-group">
-            <label class="form-label">Orario</label>
-            <input type="time" id="fieldEventTime" class="form-input" required>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Orario</label>
+          <input type="time" id="fieldEventTime" class="form-input" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Categoria</label>
+          <input type="hidden" id="fieldEventCategory" value="Visita">
+          
+          <!-- Selettore Pillole Categoria con "+ Nuova" per Tappa -->
+          <div class="wallet-cat-pills-selector" id="tripEventCatPillsContainer">
+            <!-- Popolato dinamicamente da app.js -->
           </div>
-          <div class="form-group">
-            <label class="form-label">Categoria</label>
-            <select id="fieldEventCategory" class="form-select">
-              <option value="Volo/Treno">Volo/Treno</option>
-              <option value="Cibo">Cibo</option>
-              <option value="Visita">Visita</option>
-              <option value="Alloggio">Alloggio</option>
-              <option value="Lavoro">Lavoro</option>
-              <option value="Altro">Altro</option>
-            </select>
+
+          <!-- Input Inline "+ Nuova Categoria" (nascosto di default) -->
+          <div id="tripNewCatInlineBox" style="display:none; margin-top:8px; gap:8px; align-items:center;">
+            <input type="text" id="inputNewTripCatName" class="form-input" placeholder="Nome nuova categoria (es. Shopping, Museo)" style="flex:1;">
+            <button type="button" id="btnConfirmAddTripCat" class="btn-glass-pill accent" style="padding:6px 14px; font-size:12px; font-weight:700;">
+              Aggiungi
+            </button>
+            <button type="button" id="btnCancelAddTripCat" class="btn-glass-pill" style="padding:6px 10px; font-size:12px;">
+              ✕
+            </button>
           </div>
         </div>
 
@@ -544,13 +552,23 @@
 
         <div class="form-group" style="margin-bottom:14px;">
           <label class="form-label">Categoria</label>
-          <select id="fieldPlacePlanCategory" class="form-select">
-            <option value="Visita">Visita</option>
-            <option value="Cibo">Cibo</option>
-            <option value="Volo/Treno">Volo/Treno</option>
-            <option value="Alloggio">Alloggio</option>
-            <option value="Altro">Altro</option>
-          </select>
+          <input type="hidden" id="fieldPlacePlanCategory" value="Visita">
+          
+          <!-- Selettore Pillole Categoria con "+ Nuova" per Aggiungi Luogo al Piano -->
+          <div class="wallet-cat-pills-selector" id="placePlanCatPillsContainer">
+            <!-- Popolato dinamicamente da app.js -->
+          </div>
+
+          <!-- Input Inline "+ Nuova Categoria" (nascosto di default) -->
+          <div id="placePlanNewCatInlineBox" style="display:none; margin-top:8px; gap:8px; align-items:center;">
+            <input type="text" id="inputNewPlacePlanCatName" class="form-input" placeholder="Nome nuova categoria (es. Shopping, Museo)" style="flex:1;">
+            <button type="button" id="btnConfirmAddPlacePlanCat" class="btn-glass-pill accent" style="padding:6px 14px; font-size:12px; font-weight:700;">
+              Aggiungi
+            </button>
+            <button type="button" id="btnCancelAddPlacePlanCat" class="btn-glass-pill" style="padding:6px 10px; font-size:12px;">
+              ✕
+            </button>
+          </div>
         </div>
 
         <div class="form-group" style="margin-bottom:20px;">
@@ -937,8 +955,8 @@
   <!-- Leaflet JS da CDN (cachato nel Service Worker per funzionamento offline) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=48) -->
-  <script type="module" src="./app.js?v=48"></script>
+  <!-- Script Applicativo Principale ES6 Modulare (Cache-Busting ?v=49) -->
+  <script type="module" src="./app.js?v=49"></script>
 <!-- BOTTOM SHEET: TAXI CARD & CODICI RAPIDI -->
   <div class="bottom-sheet" id="sheetTaxiCodes">
     <div class="bottom-sheet-handle"></div>

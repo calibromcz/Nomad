@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=48';
+} from './db.js?v=49';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -2536,13 +2536,177 @@ function openAddPlaceToPlanSheet(place) {
   const fieldTime = document.getElementById('fieldPlacePlanTime');
   if (fieldTime) fieldTime.value = '10:00';
 
-  const fieldCategory = document.getElementById('fieldPlacePlanCategory');
-  if (fieldCategory) fieldCategory.value = place.category || 'Visita';
+  const initialCat = place.category || 'Visita';
+  renderPlacePlanCategoryPills(initialCat);
 
   const modalTitle = document.getElementById('addPlaceToPlanTitle');
   if (modalTitle) modalTitle.textContent = `Aggiungi: ${title}`;
 
   openSheet('sheetAddPlaceToPlan');
+}
+
+function renderPlacePlanCategoryPills(selectedId = 'Visita') {
+  const container = document.getElementById('placePlanCatPillsContainer');
+  const hiddenInput = document.getElementById('fieldPlacePlanCategory');
+  if (!container || !hiddenInput) return;
+
+  const categories = getAllTripEventCategories();
+  hiddenInput.value = selectedId;
+
+  let html = '';
+  categories.forEach(cat => {
+    const isAct = cat.id === selectedId || cat.label === selectedId;
+    html += `
+      <button type="button" class="wallet-cat-pill-opt ${isAct ? 'active' : ''}" data-trip-cat-id="${cat.id}">
+        <span>${cat.icon || '🏷️'}</span>
+        <span>${escapeHTML(cat.label)}</span>
+      </button>
+    `;
+  });
+
+  html += `
+    <button type="button" class="wallet-cat-pill-opt add-new" id="btnAddNewPlacePlanCatPill">
+      <span>＋</span>
+      <span>Nuova</span>
+    </button>
+  `;
+
+  container.innerHTML = html;
+
+  // Click sulle pillole categoria
+  container.querySelectorAll('.wallet-cat-pill-opt[data-trip-cat-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const catId = btn.getAttribute('data-trip-cat-id');
+      renderPlacePlanCategoryPills(catId);
+    });
+  });
+
+  // Click su "+ Nuova"
+  document.getElementById('btnAddNewPlacePlanCatPill')?.addEventListener('click', () => {
+    const inlineBox = document.getElementById('placePlanNewCatInlineBox');
+    const input = document.getElementById('inputNewPlacePlanCatName');
+    if (inlineBox) {
+      inlineBox.style.display = 'flex';
+      setTimeout(() => { input?.focus(); }, 50);
+    }
+  });
+
+  // Setup bottoni inline per Place Plan
+  const inlineBox = document.getElementById('placePlanNewCatInlineBox');
+  const btnConfirm = document.getElementById('btnConfirmAddPlacePlanCat');
+  const btnCancel = document.getElementById('btnCancelAddPlacePlanCat');
+  const inputNewCat = document.getElementById('inputNewPlacePlanCatName');
+
+  if (btnCancel) {
+    btnCancel.onclick = () => {
+      if (inlineBox) inlineBox.style.display = 'none';
+      if (inputNewCat) inputNewCat.value = '';
+    };
+  }
+
+  if (btnConfirm) {
+    btnConfirm.onclick = () => {
+      const name = inputNewCat?.value.trim();
+      if (!name) {
+        showToast('Inserisci un nome per la categoria');
+        return;
+      }
+      const newCatId = name;
+      const newCategory = { id: newCatId, label: name, icon: '🏷️' };
+      const currentCustom = getTripCustomCategories();
+      if (!currentCustom.some(c => c.id.toLowerCase() === newCatId.toLowerCase())) {
+        currentCustom.push(newCategory);
+        saveTripCustomCategories(currentCustom);
+      }
+
+      if (inlineBox) inlineBox.style.display = 'none';
+      if (inputNewCat) inputNewCat.value = '';
+      renderPlacePlanCategoryPills(newCatId);
+      showToast(`Categoria "${name}" creata!`);
+    };
+  }
+}
+
+function renderTripEventCategoryPills(selectedId = 'Visita') {
+  const container = document.getElementById('tripEventCatPillsContainer');
+  const hiddenInput = document.getElementById('fieldEventCategory');
+  if (!container || !hiddenInput) return;
+
+  const categories = getAllTripEventCategories();
+  hiddenInput.value = selectedId;
+
+  let html = '';
+  categories.forEach(cat => {
+    const isAct = cat.id === selectedId || cat.label === selectedId;
+    html += `
+      <button type="button" class="wallet-cat-pill-opt ${isAct ? 'active' : ''}" data-event-cat-id="${cat.id}">
+        <span>${cat.icon || '🏷️'}</span>
+        <span>${escapeHTML(cat.label)}</span>
+      </button>
+    `;
+  });
+
+  html += `
+    <button type="button" class="wallet-cat-pill-opt add-new" id="btnAddNewTripEventCatPill">
+      <span>＋</span>
+      <span>Nuova</span>
+    </button>
+  `;
+
+  container.innerHTML = html;
+
+  // Click sulle pillole categoria
+  container.querySelectorAll('.wallet-cat-pill-opt[data-event-cat-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const catId = btn.getAttribute('data-event-cat-id');
+      renderTripEventCategoryPills(catId);
+    });
+  });
+
+  // Click su "+ Nuova"
+  document.getElementById('btnAddNewTripEventCatPill')?.addEventListener('click', () => {
+    const inlineBox = document.getElementById('tripNewCatInlineBox');
+    const input = document.getElementById('inputNewTripCatName');
+    if (inlineBox) {
+      inlineBox.style.display = 'flex';
+      setTimeout(() => { input?.focus(); }, 50);
+    }
+  });
+
+  // Setup bottoni inline per Tappa
+  const inlineBox = document.getElementById('tripNewCatInlineBox');
+  const btnConfirm = document.getElementById('btnConfirmAddTripCat');
+  const btnCancel = document.getElementById('btnCancelAddTripCat');
+  const inputNewCat = document.getElementById('inputNewTripCatName');
+
+  if (btnCancel) {
+    btnCancel.onclick = () => {
+      if (inlineBox) inlineBox.style.display = 'none';
+      if (inputNewCat) inputNewCat.value = '';
+    };
+  }
+
+  if (btnConfirm) {
+    btnConfirm.onclick = () => {
+      const name = inputNewCat?.value.trim();
+      if (!name) {
+        showToast('Inserisci un nome per la categoria');
+        return;
+      }
+      const newCatId = name;
+      const newCategory = { id: newCatId, label: name, icon: '🏷️' };
+      const currentCustom = getTripCustomCategories();
+      if (!currentCustom.some(c => c.id.toLowerCase() === newCatId.toLowerCase())) {
+        currentCustom.push(newCategory);
+        saveTripCustomCategories(currentCustom);
+      }
+
+      if (inlineBox) inlineBox.style.display = 'none';
+      if (inputNewCat) inputNewCat.value = '';
+      renderTripEventCategoryPills(newCatId);
+      showToast(`Categoria "${name}" creata!`);
+    };
+  }
 }
 
 
@@ -3411,6 +3575,36 @@ function saveCustomCategories(cats) {
   try {
     localStorage.setItem('nomad_custom_categories', JSON.stringify(cats));
   } catch (e) {}
+}
+
+function getTripCustomCategories() {
+  try {
+    const raw = localStorage.getItem('nomad_custom_trip_categories');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveTripCustomCategories(cats) {
+  try {
+    localStorage.setItem('nomad_custom_trip_categories', JSON.stringify(cats));
+  } catch (e) {}
+}
+
+function getAllTripEventCategories() {
+  const base = [
+    { id: 'Visita', label: 'Visita', icon: '🏛️' },
+    { id: 'Cibo', label: 'Cibo', icon: '🍜' },
+    { id: 'Shopping', label: 'Shopping', icon: '🛍️' },
+    { id: 'Volo/Treno', label: 'Trasporti', icon: '🚆' },
+    { id: 'Relax', label: 'Relax', icon: '☕' },
+    { id: 'Alloggio', label: 'Alloggio', icon: '🏨' },
+    { id: 'Lavoro', label: 'Lavoro', icon: '💼' },
+    { id: 'Altro', label: 'Altro', icon: '📍' }
+  ];
+  const custom = getTripCustomCategories();
+  return [...base, ...custom];
 }
 
 function getAllWalletCategories() {
@@ -6663,6 +6857,10 @@ function openAddEventSheet() {
   document.getElementById('fieldEventTime').value = '10:00';
   document.getElementById('fieldEventLat').value = '';
   document.getElementById('fieldEventLng').value = '';
+  
+  // Render pillole categoria per Tappa
+  renderTripEventCategoryPills('Visita');
+  
   openSheet('sheetEvent');
 }
 
