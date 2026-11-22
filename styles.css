@@ -1109,6 +1109,239 @@ body {
   color: #FFFFFF;
 }
 
+/* Barra Compatta Alloggio & Codici */
+.wallet-hotel-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  min-height: 52px;
+  box-sizing: border-box;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+
+[data-theme="dark"] .wallet-hotel-bar {
+  background: #FCFBF8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28) !important;
+  color: #1C1F1E !important;
+}
+
+.wallet-hotel-bar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.wallet-hotel-bar:active {
+  transform: translateY(1px);
+}
+
+.wallet-hotel-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.wallet-hotel-bar-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.wallet-hotel-bar-texts {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wallet-hotel-bar-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+[data-theme="dark"] .wallet-hotel-bar-title {
+  color: #1C1F1E !important;
+}
+
+.wallet-hotel-bar-sub {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+[data-theme="dark"] .wallet-hotel-bar-sub {
+  color: #555957 !important;
+}
+
+.wallet-hotel-bar-arrow {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+/* Lista Documenti Compatta Pass-Style */
+.wallet-pass-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wallet-pass-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .wallet-pass-row {
+  background: #FCFBF8 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28) !important;
+  color: #1C1F1E !important;
+}
+
+.wallet-pass-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+}
+
+.wallet-pass-row:active {
+  transform: translateY(1px);
+}
+
+.wallet-pass-thumb-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wallet-pass-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wallet-pass-pdf-icon {
+  font-size: 12px;
+  font-weight: 800;
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.12);
+  padding: 4px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.wallet-pass-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  justify-content: center;
+}
+
+.wallet-pass-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+[data-theme="dark"] .wallet-pass-title {
+  color: #1C1F1E !important;
+}
+
+.wallet-pass-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  min-width: 0;
+}
+
+.wallet-pass-subnote {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .wallet-pass-subnote {
+  color: #555957 !important;
+}
+
+.wallet-pass-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.wallet-action-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: transform var(--duration-fast) ease, background var(--duration-fast) ease;
+}
+
+.wallet-action-icon-btn:active {
+  transform: translateY(1px);
+}
+
+.wallet-action-icon-btn.active {
+  color: #FFFFFF;
+  background: #1B6B4D;
+  border-color: #141414;
+}
+
+.wallet-action-icon-btn.btn-del {
+  color: #EF4444;
+}
+
+.wallet-action-icon-btn.btn-del:active {
+  background: rgba(239, 68, 68, 0.15);
+}
+
 .wallet-taxi-card {
   padding: 14px 16px;
   margin-bottom: 14px;

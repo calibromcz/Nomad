@@ -17,7 +17,7 @@ import {
   DEFAULT_PACKING_TEMPLATES,
   getDemoTrip,
   DEFAULT_SURVIVAL_PHRASES
-} from './db.js?v=40';
+} from './db.js?v=41';
 
 import * as fflate from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
 
@@ -1320,6 +1320,12 @@ function openTaxiCodesSheet() {
   document.getElementById('btnSheetOpenTaxiFull')?.addEventListener('click', () => {
     closeAllSheets();
     openTaxiCard();
+  });
+
+  // Bind click per modificare codici viaggio
+  document.getElementById('btnSheetEditTripCodes')?.addEventListener('click', () => {
+    closeAllSheets();
+    openEditTripSheet(state.activeTrip);
   });
 
   // Bind tap-to-copy
@@ -3148,75 +3154,17 @@ function renderTabWallet() {
   const vaultPinHash = localStorage.getItem('nomad_vault_pin_hash');
   const isVaultTab = state.walletSubView === 'vault';
 
-  // 1. BLOCCO 1: HEADER + PULSANTE AGGIUNGI
+  // 1. BLOCCO 1: HEADER PULITO ("Wallet" + "+" button)
   let html = `
     <div class="wallet-header-row">
-      <div>
-        <h2 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0;">Apple Wallet</h2>
-        <span style="font-size:12px; color:var(--text-secondary);">Pass, biglietti e documenti 100% offline</span>
-      </div>
+      <h2 style="font-size:1.4rem; font-weight:800; color:var(--text-primary); margin:0; letter-spacing:-0.02em;">Wallet</h2>
       <button class="wallet-add-btn-circle" id="btnOpenUploadFile" title="Aggiungi Documento" aria-label="Aggiungi Documento">
         +
       </button>
     </div>
 
-    <!-- 2. BLOCCO 2: CARD RAPIDA TAXI & CODICI -->
-    <div class="wallet-taxi-card">
-      <div class="wallet-taxi-header">
-        <div class="wallet-taxi-title">
-          <span>🚕</span>
-          <span>Taxi Card & Codici Rapidi</span>
-        </div>
-        <button id="btnWalletEditTripCodes" class="btn-glass-pill" style="padding:4px 10px; font-size:11.5px; font-weight:600;">
-          ✎ Modifica
-        </button>
-      </div>
-
-      <div class="wallet-taxi-address">
-        <strong>${escapeHTML(hotel.nameLocal || hotel.name || 'Alloggio Principale')}</strong>
-        ${hotel.addressLocal ? `<div style="font-size:13px; font-weight:600; color:var(--text-primary); margin-top:2px;">${escapeHTML(hotel.addressLocal)}</div>` : ''}
-        ${hotel.address ? `<div style="font-size:11.5px; color:var(--text-tertiary);">${escapeHTML(hotel.address)}</div>` : ''}
-      </div>
-
-      <div class="wallet-taxi-actions">
-        <button id="btnWalletOpenTaxiCard" class="btn-glass-pill accent" style="width:100%; justify-content:center; padding:9px 14px; font-size:13px; font-weight:700;">
-          🚕 Apri Taxi Card (Schermo Intero)
-        </button>
-      </div>
-
-      <div class="wallet-taxi-codes-grid">
-        ${codes.pnr ? `
-          <div class="wallet-code-chip" data-copy-val="${escapeHTML(codes.pnr)}" data-copy-desc="PNR Volo">
-            <div class="wallet-code-info">
-              <span class="wallet-code-label">PNR Volo</span>
-              <span class="wallet-code-val tabular-nums">${escapeHTML(codes.pnr)}</span>
-            </div>
-            <span style="font-size:12px; color:var(--text-tertiary);">📋</span>
-          </div>
-        ` : ''}
-        ${codes.lockbox ? `
-          <div class="wallet-code-chip" data-copy-val="${escapeHTML(codes.lockbox)}" data-copy-desc="Codice Porta">
-            <div class="wallet-code-info">
-              <span class="wallet-code-label">Lockbox</span>
-              <span class="wallet-code-val tabular-nums">${escapeHTML(codes.lockbox)}</span>
-            </div>
-            <span style="font-size:12px; color:var(--text-tertiary);">📋</span>
-          </div>
-        ` : ''}
-        ${codes.wifi ? `
-          <div class="wallet-code-chip" data-copy-val="${escapeHTML(codes.wifi)}" data-copy-desc="Password Wi-Fi">
-            <div class="wallet-code-info">
-              <span class="wallet-code-label">Wi-Fi</span>
-              <span class="wallet-code-val">${escapeHTML(codes.wifi)}</span>
-            </div>
-            <span style="font-size:12px; color:var(--text-tertiary);">📋</span>
-          </div>
-        ` : ''}
-      </div>
-    </div>
-
-    <!-- 3. BLOCCO 3: SEGMENTED CONTROL (DOCUMENTI | CASSAFORTE) -->
-    <div style="margin-bottom:14px;">
+    <!-- 2. BLOCCO 2: SEGMENTED CONTROL (DOCUMENTI | CASSAFORTE) -->
+    <div style="margin-bottom:12px;">
       <div class="trans-segmented-bar">
         <button class="trans-segmented-btn ${!isVaultTab ? 'active' : ''}" id="btnWalletTabDocs">
           📄 Documenti (${files.filter(f => !f.inVault).length})
@@ -3226,6 +3174,18 @@ function renderTabWallet() {
         </button>
       </div>
     </div>
+
+    <!-- 3. BLOCCO 3: BARRA COMPATTA "ALLOGGIO & CODICI" -->
+    <div class="wallet-hotel-bar" id="btnWalletOpenHotelSheet" role="button" tabindex="0" aria-label="Alloggio e Codici Rapidi">
+      <div class="wallet-hotel-bar-left">
+        <span class="wallet-hotel-bar-icon">🏨</span>
+        <div class="wallet-hotel-bar-texts">
+          <div class="wallet-hotel-bar-title">Alloggio & Codici</div>
+          <div class="wallet-hotel-bar-sub">${escapeHTML(hotel.nameLocal || hotel.name || 'Aggiungi indirizzo, PNR, Wi-Fi')}</div>
+        </div>
+      </div>
+      <div class="wallet-hotel-bar-arrow">›</div>
+    </div>
   `;
 
   // CONTENUTO TAB DOCUMENTI NORMALI
@@ -3234,9 +3194,9 @@ function renderTabWallet() {
       { id: 'Tutti', label: 'Tutti', icon: '🗂️' },
       { id: 'flight', label: 'Volo', icon: '✈️' },
       { id: 'hotel', label: 'Hotel', icon: '🏨' },
-      { id: 'train', label: 'Trasporti', icon: '🚆' },
+      { id: 'train', label: 'Treni', icon: '🚆' },
       { id: 'event', label: 'Eventi', icon: '🎟️' },
-      { id: 'documents', label: 'Visti/Assicurazione', icon: '🛂' }
+      { id: 'documents', label: 'Altro', icon: '📄' }
     ];
 
     html += `<div class="wallet-filter-strip">`;
@@ -3260,43 +3220,38 @@ function renderTabWallet() {
     });
 
     if (filteredFiles.length > 0) {
-      html += `<div class="wallet-grid">`;
+      html += `<div class="wallet-pass-list">`;
       filteredFiles.forEach(file => {
         const isPdf = file.type === 'application/pdf';
         const badge = getCategoryBadgeData(file.category);
+        const subNote = file.notes ? escapeHTML(file.notes) : formatFileSize(file.size);
 
         html += `
-          <div class="glass-card wallet-card" data-file-id="${file.id}">
-            <div class="wallet-preview-box">
+          <div class="wallet-pass-row" data-file-id="${file.id}">
+            <div class="wallet-pass-thumb-box" data-action="gate" data-file-id="${file.id}">
               ${isPdf ? `
-                <div class="wallet-pdf-badge">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  <span style="font-size:11px; font-weight:700;">PDF DOCUMENT</span>
-                </div>
+                <div class="wallet-pass-pdf-icon">PDF</div>
               ` : `
-                <img class="wallet-preview-img" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
+                <img class="wallet-pass-thumb-img" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
               `}
             </div>
 
-            <div style="margin-bottom:4px;">
-              <span class="taxi-badge ${badge.cls}" style="font-size:10px; padding:2px 6px;">${badge.label}</span>
+            <div class="wallet-pass-info" data-action="gate" data-file-id="${file.id}">
+              <div class="wallet-pass-title">${escapeHTML(file.title)}</div>
+              <div class="wallet-pass-meta">
+                <span class="taxi-badge ${badge.cls}" style="font-size:9.5px; padding:1px 5px;">${badge.label}</span>
+                <span class="wallet-pass-subnote">${subNote}</span>
+              </div>
             </div>
-            <div class="wallet-card-title">${escapeHTML(file.title)}</div>
-            ${file.notes ? `<div style="font-size:11px; color:var(--text-tertiary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px;">${escapeHTML(file.notes)}</div>` : ''}
-            <div style="font-size:10.5px; color:var(--text-quaternary);">${formatFileSize(file.size)}</div>
 
-            <!-- Azioni Rapide sulla Card -->
-            <div class="wallet-card-actions">
-              <button class="wallet-action-btn ${file.isPinned ? 'active' : ''}" data-action="pin" data-file-id="${file.id}" title="${file.isPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin">
+            <div class="wallet-pass-actions">
+              <button class="wallet-action-icon-btn ${file.isPinned ? 'active' : ''}" data-action="pin" data-file-id="${file.id}" title="${file.isPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin">
                 📌
               </button>
-              <button class="wallet-action-btn" data-action="toggle-vault" data-file-id="${file.id}" title="Sposta in Cassaforte" aria-label="Cassaforte">
+              <button class="wallet-action-icon-btn" data-action="toggle-vault" data-file-id="${file.id}" title="Sposta in Cassaforte" aria-label="Cassaforte">
                 🔒
               </button>
-              <button class="wallet-action-btn" data-action="gate" data-file-id="${file.id}" title="Modalità Gate" aria-label="Gate">
-                ⛶
-              </button>
-              <button class="wallet-action-btn" data-action="delete" data-file-id="${file.id}" title="Elimina" aria-label="Elimina" style="color:#EF4444;">
+              <button class="wallet-action-icon-btn btn-del" data-action="delete" data-file-id="${file.id}" title="Elimina" aria-label="Elimina">
                 🗑
               </button>
             </div>
@@ -3365,43 +3320,38 @@ function renderTabWallet() {
       `;
 
       if (vaultFiles.length > 0) {
-        html += `<div class="wallet-grid">`;
+        html += `<div class="wallet-pass-list">`;
         vaultFiles.forEach(file => {
           const isPdf = file.type === 'application/pdf';
           const badge = getCategoryBadgeData(file.category);
+          const subNote = file.notes ? escapeHTML(file.notes) : formatFileSize(file.size);
 
           html += `
-            <div class="glass-card wallet-card" data-file-id="${file.id}">
-              <div class="wallet-preview-box">
+            <div class="wallet-pass-row" data-file-id="${file.id}">
+              <div class="wallet-pass-thumb-box" data-action="gate" data-file-id="${file.id}">
                 ${isPdf ? `
-                  <div class="wallet-pdf-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                    <span style="font-size:11px; font-weight:700;">PDF PROTETTO</span>
-                  </div>
+                  <div class="wallet-pass-pdf-icon">PDF</div>
                 ` : `
-                  <img class="wallet-preview-img" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
+                  <img class="wallet-pass-thumb-img" id="thumb_${file.id}" alt="${escapeHTML(file.title)}">
                 `}
               </div>
 
-              <div style="margin-bottom:4px;">
-                <span class="taxi-badge ${badge.cls}" style="font-size:10px; padding:2px 6px;">${badge.label}</span>
+              <div class="wallet-pass-info" data-action="gate" data-file-id="${file.id}">
+                <div class="wallet-pass-title">${escapeHTML(file.title)}</div>
+                <div class="wallet-pass-meta">
+                  <span class="taxi-badge ${badge.cls}" style="font-size:9.5px; padding:1px 5px;">${badge.label}</span>
+                  <span class="wallet-pass-subnote">${subNote}</span>
+                </div>
               </div>
-              <div class="wallet-card-title">${escapeHTML(file.title)}</div>
-              ${file.notes ? `<div style="font-size:11px; color:var(--text-tertiary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px;">${escapeHTML(file.notes)}</div>` : ''}
-              <div style="font-size:10.5px; color:var(--text-quaternary);">${formatFileSize(file.size)}</div>
 
-              <!-- Azioni Rapide sulla Card -->
-              <div class="wallet-card-actions">
-                <button class="wallet-action-btn ${file.isPinned ? 'active' : ''}" data-action="pin" data-file-id="${file.id}" title="${file.isPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin">
+              <div class="wallet-pass-actions">
+                <button class="wallet-action-icon-btn ${file.isPinned ? 'active' : ''}" data-action="pin" data-file-id="${file.id}" title="${file.isPinned ? 'Rimuovi da Dashboard' : 'Pinna in Dashboard'}" aria-label="Pin">
                   📌
                 </button>
-                <button class="wallet-action-btn active" data-action="toggle-vault" data-file-id="${file.id}" title="Rimuovi da Cassaforte" aria-label="Togli da Cassaforte">
+                <button class="wallet-action-icon-btn active" data-action="toggle-vault" data-file-id="${file.id}" title="Rimuovi da Cassaforte" aria-label="Togli da Cassaforte">
                   🔓
                 </button>
-                <button class="wallet-action-btn" data-action="gate" data-file-id="${file.id}" title="Modalità Gate" aria-label="Gate">
-                  ⛶
-                </button>
-                <button class="wallet-action-btn" data-action="delete" data-file-id="${file.id}" title="Elimina" aria-label="Elimina" style="color:#EF4444;">
+                <button class="wallet-action-icon-btn btn-del" data-action="delete" data-file-id="${file.id}" title="Elimina" aria-label="Elimina">
                   🗑
                 </button>
               </div>
@@ -3446,28 +3396,15 @@ function renderTabWallet() {
     renderTabWallet();
   });
 
-  // Apri Taxi Card e Modifica Alloggio
-  document.getElementById('btnWalletOpenTaxiCard')?.addEventListener('click', () => openTaxiCard());
-  document.getElementById('btnWalletEditTripCodes')?.addEventListener('click', () => {
-    openEditTripSheet(state.activeTrip);
+  // Apri Bottom Sheet Alloggio & Codici
+  document.getElementById('btnWalletOpenHotelSheet')?.addEventListener('click', () => {
+    openTaxiCodesSheet();
   });
-
-  // Copia codici rapidi
-  container.querySelectorAll('.wallet-code-chip').forEach(chip => {
-    chip.addEventListener('click', async () => {
-      const val = chip.getAttribute('data-copy-val');
-      const desc = chip.getAttribute('data-copy-desc') || 'Codice';
-      if (val) {
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(val);
-          }
-          showToast(`${desc} copiato!`);
-        } catch (e) {
-          showToast(`Copiato: ${val}`);
-        }
-      }
-    });
+  document.getElementById('btnWalletOpenHotelSheet')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openTaxiCodesSheet();
+    }
   });
 
   // Filtri pillola Documenti
@@ -3483,8 +3420,8 @@ function renderTabWallet() {
   document.getElementById('btnEmptyUploadFile')?.addEventListener('click', () => openWalletUploadModal(false));
   document.getElementById('btnEmptyUploadVaultFile')?.addEventListener('click', () => openWalletUploadModal(true));
 
-  // Azioni sulle card (Pin, Toggle Vault, Gate, Delete)
-  container.querySelectorAll('[data-action]').forEach(btn => {
+  // Azioni sulle righe pass (Pin, Toggle Vault, Delete)
+  container.querySelectorAll('.wallet-action-icon-btn[data-action]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const action = btn.getAttribute('data-action');
@@ -3502,8 +3439,6 @@ function renderTabWallet() {
         await putToStore('files_store', file);
         await refreshApplicationData();
         showToast(file.inVault ? 'Spostato in Cassaforte 🔒' : 'Spostato in Documenti standard');
-      } else if (action === 'gate') {
-        openGateMode(file);
       } else if (action === 'delete') {
         if (confirm(`Eliminare definitivamente "${file.title}"?`)) {
           await deleteFromStore('files_store', file.id);
@@ -3514,11 +3449,11 @@ function renderTabWallet() {
     });
   });
 
-  // Tap su card intera -> Modalità Gate
-  container.querySelectorAll('.wallet-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('[data-action]')) return;
-      const fileId = card.getAttribute('data-file-id');
+  // Tap su riga pass intera (o thumbnail o testo) -> Modalità Gate (⛶)
+  container.querySelectorAll('.wallet-pass-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.wallet-action-icon-btn')) return;
+      const fileId = row.getAttribute('data-file-id');
       const file = files.find(f => f.id === fileId);
       if (file) openGateMode(file);
     });
